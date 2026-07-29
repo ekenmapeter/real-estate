@@ -27,8 +27,14 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Custom Glassmorphism & Navbar Styling -->
+    /* Custom Glassmorphism & Navbar Styling */
     <style>
+      /* ── Prevent Mobile Horizontal Scroll Overflow ── */
+      html, body {
+        max-width: 100vw;
+        overflow-x: hidden;
+      }
+
       /* ── Navbar base ── */
       .nav-link-item {
         display: inline-flex;
@@ -66,7 +72,7 @@
       }
 
       /* push page content below fixed header */
-      body { padding-top: 68px; }
+      body { padding-top: 70px; }
 
       /* Glassmorphism Design Tokens */
       .glass-panel {
@@ -126,6 +132,54 @@
       .delay-2 { transition-delay: 0.2s; }
       .delay-3 { transition-delay: 0.3s; }
       .delay-4 { transition-delay: 0.4s; }
+
+      /* ── Comprehensive Mobile Responsive Overrides ── */
+      @media (max-width: 767.98px) {
+        body {
+          padding-top: 64px;
+        }
+
+        #header img {
+          height: 34px !important;
+        }
+
+        .container, .container-fluid {
+          padding-left: 14px !important;
+          padding-right: 14px !important;
+        }
+
+        h1, .display-4, .display-5, .display-6 {
+          font-size: clamp(1.75rem, 6vw, 2.5rem) !important;
+          line-height: 1.25 !important;
+        }
+
+        h2 {
+          font-size: clamp(1.4rem, 5vw, 1.85rem) !important;
+        }
+
+        h3 {
+          font-size: clamp(1.25rem, 4.5vw, 1.5rem) !important;
+        }
+
+        .card-body {
+          padding: 1.15rem !important;
+        }
+
+        .table-responsive {
+          -webkit-overflow-scrolling: touch;
+        }
+
+        /* Mobile buttons touch targets */
+        .btn {
+          padding-top: 0.55rem;
+          padding-bottom: 0.55rem;
+        }
+
+        /* Footer mobile stack spacing */
+        footer .row {
+          text-align: left;
+        }
+      }
     </style>
 </head>
 
@@ -135,17 +189,17 @@
         <div id="pagee" class="clearfix">
 
             <!-- Main Header -->
-            <header id="header" class="main-header header-fixed fixed-header" style="position: fixed; top: 0; left: 0; right: 0; z-index: 999; background: rgba(255,255,255,0.96) !important; backdrop-filter: blur(16px); border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 12px rgba(0,0,0,0.06);">
-                <div class="container-fluid px-4">
-                    <div class="d-flex align-items-center justify-content-between" style="height: 68px;">
+            <header id="header" style="position: fixed; top: 0; left: 0; right: 0; z-index: 99999; background: #ffffff !important; border-bottom: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
+                <div class="container-fluid px-3 px-lg-5">
+                    <div class="d-flex align-items-center justify-content-between" style="height: 70px;">
 
                         <!-- Logo -->
-                        <a href="{{ url('/') }}" class="flex-shrink-0">
-                            <img src="{{ asset('frontend/images/logo/radiantblue.png') }}" alt="Radiant Dream Realty" height="40">
+                        <a href="{{ url('/') }}" class="flex-shrink-0 d-flex align-items-center">
+                            <img src="{{ asset('frontend/images/logo/radiantblue.png') }}" alt="Radiant Dream Realty" height="42" style="object-fit: contain;">
                         </a>
 
-                        <!-- Desktop Nav -->
-                        <nav class="d-none d-xl-flex align-items-center" style="gap: 0.15rem;">
+                        <!-- Desktop & Laptop Navigation (Visible on Large Screens >= 992px) -->
+                        <nav class="d-none d-lg-flex align-items-center gap-1">
                             <a href="{{ url('/') }}" class="nav-link-item {{ request()->is('/') ? 'active' : '' }}">Home</a>
                             <a href="{{ url('/properties') }}" class="nav-link-item {{ request()->is('properties*') ? 'active' : '' }}">Properties</a>
                             <a href="{{ url('/list-property') }}" class="nav-link-item {{ request()->is('list-property*') ? 'active' : '' }}">List Property</a>
@@ -154,9 +208,9 @@
                             <!-- Partners Dropdown -->
                             <div class="nav-dropdown-wrap" style="position:relative;">
                                 <button class="nav-link-item d-flex align-items-center gap-1 border-0 bg-transparent" style="cursor:pointer;" onclick="toggleNavDropdown(this)">
-                                    Partners <i class="bi bi-chevron-down" style="font-size:0.65rem; transition: transform 0.2s;"></i>
+                                    Partners <i class="bi bi-chevron-down ms-1" style="font-size:0.7rem; transition: transform 0.2s;"></i>
                                 </button>
-                                <div class="nav-dropdown-menu" style="display:none; position:absolute; top:calc(100% + 8px); left:0; background:#fff; min-width:210px; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,0.12); border:1px solid #f1f5f9; padding:8px 0; z-index:2000;">
+                                <div class="nav-dropdown-menu" style="display:none; position:absolute; top:calc(100% + 8px); left:0; background:#ffffff; min-width:220px; border-radius:12px; box-shadow:0 12px 35px rgba(15,23,42,0.15); border:1px solid #e2e8f0; padding:8px 0; z-index:999999;">
                                     <a href="{{ url('/team') }}" class="nav-dropdown-item">
                                         <i class="bi bi-people-fill me-2 text-primary"></i>Meet The Team
                                     </a>
@@ -175,102 +229,52 @@
                             <a href="{{ url('/resources') }}" class="nav-link-item {{ request()->is('resources*') ? 'active' : '' }}">Resources</a>
                         </nav>
 
-                        <!-- Right Actions -->
+                        <!-- Right Header CTA & Profile Actions -->
                         <div class="d-flex align-items-center gap-2 flex-shrink-0">
                             @auth
-                                <a href="{{ url('/dashboard') }}" class="btn btn-primary btn-sm fw-semibold px-3" style="background:#2756fd; border:none; border-radius:7px; font-size:0.82rem;">Dashboard</a>
+                                <a href="{{ url('/dashboard') }}" class="btn btn-primary btn-sm fw-bold px-3 py-2" style="background:#2756fd; border:none; border-radius:8px; font-size:0.85rem;">
+                                    <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                                </a>
                             @else
-                                <a href="{{ route('login') }}" class="btn btn-sm fw-semibold px-3 py-2" style="color:#1a3c5e; font-size:0.82rem; border:1px solid #e2e8f0; border-radius:7px; background:#f8fafc;">Sign In</a>
-                                <a href="{{ route('register') }}" class="btn btn-primary btn-sm fw-semibold px-3 py-2" style="background:#2756fd; border:none; border-radius:7px; font-size:0.82rem;">Get Started</a>
+                                <a href="{{ route('login') }}" class="btn btn-sm fw-bold px-3 py-2" style="color:#0f172a; font-size:0.85rem; border:1px solid #cbd5e1; border-radius:8px; background:#f8fafc;">Sign In</a>
+                                <a href="{{ route('register') }}" class="btn btn-primary btn-sm fw-bold px-3 py-2" style="background:#2756fd; border:none; border-radius:8px; font-size:0.85rem;">Get Started</a>
                             @endauth
 
-                            <!-- Mobile Toggle -->
-                            <button class="btn btn-sm d-xl-none ms-1 p-2" id="mobileMenuToggle" style="border:1px solid #e2e8f0; border-radius:7px; background:#f8fafc;" onclick="toggleMobileMenu()">
-                                <i class="bi bi-list" style="font-size:1.2rem; color:#1a3c5e;"></i>
+                            <!-- Mobile Menu Toggle Button (Visible on Screens < 992px) -->
+                            <button class="btn btn-sm d-lg-none ms-1 p-2 border-0" id="mobileMenuToggle" style="border-radius:8px; background:#f1f5f9; color:#0f172a;" onclick="toggleMobileMenu()" aria-label="Toggle navigation">
+                                <i class="bi bi-list" style="font-size:1.4rem; line-height:1;"></i>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Mobile Slide-Down Menu -->
-                <div id="mobileNavMenu" style="display:none; background:#fff; border-top:1px solid #f1f5f9; padding:16px 20px 20px; box-shadow:0 8px 24px rgba(0,0,0,0.08);">
+                <!-- Responsive Mobile Slide-Down Menu -->
+                <div id="mobileNavMenu" style="display:none; background:#ffffff; border-top:1px solid #e2e8f0; padding:16px 20px 24px; box-shadow:0 12px 30px rgba(0,0,0,0.12);">
                     <ul class="list-unstyled mb-0">
-                        <li class="border-bottom py-2"><a href="{{ url('/') }}" class="text-dark fw-semibold text-decoration-none" style="font-size:0.9rem;">Home</a></li>
-                        <li class="border-bottom py-2"><a href="{{ url('/properties') }}" class="text-dark fw-semibold text-decoration-none" style="font-size:0.9rem;">Properties</a></li>
-                        <li class="border-bottom py-2"><a href="{{ url('/list-property') }}" class="text-dark fw-semibold text-decoration-none" style="font-size:0.9rem;">List Property</a></li>
-                        <li class="border-bottom py-2"><a href="{{ url('/project-marketplace') }}" class="text-dark fw-semibold text-decoration-none" style="font-size:0.9rem;">Marketplace</a></li>
+                        <li class="border-bottom py-2"><a href="{{ url('/') }}" class="text-dark fw-bold text-decoration-none d-block" style="font-size:0.95rem;">Home</a></li>
+                        <li class="border-bottom py-2"><a href="{{ url('/properties') }}" class="text-dark fw-bold text-decoration-none d-block" style="font-size:0.95rem;">Properties</a></li>
+                        <li class="border-bottom py-2"><a href="{{ url('/list-property') }}" class="text-dark fw-bold text-decoration-none d-block" style="font-size:0.95rem;">List Property</a></li>
+                        <li class="border-bottom py-2"><a href="{{ url('/project-marketplace') }}" class="text-dark fw-bold text-decoration-none d-block" style="font-size:0.95rem;">Marketplace</a></li>
                         <li class="border-bottom py-2">
-                            <span class="fw-bold text-dark d-block mb-1" style="font-size:0.9rem;">Partners</span>
+                            <span class="fw-bold text-dark d-block mb-1" style="font-size:0.95rem;">Partners</span>
                             <ul class="list-unstyled ms-3 mb-0">
-                                <li class="py-1"><a href="{{ url('/team') }}" class="text-secondary text-decoration-none" style="font-size:0.84rem;">Meet The Team</a></li>
-                                <li class="py-1"><a href="{{ url('/agent') }}" class="text-secondary text-decoration-none" style="font-size:0.84rem;">Become an Agent</a></li>
-                                <li class="py-1"><a href="{{ url('/affiliate') }}" class="text-secondary text-decoration-none" style="font-size:0.84rem;">Become an Affiliate</a></li>
-                                <li class="py-1"><a href="{{ url('/career') }}" class="text-secondary text-decoration-none" style="font-size:0.84rem;">Careers</a></li>
+                                <li class="py-1"><a href="{{ url('/team') }}" class="text-secondary fw-semibold text-decoration-none" style="font-size:0.88rem;">Meet The Team</a></li>
+                                <li class="py-1"><a href="{{ url('/agent') }}" class="text-secondary fw-semibold text-decoration-none" style="font-size:0.88rem;">Become an Agent</a></li>
+                                <li class="py-1"><a href="{{ url('/affiliate') }}" class="text-secondary fw-semibold text-decoration-none" style="font-size:0.88rem;">Become an Affiliate</a></li>
+                                <li class="py-1"><a href="{{ url('/career') }}" class="text-secondary fw-semibold text-decoration-none" style="font-size:0.88rem;">Careers</a></li>
                             </ul>
                         </li>
-                        <li class="pt-2"><a href="{{ url('/resources') }}" class="text-dark fw-semibold text-decoration-none" style="font-size:0.9rem;">Resources</a></li>
+                        <li class="pt-2"><a href="{{ url('/resources') }}" class="text-dark fw-bold text-decoration-none d-block" style="font-size:0.95rem;">Resources</a></li>
                     </ul>
-                    <div class="d-flex gap-2 mt-3">
+                    <div class="d-flex gap-2 mt-3 pt-2 border-top">
                         @auth
-                            <a href="{{ url('/dashboard') }}" class="btn btn-primary btn-sm w-100 fw-semibold" style="background:#2756fd; border:none; font-size:0.85rem;">Dashboard</a>
+                            <a href="{{ url('/dashboard') }}" class="btn btn-primary btn-sm w-100 fw-bold py-2" style="background:#2756fd; border:none; font-size:0.9rem;">Dashboard</a>
                         @else
-                            <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm flex-fill fw-semibold" style="font-size:0.85rem;">Sign In</a>
-                            <a href="{{ route('register') }}" class="btn btn-primary btn-sm flex-fill fw-semibold" style="background:#2756fd; border:none; font-size:0.85rem;">Get Started</a>
+                            <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm flex-fill fw-bold py-2" style="font-size:0.9rem;">Sign In</a>
+                            <a href="{{ route('register') }}" class="btn btn-primary btn-sm flex-fill fw-bold py-2" style="background:#2756fd; border:none; font-size:0.9rem;">Get Started</a>
                         @endauth
                     </div>
                 </div>
-            </header>
-
-                <!-- Hamburger Icon for Mobile Menu -->
-                <div class="mobile-nav-toggler d-lg-none d-block" style="position:absolute;top:24px;right:24px;z-index:1001;cursor:pointer;">
-                    <span class="icon icon-menu" style="font-size:2rem;"></span>
-                </div>
-
-                <!-- Mobile Menu  -->
-                <div class="close-btn"><span class="icon flaticon-cancel-1"></span></div>
-                <div class="mobile-menu">
-                    <div class="menu-backdrop"></div>
-                    <nav class="menu-box">
-                        <div class="nav-logo">
-                            <a href="{{ url('/') }}">
-                                <img src="{{ asset('frontend/images/logo/radiantblue.png') }}" alt="logo" width="166" height="48">
-                            </a>
-                        </div>
-                        <div class="bottom-canvas">
-                            <div class="login-box flex align-center">
-                                @auth
-                                    <a href="{{ url('/dashboard') }}">Dashboard</a>
-                                @else
-                                    <a href="{{ route('login') }}">Login</a>
-                                    <span>/</span>
-                                    <a href="{{ route('register') }}">Register</a>
-                                @endauth
-                            </div>
-                            <div class="menu-outer p-3">
-                                <ul class="list-unstyled space-y-2">
-                                    <li class="py-2 border-bottom"><a href="{{ url('/') }}" class="fw-bold text-dark text-decoration-none">Home</a></li>
-                                    <li class="py-2 border-bottom"><a href="{{ url('/properties') }}" class="fw-bold text-dark text-decoration-none">Properties</a></li>
-                                    <li class="py-2 border-bottom"><a href="{{ url('/list-property') }}" class="fw-bold text-dark text-decoration-none">List Properties</a></li>
-                                    <li class="py-2 border-bottom"><a href="{{ url('/project-marketplace') }}" class="fw-bold text-dark text-decoration-none">Project Marketplace</a></li>
-                                    <li class="py-2 border-bottom">
-                                        <span class="fw-bold text-dark d-block mb-1">Partners</span>
-                                        <ul class="list-unstyled ms-3">
-                                            <li><a href="{{ url('/team') }}" class="text-secondary text-decoration-none small">Meet The Team</a></li>
-                                            <li><a href="{{ url('/agent') }}" class="text-secondary text-decoration-none small">Become an Agent</a></li>
-                                            <li><a href="{{ url('/affiliate') }}" class="text-secondary text-decoration-none small">Become an Affiliate</a></li>
-                                            <li><a href="{{ url('/career') }}" class="text-secondary text-decoration-none small">Careers</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="py-2"><a href="{{ url('/resources') }}" class="fw-bold text-dark text-decoration-none">Resources</a></li>
-                                </ul>
-                            </div>
-                            <div class="button-mobi-sell mt-3">
-                                <a class="tf-btn primary w-100 text-center" href="{{ url('/list-property') }}">Submit Property</a>
-                            </div>
-                        </div>
-                    </nav>
-                </div>
-                <!-- End Mobile Menu -->
             </header>
 
             <!-- Main Content -->
