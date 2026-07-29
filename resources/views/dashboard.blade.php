@@ -577,7 +577,7 @@
                                             <div class="progress-bar bg-primary" style="width:{{ $prop->total_shares > 0 ? round((($prop->total_shares - $prop->available_shares) / $prop->total_shares) * 100) : 0 }}%;"></div>
                                         </div>
                                     </div>
-                                    <button class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;" @click="openBuyModal({{ json_encode($prop) }})">
+                                    <button class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;" @click="openBuyModal({{ $prop->id }}, '{{ addslashes($prop->title) }}', '{{ addslashes($prop->location) }}', {{ $prop->price_per_share }}, {{ $prop->roi_percentage }}, {{ $prop->available_shares }})">
                                         <i class="bi bi-lightning-charge me-1"></i> Invest Now
                                     </button>
                                 </div>
@@ -768,7 +768,7 @@
                                         <span>Share Price: ${{ number_format($prop->price_per_share, 2) }}</span>
                                         <span class="text-success">{{ $prop->roi_percentage }}% ROI</span>
                                     </div>
-                                    <button class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;" @click="openBuyModal({{ json_encode($prop) }})">
+                                    <button class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;" @click="openBuyModal({{ $prop->id }}, '{{ addslashes($prop->title) }}', '{{ addslashes($prop->location) }}', {{ $prop->price_per_share }}, {{ $prop->roi_percentage }}, {{ $prop->available_shares }})">
                                         <i class="bi bi-lightning-charge me-1"></i> Invest Now
                                     </button>
                                 </div>
@@ -1161,6 +1161,43 @@
     </div>
 </div>
 
+<!-- Buy Shares Modal -->
+<div x-show="selectedProperty" x-cloak class="custom-modal-backdrop">
+    <div class="custom-modal-card p-4" style="max-width:500px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold me-2">Property Investment</span>
+                <h5 class="fw-bold text-dark mb-0 mt-1" x-text="selectedProperty?.title"></h5>
+            </div>
+            <button type="button" class="btn-close" @click="selectedProperty = null"></button>
+        </div>
+        <div class="p-3 rounded-3 bg-light border mb-3">
+            <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">Location</span><strong class="text-dark" x-text="selectedProperty?.location"></strong></div>
+            <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">Price Per Share</span><strong class="text-dark" x-text="'$' + parseFloat(selectedProperty?.price_per_share || 0).toFixed(2)"></strong></div>
+            <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">ROI</span><strong class="text-success" x-text="(selectedProperty?.roi_percentage || 0) + '%'"></strong></div>
+            <div class="d-flex justify-content-between small"><span class="text-muted">Available Shares</span><strong class="text-dark" x-text="selectedProperty?.available_shares"></strong></div>
+        </div>
+        <form action="{{ route('buy-shares.store') }}" method="POST">
+            @csrf
+            <input type="hidden" name="property_id" :value="selectedProperty?.id">
+            <div class="mb-3">
+                <label class="form-label fw-bold text-dark small">Number of Shares to Buy</label>
+                <input type="number" name="shares" min="1" class="form-control fw-bold" placeholder="1" x-model="buySharesQty" @input="buyTotal = buySharesQty * (selectedProperty?.price_per_share || 0)" required>
+            </div>
+            <div class="p-3 rounded-3 mb-3" style="background:#eff6ff; border:1px solid #bfdbfe;">
+                <div class="d-flex justify-content-between small fw-bold">
+                    <span class="text-muted">Total Cost</span>
+                    <span class="text-primary fs-5" x-text="'$' + parseFloat(buyTotal || 0).toFixed(2)">$0.00</span>
+                </div>
+                <div class="text-muted mt-1" style="font-size:0.78rem;">Your wallet: <strong class="text-success">${{ number_format($walletBalance, 2) }}</strong></div>
+            </div>
+            <button type="submit" class="btn btn-primary fw-bold w-100 py-2 rounded-3" style="background:#2563eb;">
+                <i class="bi bi-lightning-charge me-1"></i> Confirm Purchase
+            </button>
+        </form>
+    </div>
+</div>
+
 <!-- Receive Funds Modal -->
 <div x-show="openReceiveModal" x-cloak class="custom-modal-backdrop">
     <div class="custom-modal-card p-4 text-center">
@@ -1196,10 +1233,17 @@
                 this.showFinanceModal = true;
             },
 
-            openBuyModal(prop) {
-                this.selectedProperty = prop;
+            openBuyModal(id, title, location, price, roi, shares) {
+                this.selectedProperty = {
+                    id: id,
+                    title: title,
+                    location: location,
+                    price_per_share: price,
+                    roi_percentage: roi,
+                    available_shares: shares
+                };
                 this.buySharesQty = 1;
-                this.buyTotal = parseFloat(prop.price_per_share || 0);
+                this.buyTotal = parseFloat(price || 0);
             },
 
             showInstructionsModal(dep) {
@@ -1208,7 +1252,6 @@
 
             copyText(text) {
                 navigator.clipboard.writeText(text).then(() => {
-                    // Show a brief toast instead of alert
                     const toast = document.createElement('div');
                     toast.textContent = 'Copied!';
                     toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1d4ed8;color:#fff;padding:10px 20px;border-radius:8px;font-weight:600;font-size:0.85rem;z-index:999999;box-shadow:0 4px 20px rgba(0,0,0,0.2);';
