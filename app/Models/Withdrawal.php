@@ -14,6 +14,10 @@ class Withdrawal extends Model
         'withdrawal_code',
         'amount',
         'withdrawal_method',
+        'country',
+        'currency',
+        'account_name',
+        'account_number',
         'account_details',
         'status',
     ];

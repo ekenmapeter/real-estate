@@ -27,7 +27,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    /* Custom Glassmorphism & Navbar Styling */
+
     <style>
       /* ── Prevent Mobile Horizontal Scroll Overflow ── */
       html, body {

@@ -13,6 +13,7 @@ Route::get('/', function () {
 // User Investment Dashboard
 Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
 Route::post('/deposit', [UserDashboardController::class, 'deposit'])->name('deposit.store');
+Route::post('/deposit/evidence/{id}', [UserDashboardController::class, 'uploadEvidence'])->name('deposit.evidence');
 Route::post('/withdraw', [UserDashboardController::class, 'withdraw'])->name('withdraw.store');
 Route::post('/send-funds', [UserDashboardController::class, 'sendFunds'])->name('send-funds.store');
 Route::post('/buy-shares', [UserDashboardController::class, 'buyShares'])->name('buy-shares.store');
@@ -20,6 +21,7 @@ Route::post('/buy-shares', [UserDashboardController::class, 'buyShares'])->name(
 // Admin Platform Management Dashboard
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::post('/deposit/instructions/{id}', [AdminDashboardController::class, 'sendInstructions'])->name('deposit.instructions');
     Route::post('/deposit/approve/{id}', [AdminDashboardController::class, 'approveDeposit'])->name('deposit.approve');
     Route::post('/deposit/reject/{id}', [AdminDashboardController::class, 'rejectDeposit'])->name('deposit.reject');
     Route::post('/withdrawal/approve/{id}', [AdminDashboardController::class, 'approveWithdrawal'])->name('withdrawal.approve');

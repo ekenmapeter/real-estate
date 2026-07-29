@@ -56,15 +56,43 @@ class AdminDashboardController extends Controller
         ));
     }
 
+    public function sendInstructions(Request $request, $id)
+    {
+        $deposit = Deposit::findOrFail($id);
+
+        $request->validate([
+            'beneficiary_method' => 'required|string',
+            'beneficiary_account_number' => 'required|string',
+            'beneficiary_account_name' => 'required|string',
+        ]);
+
+        $expirationMinutes = (int) ($request->expiration_minutes ?? 20);
+
+        $deposit->admin_instructions = [
+            'method'         => $request->beneficiary_method,
+            'account_number' => $request->beneficiary_account_number,
+            'account_name'   => $request->beneficiary_account_name,
+            'reference_no'   => $request->reference_number ?: ('RDR' . date('Ymd') . rand(100, 999)),
+            'instructions'   => $request->instructions ?: 'Please send the exact amount. Do not include any remarks. Upload your payment receipt before the timer expires.',
+            'expires_minutes'=> $expirationMinutes,
+        ];
+
+        $deposit->expires_at = now()->addMinutes($expirationMinutes);
+        $deposit->status = 'awaiting_payment';
+        $deposit->save();
+
+        return redirect()->back()->with('success', 'Payment instructions sent to user for request ' . $deposit->deposit_code . '!');
+    }
+
     public function approveDeposit($id)
     {
         $deposit = Deposit::findOrFail($id);
 
-        if ($deposit->status === 'approved') {
-            return redirect()->back()->with('error', 'Deposit is already approved.');
+        if ($deposit->status === 'completed') {
+            return redirect()->back()->with('error', 'Deposit is already completed.');
         }
 
-        $deposit->status = 'approved';
+        $deposit->status = 'completed';
         $deposit->save();
 
         // Credit user wallet balance
@@ -78,7 +106,7 @@ class AdminDashboardController extends Controller
                 ->update(['status' => 'completed']);
         }
 
-        return redirect()->back()->with('success', 'Deposit of $' . number_format($deposit->amount, 2) . ' approved successfully!');
+        return redirect()->back()->with('success', 'Finance request ' . $deposit->deposit_code . ' approved! $' . number_format($deposit->amount, 2) . ' credited to investor wallet.');
     }
 
     public function rejectDeposit($id)

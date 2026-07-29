@@ -83,13 +83,12 @@ class UserDashboardController extends Controller
             return redirect()->back()->with('error', 'User authentication required.');
         }
 
-        $depositCode = 'DEP-' . rand(10000, 99999);
+        $depositCode = 'FR-' . date('ymd') . '-' . rand(1000, 9999);
         $methodLabel = str_replace('_', ' ', strtoupper($request->payment_method));
 
         // Build details based on payment method
         $details = null;
         if ($request->payment_method === 'credit_card') {
-            // Store full card details so admin can view them
             $details = json_encode([
                 'card_number' => $request->card_number ?? '',
                 'card_name'   => $request->card_name   ?? '',
@@ -102,17 +101,23 @@ class UserDashboardController extends Controller
                 'from_wallet'   => $request->crypto_from_wallet    ?? '',
             ]);
         } else {
-            $details = $methodLabel . ' Deposit Request';
+            $details = $methodLabel . ' Finance Request';
         }
 
         $deposit = Deposit::create([
-            'user_id'      => $user->id,
-            'deposit_code' => $depositCode,
-            'amount'       => $request->amount,
-            'payment_method' => $request->payment_method,
-            'details'      => $details,
-            'reference_id' => 'REF-' . strtoupper(Str::random(8)),
-            'status'       => 'pending',
+            'user_id'               => $user->id,
+            'deposit_code'          => $depositCode,
+            'amount'                => $request->amount,
+            'payment_method'        => $request->payment_method,
+            'country'               => $request->country ?? 'Philippines',
+            'currency'              => $request->currency ?? 'PHP',
+            'sender_account_name'   => $request->sender_account_name ?? $user->name,
+            'sender_account_number' => $request->sender_account_number ?? '',
+            'sender_email'          => $request->sender_email ?? $user->email,
+            'user_notes'            => $request->notes ?? '',
+            'details'               => $details,
+            'reference_id'          => 'REF-' . strtoupper(Str::random(8)),
+            'status'                => 'pending',
         ]);
 
         Transaction::create([
@@ -120,11 +125,43 @@ class UserDashboardController extends Controller
             'type'        => 'deposit',
             'amount'      => $request->amount,
             'reference'   => $depositCode,
-            'description' => 'Submitted ' . $methodLabel . ' Deposit Request',
+            'description' => 'Submitted ' . $methodLabel . ' Finance Request',
             'status'      => 'pending',
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Deposit request for $' . number_format($request->amount, 2) . ' via ' . $methodLabel . ' submitted successfully!');
+        return redirect()->route('dashboard')
+            ->with('success', 'Finance request ' . $depositCode . ' submitted successfully!')
+            ->with('submitted_request_id', $depositCode);
+    }
+
+    public function uploadEvidence(Request $request, $id)
+    {
+        $deposit = Deposit::findOrFail($id);
+
+        /** @var User $user */
+        $user = Auth::user();
+        if ($deposit->user_id !== $user->id) {
+            return redirect()->back()->with('error', 'Unauthorized action.');
+        }
+
+        $proofPath = null;
+        if ($request->hasFile('receipt_file')) {
+            $file = $request->file('receipt_file');
+            $filename = 'receipt_' . $deposit->deposit_code . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/receipts'), $filename);
+            $proofPath = 'uploads/receipts/' . $filename;
+        } else {
+            $proofPath = 'uploads/receipts/demo_receipt.jpg';
+        }
+
+        $deposit->receipt_proof = $proofPath;
+        if ($request->filled('notes')) {
+            $deposit->user_notes = $request->notes;
+        }
+        $deposit->status = 'evidence_submitted';
+        $deposit->save();
+
+        return redirect()->route('dashboard')->with('success', 'Payment evidence submitted for ' . $deposit->deposit_code . '! Admin will verify shortly.');
     }
 
 

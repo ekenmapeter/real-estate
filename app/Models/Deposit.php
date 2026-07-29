@@ -14,13 +14,24 @@ class Deposit extends Model
         'deposit_code',
         'amount',
         'payment_method',
+        'country',
+        'currency',
+        'sender_account_name',
+        'sender_account_number',
+        'sender_email',
         'details',
+        'receipt_proof',
+        'user_notes',
+        'admin_instructions',
+        'expires_at',
         'reference_id',
         'status',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'admin_instructions' => 'array',
+        'expires_at' => 'datetime',
     ];
 
     public function user()
