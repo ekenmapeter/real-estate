@@ -1,15 +1,30 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\AdminDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// User Investment Dashboard
+Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+Route::post('/deposit', [UserDashboardController::class, 'deposit'])->name('deposit.store');
+Route::post('/withdraw', [UserDashboardController::class, 'withdraw'])->name('withdraw.store');
+Route::post('/send-funds', [UserDashboardController::class, 'sendFunds'])->name('send-funds.store');
+Route::post('/buy-shares', [UserDashboardController::class, 'buyShares'])->name('buy-shares.store');
+
+// Admin Platform Management Dashboard
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::post('/deposit/approve/{id}', [AdminDashboardController::class, 'approveDeposit'])->name('deposit.approve');
+    Route::post('/deposit/reject/{id}', [AdminDashboardController::class, 'rejectDeposit'])->name('deposit.reject');
+    Route::post('/withdrawal/approve/{id}', [AdminDashboardController::class, 'approveWithdrawal'])->name('withdrawal.approve');
+    Route::post('/withdrawal/reject/{id}', [AdminDashboardController::class, 'rejectWithdrawal'])->name('withdrawal.reject');
+    Route::post('/property/store', [AdminDashboardController::class, 'storeProperty'])->name('property.store');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

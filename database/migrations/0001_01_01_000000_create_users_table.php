@@ -17,6 +17,11 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('account_id')->unique()->nullable();
+            $table->decimal('wallet_balance', 15, 2)->default(0.00);
+            $table->string('role')->default('user');
+            $table->string('affiliate_code')->nullable();
+            $table->decimal('affiliate_earnings', 15, 2)->default(0.00);
             $table->rememberToken();
             $table->timestamps();
         });
