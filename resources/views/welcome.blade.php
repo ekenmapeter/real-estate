@@ -369,53 +369,50 @@
     </div>
 
     <div class="row g-4">
-      <!-- Project 1 -->
-      <div class="col-lg-4 col-md-6">
-        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-          <img src="https://radiantdreamrealty.com/frontend/images/home/house-1.jpg" class="card-img-top" alt="Modern Pool Estate" style="height: 220px; object-fit: cover;">
-          <div class="card-body p-4">
-            <span class="badge bg-primary mb-2">Luxury</span>
-            <h5 class="card-title fw-bold">Modern Pool Estate</h5>
-            <p class="text-muted small mb-3"><i class="bi bi-geo-alt me-1"></i> California, New York</p>
-            <div class="d-flex justify-content-between border-top pt-3">
-              <span class="fw-bold text-primary fs-5">$240,000</span>
-              <a href="#" class="btn btn-sm btn-primary">View Project</a>
+      @forelse($properties->take(3) as $prop)
+        @php
+          $fundedPercent = $prop->total_shares > 0 ? round((($prop->total_shares - $prop->available_shares) / $prop->total_shares) * 100) : 0;
+          $totalValuation = $prop->price_per_share * $prop->total_shares;
+        @endphp
+        <div class="col-lg-4 col-md-6">
+          <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="position-relative">
+              <img src="{{ $prop->image_url ?? 'https://radiantdreamrealty.com/frontend/images/home/house-1.jpg' }}" class="card-img-top" alt="{{ $prop->title }}" style="height: 220px; object-fit: cover;">
+              <div class="position-absolute top-0 start-0 m-3 d-flex gap-2">
+                <span class="badge bg-primary">{{ $prop->category ?? 'Co-Ownership' }}</span>
+                <span class="badge bg-success">{{ $prop->roi_percentage }}% ROI</span>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+            <div class="card-body p-4">
+              <h5 class="card-title fw-bold" style="color: #1a3c5e;">{{ $prop->title }}</h5>
+              <p class="text-muted small mb-3"><i class="bi bi-geo-alt me-1"></i> {{ $prop->location }}</p>
 
-      <!-- Project 2 -->
-      <div class="col-lg-4 col-md-6">
-        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-          <img src="https://radiantdreamrealty.com/frontend/images/home/house-2.jpg" class="card-img-top" alt="Urban Loft Collection" style="height: 220px; object-fit: cover;">
-          <div class="card-body p-4">
-            <span class="badge bg-info text-white mb-2">Residential</span>
-            <h5 class="card-title fw-bold">Urban Loft Collection</h5>
-            <p class="text-muted small mb-3"><i class="bi bi-geo-alt me-1"></i> California, New York</p>
-            <div class="d-flex justify-content-between border-top pt-3">
-              <span class="fw-bold text-primary fs-5">$180,000</span>
-              <a href="#" class="btn btn-sm btn-primary">View Project</a>
-            </div>
-          </div>
-        </div>
-      </div>
+              <!-- Funding Progress -->
+              <div class="mb-3">
+                <div class="d-flex justify-content-between small fw-bold mb-1">
+                  <span>Funded: {{ $fundedPercent }}%</span>
+                  <span class="text-primary">${{ number_format($prop->price_per_share, 2) }} / Share</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                  <div class="progress-bar bg-primary" style="width: {{ $fundedPercent }}%;"></div>
+                </div>
+              </div>
 
-      <!-- Project 3 -->
-      <div class="col-lg-4 col-md-6">
-        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
-          <img src="https://radiantdreamrealty.com/frontend/images/home/house-3.jpg" class="card-img-top" alt="Seaside Retreat Villas" style="height: 220px; object-fit: cover;">
-          <div class="card-body p-4">
-            <span class="badge bg-success mb-2">Vacation Home</span>
-            <h5 class="card-title fw-bold">Seaside Retreat Villas</h5>
-            <p class="text-muted small mb-3"><i class="bi bi-geo-alt me-1"></i> Miami Beach, Florida</p>
-            <div class="d-flex justify-content-between border-top pt-3">
-              <span class="fw-bold text-primary fs-5">$320,000</span>
-              <a href="#" class="btn btn-sm btn-primary">View Project</a>
+              <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                <div>
+                  <small class="text-muted d-block">Valuation</small>
+                  <span class="fw-bold text-primary fs-5">${{ number_format($totalValuation, 2) }}</span>
+                </div>
+                <a href="{{ route('dashboard') }}" class="btn btn-sm btn-primary fw-bold px-3 py-2 rounded-3">Invest / Co-Own</a>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      @empty
+        <div class="col-12 text-center py-4">
+          <p class="text-muted">No active property projects available at the moment.</p>
+        </div>
+      @endforelse
     </div>
   </div>
 </section>
@@ -443,106 +440,50 @@
 <section class="py-5" style="background: #f8fafc;">
   <div class="container">
     <div class="text-center mb-5">
-      <span class="text-primary fw-bold text-uppercase" style="font-size: 0.85rem;">Top Properties</span>
-      <h3 class="fw-bold mt-1" style="color: #1a3c5e;">Buy | Sell | Rent</h3>
+      <span class="text-primary fw-bold text-uppercase" style="font-size: 0.85rem;">Verified Real Estate Listings</span>
+      <h3 class="fw-bold mt-1" style="color: #1a3c5e;">Explore Live Property Listings</h3>
     </div>
 
     <div class="row g-4 mb-4">
-      <!-- Property 1 -->
-      <div class="col-lg-4 col-md-6">
-        <div class="card h-100 border-0 rounded-4 shadow-sm overflow-hidden bg-white">
-          <div class="position-relative">
-            <img src="https://radiantdreamrealty.com/frontend/images/home/house-7.jpg" class="card-img-top" alt="Silverwood Modern Estate" style="height: 230px; object-fit: cover;">
-            <div class="position-absolute top-0 start-0 m-3 d-flex gap-2">
-              <span class="badge bg-primary">Featured</span>
-              <span class="badge bg-success">For Sale</span>
+      @forelse($properties as $prop)
+        @php
+          $totalVal = $prop->price_per_share * $prop->total_shares;
+        @endphp
+        <div class="col-lg-4 col-md-6">
+          <div class="card h-100 border-0 rounded-4 shadow-sm overflow-hidden bg-white">
+            <div class="position-relative">
+              <img src="{{ $prop->image_url ?? 'https://radiantdreamrealty.com/frontend/images/home/house-7.jpg' }}" class="card-img-top" alt="{{ $prop->title }}" style="height: 230px; object-fit: cover;">
+              <div class="position-absolute top-0 start-0 m-3 d-flex gap-2">
+                <span class="badge bg-primary">{{ $prop->category }}</span>
+                <span class="badge bg-success">Verified</span>
+              </div>
+              <div class="position-absolute bottom-0 start-0 w-100 p-2 text-white" style="background: linear-gradient(transparent, rgba(0,0,0,0.7)); font-size: 0.85rem;">
+                <i class="bi bi-geo-alt me-1"></i> {{ $prop->location }}
+              </div>
             </div>
-            <div class="position-absolute bottom-0 start-0 w-100 p-2 text-white" style="background: linear-gradient(transparent, rgba(0,0,0,0.7)); font-size: 0.85rem;">
-              <i class="bi bi-geo-alt me-1"></i> 145 Brooklyn Ave, California, USA
-            </div>
-          </div>
-          <div class="card-body p-4">
-            <h5 class="fw-bold mb-3" style="color: #1a3c5e;">Silverwood Modern Estate</h5>
-            <div class="d-flex justify-content-between text-muted small border-bottom pb-3 mb-3">
-              <span><i class="bi bi-door-closed me-1"></i> Beds: <b>4</b></span>
-              <span><i class="bi bi-droplet me-1"></i> Baths: <b>3</b></span>
-              <span><i class="bi bi-aspect-ratio me-1"></i> Sqft: <b>3200</b></span>
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-              <h5 class="fw-bold text-primary mb-0">$1,250,000</h5>
-              <div class="d-flex gap-2 text-secondary">
-                <i class="bi bi-facebook cursor-pointer"></i>
-                <i class="bi bi-whatsapp cursor-pointer"></i>
-                <i class="bi bi-twitter-x cursor-pointer"></i>
+            <div class="card-body p-4">
+              <h5 class="fw-bold mb-2" style="color: #1a3c5e;">{{ $prop->title }}</h5>
+              <div class="d-flex justify-content-between text-muted small border-bottom pb-3 mb-3">
+                <span><i class="bi bi-pie-chart me-1"></i> Price/Share: <b>${{ number_format($prop->price_per_share, 2) }}</b></span>
+                <span><i class="bi bi-graph-up me-1"></i> ROI: <b class="text-success">{{ $prop->roi_percentage }}%</b></span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <small class="text-muted d-block" style="font-size: 0.75rem;">Total Valuation</small>
+                  <h5 class="fw-bold text-primary mb-0">${{ number_format($totalVal, 2) }}</h5>
+                </div>
+                <a href="{{ route('dashboard') }}" class="btn btn-sm btn-outline-primary fw-bold px-3 py-2 rounded-3">
+                  Co-Own Now <i class="bi bi-arrow-right"></i>
+                </a>
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Property 2 -->
-      <div class="col-lg-4 col-md-6">
-        <div class="card h-100 border-0 rounded-4 shadow-sm overflow-hidden bg-white">
-          <div class="position-relative">
-            <img src="https://radiantdreamrealty.com/frontend/images/home/house-8.jpg" class="card-img-top" alt="Willowbrook Family Estate" style="height: 230px; object-fit: cover;">
-            <div class="position-absolute top-0 start-0 m-3 d-flex gap-2">
-              <span class="badge bg-primary">Featured</span>
-              <span class="badge bg-info text-white">For Rent</span>
-            </div>
-            <div class="position-absolute bottom-0 start-0 w-100 p-2 text-white" style="background: linear-gradient(transparent, rgba(0,0,0,0.7)); font-size: 0.85rem;">
-              <i class="bi bi-geo-alt me-1"></i> 298 Willow Creek Drive, Charlotte, NC
-            </div>
-          </div>
-          <div class="card-body p-4">
-            <h5 class="fw-bold mb-3" style="color: #1a3c5e;">Willowbrook Family Estate</h5>
-            <div class="d-flex justify-content-between text-muted small border-bottom pb-3 mb-3">
-              <span><i class="bi bi-door-closed me-1"></i> Beds: <b>4</b></span>
-              <span><i class="bi bi-droplet me-1"></i> Baths: <b>3</b></span>
-              <span><i class="bi bi-aspect-ratio me-1"></i> Sqft: <b>2450</b></span>
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-              <h5 class="fw-bold text-primary mb-0">$3,450 / mo</h5>
-              <div class="d-flex gap-2 text-secondary">
-                <i class="bi bi-facebook cursor-pointer"></i>
-                <i class="bi bi-whatsapp cursor-pointer"></i>
-                <i class="bi bi-twitter-x cursor-pointer"></i>
-              </div>
-            </div>
-          </div>
+      @empty
+        <div class="col-12 text-center py-4">
+          <p class="text-muted">No properties found in database.</p>
         </div>
-      </div>
-
-      <!-- Property 3 -->
-      <div class="col-lg-4 col-md-6">
-        <div class="card h-100 border-0 rounded-4 shadow-sm overflow-hidden bg-white">
-          <div class="position-relative">
-            <img src="https://radiantdreamrealty.com/frontend/images/home/house-9.jpg" class="card-img-top" alt="Villa Azul del Mar" style="height: 230px; object-fit: cover;">
-            <div class="position-absolute top-0 start-0 m-3 d-flex gap-2">
-              <span class="badge bg-primary">Featured</span>
-              <span class="badge bg-success">For Sale</span>
-            </div>
-            <div class="position-absolute bottom-0 start-0 w-100 p-2 text-white" style="background: linear-gradient(transparent, rgba(0,0,0,0.7)); font-size: 0.85rem;">
-              <i class="bi bi-geo-alt me-1"></i> 88 Palm Drive, Miami Beach, Florida
-            </div>
-          </div>
-          <div class="card-body p-4">
-            <h5 class="fw-bold mb-3" style="color: #1a3c5e;">Villa Azul del Mar</h5>
-            <div class="d-flex justify-content-between text-muted small border-bottom pb-3 mb-3">
-              <span><i class="bi bi-door-closed me-1"></i> Beds: <b>5</b></span>
-              <span><i class="bi bi-droplet me-1"></i> Baths: <b>6</b></span>
-              <span><i class="bi bi-aspect-ratio me-1"></i> Sqft: <b>6450</b></span>
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-              <h5 class="fw-bold text-primary mb-0">$4,950,000</h5>
-              <div class="d-flex gap-2 text-secondary">
-                <i class="bi bi-facebook cursor-pointer"></i>
-                <i class="bi bi-whatsapp cursor-pointer"></i>
-                <i class="bi bi-twitter-x cursor-pointer"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      @endforelse
     </div>
 
     <div class="text-center">

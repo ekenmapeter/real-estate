@@ -49,87 +49,56 @@
 <section id="marketplaceGrid" class="py-5" style="background-color: #f8fafc;">
   <div class="container">
     <div class="row g-4">
-      <!-- Project 1 -->
-      <div class="col-lg-4 col-md-6 reveal-on-scroll delay-1">
-        <div class="card h-100 border-0 glass-card rounded-4 overflow-hidden">
-          <img src="https://radiantdreamrealty.com/frontend/images/home/house-1.jpg" class="card-img-top" alt="Modern Pool Estate" style="height: 220px; object-fit: cover;">
-          <div class="card-body p-4">
-            <span class="badge bg-primary mb-2">Luxury Co-Ownership</span>
-            <h5 class="card-title fw-bold" style="color: #1a3c5e;">Modern Pool Estate</h5>
-            <p class="text-muted small mb-3"><i class="bi bi-geo-alt me-1"></i> California, New York</p>
-            
-            <!-- Progress Bar -->
-            <div class="mb-3">
-              <div class="d-flex justify-content-between small fw-bold mb-1">
-                <span>Funded: 84%</span>
-                <span class="text-primary">$201,600 / $240,000</span>
-              </div>
-              <div class="progress" style="height: 8px;">
-                <div class="progress-bar bg-primary" style="width: 84%;"></div>
+      @forelse($properties as $prop)
+        @php
+          $fundedPercent = $prop->total_shares > 0 ? round((($prop->total_shares - $prop->available_shares) / $prop->total_shares) * 100) : 0;
+          $raisedAmount = ($prop->total_shares - $prop->available_shares) * $prop->price_per_share;
+          $totalValuation = $prop->total_shares * $prop->price_per_share;
+        @endphp
+        <div class="col-lg-4 col-md-6 reveal-on-scroll delay-1">
+          <div class="card h-100 border-0 glass-card rounded-4 overflow-hidden">
+            <div class="position-relative">
+              <img src="{{ $prop->image_url ?? 'https://radiantdreamrealty.com/frontend/images/home/house-1.jpg' }}" class="card-img-top" alt="{{ $prop->title }}" style="height: 220px; object-fit: cover;">
+              <div class="position-absolute top-0 start-0 m-3 d-flex gap-2">
+                <span class="badge bg-warning text-dark fw-bold">{{ $prop->category }}</span>
+                <span class="badge bg-success">{{ $prop->roi_percentage }}% ROI</span>
               </div>
             </div>
+            <div class="card-body p-4">
+              <h5 class="card-title fw-bold" style="color: #1a3c5e;">{{ $prop->title }}</h5>
+              <p class="text-muted small mb-3"><i class="bi bi-geo-alt me-1"></i> {{ $prop->location }}</p>
+              
+              <!-- Progress Bar -->
+              <div class="mb-3">
+                <div class="d-flex justify-content-between small fw-bold mb-1">
+                  <span>Funded: {{ $fundedPercent }}%</span>
+                  <span class="text-primary">${{ number_format($raisedAmount, 2) }} / ${{ number_format($totalValuation, 2) }}</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                  <div class="progress-bar bg-warning" style="width: {{ $fundedPercent }}%;"></div>
+                </div>
+              </div>
 
-            <div class="d-flex justify-content-between border-top pt-3 text-muted small">
-              <span>Min Entry: <b>$1,250</b></span>
-              <span>Est. Yield: <b class="text-success">11.4% p.a.</b></span>
+              <div class="d-flex justify-content-between border-top pt-3 text-muted small mb-3">
+                <span>Share Price: <b class="text-dark">${{ number_format($prop->price_per_share, 2) }}</b></span>
+                <span>Est. Yield: <b class="text-success">{{ $prop->roi_percentage }}% p.a.</b></span>
+              </div>
+
+              <a href="{{ route('dashboard') }}" class="btn btn-warning text-dark fw-bold w-100 py-2 rounded-3 shadow-sm">
+                <i class="bi bi-cart-plus me-1"></i> Buy Shares
+              </a>
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Project 2 -->
-      <div class="col-lg-4 col-md-6 reveal-on-scroll delay-2">
-        <div class="card h-100 border-0 glass-card rounded-4 overflow-hidden">
-          <img src="https://radiantdreamrealty.com/frontend/images/home/house-2.jpg" class="card-img-top" alt="Urban Loft Collection" style="height: 220px; object-fit: cover;">
-          <div class="card-body p-4">
-            <span class="badge bg-info text-white mb-2">Residential Fund</span>
-            <h5 class="card-title fw-bold" style="color: #1a3c5e;">Urban Loft Collection</h5>
-            <p class="text-muted small mb-3"><i class="bi bi-geo-alt me-1"></i> California, New York</p>
-            
-            <div class="mb-3">
-              <div class="d-flex justify-content-between small fw-bold mb-1">
-                <span>Funded: 92%</span>
-                <span class="text-primary">$165,600 / $180,000</span>
-              </div>
-              <div class="progress" style="height: 8px;">
-                <div class="progress-bar bg-info" style="width: 92%;"></div>
-              </div>
-            </div>
-
-            <div class="d-flex justify-content-between border-top pt-3 text-muted small">
-              <span>Min Entry: <b>$1,000</b></span>
-              <span>Est. Yield: <b class="text-success">9.8% p.a.</b></span>
-            </div>
+      @empty
+        <div class="col-12 text-center py-5">
+          <div class="p-4 bg-white rounded-4 shadow-sm d-inline-block" style="max-width:400px;">
+            <i class="bi bi-building-exclamation fs-1 text-muted d-block mb-2"></i>
+            <h5 class="fw-bold text-dark">No Active Marketplace Projects</h5>
+            <p class="text-muted small mb-0">Check back soon for new property investment opportunities.</p>
           </div>
         </div>
-      </div>
-
-      <!-- Project 3 -->
-      <div class="col-lg-4 col-md-6 reveal-on-scroll delay-3">
-        <div class="card h-100 border-0 glass-card rounded-4 overflow-hidden">
-          <img src="https://radiantdreamrealty.com/frontend/images/home/house-3.jpg" class="card-img-top" alt="Seaside Retreat" style="height: 220px; object-fit: cover;">
-          <div class="card-body p-4">
-            <span class="badge bg-success mb-2">Vacation Co-Ownership</span>
-            <h5 class="card-title fw-bold" style="color: #1a3c5e;">Seaside Retreat Villas</h5>
-            <p class="text-muted small mb-3"><i class="bi bi-geo-alt me-1"></i> Miami Beach, Florida</p>
-            
-            <div class="mb-3">
-              <div class="d-flex justify-content-between small fw-bold mb-1">
-                <span>Funded: 67%</span>
-                <span class="text-primary">$214,400 / $320,000</span>
-              </div>
-              <div class="progress" style="height: 8px;">
-                <div class="progress-bar bg-success" style="width: 67%;"></div>
-              </div>
-            </div>
-
-            <div class="d-flex justify-content-between border-top pt-3 text-muted small">
-              <span>Min Entry: <b>$1,500</b></span>
-              <span>Est. Yield: <b class="text-success">13.2% p.a.</b></span>
-            </div>
-          </div>
-        </div>
-      </div>
+      @endforelse
     </div>
   </div>
 </section>

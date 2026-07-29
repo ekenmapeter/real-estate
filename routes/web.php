@@ -6,7 +6,8 @@ use App\Http\Controllers\AdminDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    $properties = \App\Models\Property::where('status', 'active')->orderBy('id', 'desc')->get();
+    return view('welcome', compact('properties'));
 });
 
 // User Investment Dashboard
@@ -32,8 +33,22 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/properties', function () {
-    return view('properties');
+Route::get('/properties', function (\Illuminate\Http\Request $request) {
+    $query = \App\Models\Property::query();
+    if ($search = $request->input('search')) {
+        $query->where(function($q) use ($search) {
+            $q->where('title', 'like', "%{$search}%")
+              ->orWhere('location', 'like', "%{$search}%")
+              ->orWhere('category', 'like', "%{$search}%");
+        });
+    }
+    if ($category = $request->input('category')) {
+        if ($category !== 'all') {
+            $query->where('category', 'like', "%{$category}%");
+        }
+    }
+    $properties = $query->orderBy('id', 'desc')->get();
+    return view('properties', compact('properties'));
 });
 
 Route::get('/list-property', function () {
@@ -41,7 +56,8 @@ Route::get('/list-property', function () {
 });
 
 Route::get('/project-marketplace', function () {
-    return view('project-marketplace');
+    $properties = \App\Models\Property::where('status', 'active')->orderBy('id', 'desc')->get();
+    return view('project-marketplace', compact('properties'));
 });
 
 Route::get('/team', function () {
