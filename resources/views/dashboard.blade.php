@@ -577,7 +577,7 @@
                                             <div class="progress-bar bg-primary" style="width:{{ $prop->total_shares > 0 ? round((($prop->total_shares - $prop->available_shares) / $prop->total_shares) * 100) : 0 }}%;"></div>
                                         </div>
                                     </div>
-                                    <button class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;" @click="openFinanceForm('deposit')">
+                                    <button class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;" @click="openBuyModal({{ json_encode($prop) }})">
                                         <i class="bi bi-lightning-charge me-1"></i> Invest Now
                                     </button>
                                 </div>
@@ -768,7 +768,9 @@
                                         <span>Share Price: ${{ number_format($prop->price_per_share, 2) }}</span>
                                         <span class="text-success">{{ $prop->roi_percentage }}% ROI</span>
                                     </div>
-                                    <button class="btn btn-primary btn-sm w-100 fw-bold" style="background:#2563eb;" @click="activeTab = 'invest'">View Details</button>
+                                    <button class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;" @click="openBuyModal({{ json_encode($prop) }})">
+                                        <i class="bi bi-lightning-charge me-1"></i> Invest Now
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1154,59 +1156,6 @@
             </button>
             <button type="button" class="btn btn-link w-100 text-muted small text-decoration-none" @click="selectedDepInstruction = null">
                 Cancel Request
-            </button>
-        </form>
-    </div>
-</div>
-
-<!-- Receive Funds Modal -->
-<div x-show="openReceiveModal" x-cloak class="custom-modal-backdrop">
-    <div class="custom-modal-card p-4 text-center">
-        <h5 class="fw-bold text-dark mb-2">Receive Funds</h5>
-        <p class="text-muted small mb-3">Share your receiving details with another investor or peer.</p>
-        <div class="p-3 bg-light rounded-3 border mb-3">
-            <span class="text-muted small d-block mb-1">Account ID</span>
-            <h4 class="fw-bold text-primary mb-0">{{ $user->account_id ?? 'RDR-884920' }}</h4>
-            <span class="text-muted small d-block mt-2">Email Address</span>
-            <strong class="text-dark">{{ $user->email ?? 'investor@radiantrealty.com' }}</strong>
-        </div>
-        <button class="btn btn-primary w-100 fw-bold py-2 mb-2" style="background:#2563eb;" @click="shareAccountDetails()">Share Credentials</button>
-        <button class="btn btn-outline-secondary w-100 fw-bold py-2" @click="openReceiveModal = false">Close</button>
-    </div>
-</div>
-
-<!-- Buy Shares Modal -->
-<div x-show="selectedProperty" x-cloak class="custom-modal-backdrop">
-    <div class="custom-modal-card p-4" style="max-width:500px;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold me-2">Property Investment</span>
-                <h5 class="fw-bold text-dark mb-0 mt-1" x-text="selectedProperty?.title"></h5>
-            </div>
-            <button type="button" class="btn-close" @click="selectedProperty = null"></button>
-        </div>
-        <div class="p-3 rounded-3 bg-light border mb-3">
-            <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">Location</span><strong class="text-dark" x-text="selectedProperty?.location"></strong></div>
-            <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">Price Per Share</span><strong class="text-dark" x-text="'$' + parseFloat(selectedProperty?.price_per_share || 0).toFixed(2)"></strong></div>
-            <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">ROI</span><strong class="text-success" x-text="(selectedProperty?.roi_percentage || 0) + '%'"></strong></div>
-            <div class="d-flex justify-content-between small"><span class="text-muted">Available Shares</span><strong class="text-dark" x-text="selectedProperty?.available_shares"></strong></div>
-        </div>
-        <form action="{{ route('buy-shares.store') }}" method="POST">
-            @csrf
-            <input type="hidden" name="property_id" :value="selectedProperty?.id">
-            <div class="mb-3">
-                <label class="form-label fw-bold text-dark small">Number of Shares to Buy</label>
-                <input type="number" name="shares" min="1" class="form-control fw-bold" placeholder="1" x-model="buySharesQty" @input="buyTotal = buySharesQty * (selectedProperty?.price_per_share || 0)" required>
-            </div>
-            <div class="p-3 rounded-3 mb-3" style="background:#eff6ff; border:1px solid #bfdbfe;">
-                <div class="d-flex justify-content-between small fw-bold">
-                    <span class="text-muted">Total Cost</span>
-                    <span class="text-primary fs-5" x-text="'$' + parseFloat(buyTotal || 0).toFixed(2)">$0.00</span>
-                </div>
-                <div class="text-muted mt-1" style="font-size:0.78rem;">Your wallet: <strong class="text-success">${{ number_format($walletBalance, 2) }}</strong></div>
-            </div>
-            <button type="submit" class="btn btn-primary fw-bold w-100 py-2 rounded-3" style="background:#2563eb;">
-                <i class="bi bi-lightning-charge me-1"></i> Confirm Purchase
             </button>
         </form>
     </div>
