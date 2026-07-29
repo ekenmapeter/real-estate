@@ -577,7 +577,7 @@
                                             <div class="progress-bar bg-primary" style="width:{{ $prop->total_shares > 0 ? round((($prop->total_shares - $prop->available_shares) / $prop->total_shares) * 100) : 0 }}%;"></div>
                                         </div>
                                     </div>
-                                    <button class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;" @click="openBuyModal({{ $prop->id }}, '{{ addslashes($prop->title) }}', '{{ addslashes($prop->location) }}', {{ $prop->price_per_share }}, {{ $prop->roi_percentage }}, {{ $prop->available_shares }})">
+                                    <button type="button" class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;" @click="openBuyModalById({{ $prop->id }})">
                                         <i class="bi bi-lightning-charge me-1"></i> Invest Now
                                     </button>
                                 </div>
@@ -768,7 +768,7 @@
                                         <span>Share Price: ${{ number_format($prop->price_per_share, 2) }}</span>
                                         <span class="text-success">{{ $prop->roi_percentage }}% ROI</span>
                                     </div>
-                                    <button class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;" @click="openBuyModal({{ $prop->id }}, '{{ addslashes($prop->title) }}', '{{ addslashes($prop->location) }}', {{ $prop->price_per_share }}, {{ $prop->roi_percentage }}, {{ $prop->available_shares }})">
+                                    <button type="button" class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;" @click="openBuyModalById({{ $prop->id }})">
                                         <i class="bi bi-lightning-charge me-1"></i> Invest Now
                                     </button>
                                 </div>
@@ -1228,22 +1228,19 @@
             selectedProperty: null,
             buySharesQty: 1,
             buyTotal: 0,
+            propertiesList: @json($properties),
 
             openFinanceForm(type) {
                 this.showFinanceModal = true;
             },
 
-            openBuyModal(id, title, location, price, roi, shares) {
-                this.selectedProperty = {
-                    id: id,
-                    title: title,
-                    location: location,
-                    price_per_share: price,
-                    roi_percentage: roi,
-                    available_shares: shares
-                };
-                this.buySharesQty = 1;
-                this.buyTotal = parseFloat(price || 0);
+            openBuyModalById(id) {
+                const prop = this.propertiesList.find(p => p.id == id);
+                if (prop) {
+                    this.selectedProperty = prop;
+                    this.buySharesQty = 1;
+                    this.buyTotal = parseFloat(prop.price_per_share || 0);
+                }
             },
 
             showInstructionsModal(dep) {
