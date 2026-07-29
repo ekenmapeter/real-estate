@@ -241,85 +241,240 @@
 
             <!-- STEP 1: DASHBOARD OVERVIEW -->
             <div x-show="activeTab === 'overview'" x-transition>
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <div>
-                        <h4 class="fw-bold text-dark mb-1">Welcome back, {{ $user->name ?? 'Investor' }} 👋</h4>
-                        <p class="text-muted mb-0" style="font-size: 0.88rem;">Manage your real estate portfolio, request funds, and complete payments seamlessly.</p>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-primary fw-bold px-3 py-2 rounded-3 shadow-sm" style="background:#2563eb;" @click="openFinanceForm('deposit')">
-                            <i class="bi bi-plus-circle me-1"></i> Deposit Funds
-                        </button>
-                        <button class="btn btn-outline-primary fw-bold px-3 py-2 rounded-3" @click="openFinanceForm('withdrawal')">
-                            Withdraw Funds
-                        </button>
+                <!-- Top Header Card -->
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h3 class="fw-bold text-dark mb-0">Dashboard</h3>
+                                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-1 rounded-pill" style="font-size:0.78rem;">
+                                    {{ $user->name ? $user->name : 'New User' }}
+                                </span>
+                            </div>
+                            <p class="text-muted mb-0 small">Overview of your real estate investment portfolio and account activity.</p>
+                        </div>
+                        <div class="text-md-end bg-light p-3 rounded-3 border">
+                            <span class="text-muted small d-block">Total Account Balance</span>
+                            <h2 class="fw-bold text-dark mb-0">${{ number_format(($walletBalance + $totalInvested), 2) }}</h2>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Balance Summary Cards -->
-                <div class="row g-4 mb-4">
-                    <div class="col-lg-6 col-md-12">
-                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div>
-                                    <span class="text-muted small fw-semibold">Total Balance</span>
-                                    <h2 class="display-6 fw-bold text-dark mb-0 mt-1">${{ number_format(($walletBalance + $totalInvested), 2) }}</h2>
+                <!-- 4 Key Metric Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-lg-3">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-3 h-100">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px; height:44px; background:#eff6ff; color:#2563eb;">
+                                    <i class="bi bi-wallet2 fs-4"></i>
                                 </div>
-                                <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-2 rounded-pill">+12.5%</span>
-                            </div>
-                            <div class="pt-3 border-top d-flex justify-content-between align-items-center text-muted small">
-                                <span>Available Wallet Balance:</span>
-                                <strong class="text-dark fs-6">${{ number_format($walletBalance, 2) }}</strong>
+                                <div>
+                                    <span class="text-muted small d-block">Wallet Balance</span>
+                                    <h4 class="fw-bold text-dark mb-0">${{ number_format($walletBalance, 2) }}</h4>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Finance Team Callout Widget (From Image) -->
-                    <div class="col-lg-6 col-md-12">
-                        <div class="card border-0 rounded-4 shadow-sm p-4 h-100" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe !important;">
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; background: #2563eb !important;">
-                                        <i class="bi bi-headset fs-4"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="fw-bold text-dark mb-1">Finance Team Support</h6>
-                                        <p class="text-secondary mb-0 small">Need help with deposits or withdrawals in your local currency?</p>
-                                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-3 h-100">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px; height:44px; background:#f0fdf4; color:#16a34a;">
+                                    <i class="bi bi-building fs-4"></i>
+                                </div>
+                                <div>
+                                    <span class="text-muted small d-block">Total Invested</span>
+                                    <h4 class="fw-bold text-dark mb-0">${{ number_format($totalInvested, 2) }}</h4>
                                 </div>
                             </div>
-                            <button class="btn btn-primary fw-bold w-100 py-2 rounded-3 shadow-sm mt-auto" style="background: #2563eb;" @click="openFinanceForm('deposit')">
-                                Open Finance Request
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-3 h-100">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px; height:44px; background:#faf5ff; color:#9333ea;">
+                                    <i class="bi bi-graph-up-arrow fs-4"></i>
+                                </div>
+                                <div>
+                                    <span class="text-muted small d-block">Total Earned</span>
+                                    <h4 class="fw-bold text-success mb-0">${{ number_format($totalRoiEarned, 2) }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-3 h-100">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px; height:44px; background:#fffbeb; color:#d97706;">
+                                    <i class="bi bi-pie-chart-fill fs-4"></i>
+                                </div>
+                                <div>
+                                    <span class="text-muted small d-block">Active Investments</span>
+                                    <h4 class="fw-bold text-dark mb-0">{{ $activeProjectsCount }}</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Action Buttons Bar -->
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-3 mb-4">
+                    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                        <span class="fw-bold text-dark small"><i class="bi bi-lightning-fill text-warning me-1"></i> Quick Actions:</span>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-primary fw-bold px-4 py-2 rounded-3 shadow-sm" style="background:#2563eb;" @click="activeTab = 'deposit'">
+                                <i class="bi bi-plus-circle me-1.5"></i> Deposit Funds
+                            </button>
+                            <button class="btn btn-outline-primary fw-bold px-4 py-2 rounded-3" @click="activeTab = 'marketplace'">
+                                <i class="bi bi-building me-1.5"></i> Browse Properties
+                            </button>
+                            <button class="btn btn-outline-secondary fw-bold px-4 py-2 rounded-3" @click="activeTab = 'withdraw'">
+                                <i class="bi bi-arrow-up-circle me-1.5"></i> Withdraw
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recent Transactions List (Step 1 From Image) -->
-                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold text-dark mb-0">Recent Transactions</h6>
-                        <button class="btn btn-link text-primary p-0 fw-bold small text-decoration-none" @click="activeTab = 'transactions'">View all</button>
-                    </div>
-                    <div class="list-group list-group-flush">
-                        @forelse($transactions->take(4) as $txn)
-                            <div class="list-group-item px-0 py-3 d-flex align-items-center justify-content-between border-bottom">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; {{ in_array($txn->type, ['deposit', 'receive_funds', 'affiliate_earning', 'roi_payout']) ? 'background: #dcfce7; color: #16a34a;' : 'background: #fee2e2; color: #dc2626;' }}">
-                                        <i class="bi {{ in_array($txn->type, ['deposit', 'receive_funds', 'affiliate_earning', 'roi_payout']) ? 'bi-arrow-down-left' : 'bi-arrow-up-right' }}"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="fw-bold text-dark mb-0" style="font-size: 0.9rem;">{{ ucwords(str_replace('_', ' ', $txn->type)) }}</h6>
-                                        <small class="text-muted">{{ $txn->created_at ? $txn->created_at->format('M d, Y') : 'Recent' }}</small>
-                                    </div>
-                                </div>
-                                <span class="fw-bold {{ in_array($txn->type, ['deposit', 'receive_funds', 'affiliate_earning', 'roi_payout']) ? 'text-success' : 'text-danger' }}">
-                                    {{ in_array($txn->type, ['deposit', 'receive_funds', 'affiliate_earning', 'roi_payout']) ? '+' : '-' }}${{ number_format($txn->amount, 2) }}
-                                </span>
+                <!-- Investment vs Returns & Referral Program Section -->
+                <div class="row g-4 mb-4">
+                    <!-- Investment vs Returns Visual Progress Card -->
+                    <div class="col-lg-7">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-bar-chart-line-fill text-primary me-2"></i>Investment vs Returns</h6>
+                                <span class="badge bg-success bg-opacity-10 text-success fw-bold px-2.5 py-1 rounded-pill">Active Portfolio</span>
                             </div>
-                        @empty
-                            <div class="py-3 text-center text-muted small">No recent transactions recorded.</div>
-                        @endforelse
+                            <p class="text-muted small mb-4">Comparison of capital invested against total returns generated.</p>
+                            
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between small fw-bold mb-1">
+                                    <span class="text-muted"><i class="bi bi-circle-fill text-primary me-1" style="font-size:0.6rem;"></i> Total Invested Capital</span>
+                                    <span class="text-dark">${{ number_format($totalInvested, 2) }}</span>
+                                </div>
+                                <div class="progress rounded-pill" style="height:10px;">
+                                    <div class="progress-bar" style="width: {{ $totalInvested > 0 ? min(100, round(($totalInvested / max(1, $totalInvested + $totalRoiEarned)) * 100)) : 0 }}%; background: linear-gradient(90deg, #2563eb, #3b82f6);"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between small fw-bold mb-1">
+                                    <span class="text-muted"><i class="bi bi-circle-fill text-success me-1" style="font-size:0.6rem;"></i> Total Returns Earned</span>
+                                    <span class="text-success">${{ number_format($totalRoiEarned, 2) }}</span>
+                                </div>
+                                <div class="progress rounded-pill" style="height:10px;">
+                                    <div class="progress-bar bg-success" style="width: {{ $totalRoiEarned > 0 ? min(100, round(($totalRoiEarned / max(1, $totalInvested + $totalRoiEarned)) * 100)) : 0 }}%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-top d-flex justify-content-between align-items-center text-muted small mt-auto">
+                                <span>Portfolio Net Return:</span>
+                                <strong class="text-success fs-6">+{{ $totalInvested > 0 ? number_format(($totalRoiEarned / $totalInvested) * 100, 1) : '0.0' }}%</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Referral Program Card -->
+                    <div class="col-lg-5">
+                        <div class="card border-0 rounded-4 shadow-sm p-4 h-100" style="background: linear-gradient(135deg, #0b1329 0%, #1e3a8a 100%); color:#fff;">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-people-fill fs-4 text-warning"></i>
+                                <h6 class="fw-bold text-white mb-0">Referral Program</h6>
+                            </div>
+                            <p class="small mb-3" style="color:#93c5fd;">Share your referral link and earn 5% bonus on referral investments.</p>
+                            
+                            <!-- Referral Link Box -->
+                            <div class="mb-3">
+                                <label class="form-label small text-white-50 mb-1">Referral Link</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control bg-dark bg-opacity-50 text-white border-secondary small" value="{{ url('/register?ref=' . ($user->affiliate_code ?? '32C8A530')) }}" readonly>
+                                    <button class="btn btn-primary fw-bold" style="background:#2563eb;" onclick="navigator.clipboard.writeText('{{ url('/register?ref=' . ($user->affiliate_code ?? '32C8A530')) }}'); alert('Referral link copied!')">
+                                        <i class="bi bi-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Referral Code Box -->
+                            <div>
+                                <label class="form-label small text-white-50 mb-1">Referral Code</label>
+                                <div class="d-flex align-items-center justify-content-between p-2.5 rounded-3" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);">
+                                    <code class="fs-6 fw-bold text-white">Code: {{ $user->affiliate_code ?? '32C8A530' }}</code>
+                                    <button class="btn btn-sm btn-outline-light py-0.5 px-2 fw-bold" onclick="navigator.clipboard.writeText('{{ $user->affiliate_code ?? '32C8A530' }}'); alert('Code copied!')">
+                                        Copy Code
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3 Summary Lists (Notifications, Active Investments, Recent Transactions) -->
+                <div class="row g-4">
+                    <!-- Recent Notifications -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-bell me-1 text-primary"></i>Recent Notifications</h6>
+                                <button class="btn btn-link text-primary p-0 fw-bold small text-decoration-none" @click="activeTab = 'notifications'">View All</button>
+                            </div>
+                            @php $awaiting = $deposits->where('status', 'awaiting_payment'); @endphp
+                            <div class="list-group list-group-flush">
+                                @forelse($awaiting->take(3) as $dep)
+                                    <div class="list-group-item px-0 py-2 border-bottom">
+                                        <div class="fw-bold text-dark small">{{ $dep->deposit_code }}</div>
+                                        <small class="text-muted d-block">Payment instructions ready for {{ $dep->currency }} {{ number_format($dep->amount, 2) }}</small>
+                                    </div>
+                                @empty
+                                    <div class="py-4 text-center text-muted small">No notifications yet.</div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Investments -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-pie-chart me-1 text-success"></i>Active Investments</h6>
+                                <button class="btn btn-link text-primary p-0 fw-bold small text-decoration-none" @click="activeTab = 'my_investments'">View All</button>
+                            </div>
+                            <div class="list-group list-group-flush">
+                                @forelse($userInvestments->where('status', 'active')->take(3) as $inv)
+                                    <div class="list-group-item px-0 py-2 border-bottom d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold text-dark small text-truncate" style="max-width: 140px;">{{ $inv->property->title ?? 'Property' }}</div>
+                                            <small class="text-muted">{{ $inv->shares_bought }} Shares</small>
+                                        </div>
+                                        <span class="fw-bold text-success small">${{ number_format($inv->total_amount, 2) }}</span>
+                                    </div>
+                                @empty
+                                    <div class="py-4 text-center text-muted small">No active investments yet.</div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Transactions -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-arrow-down-up me-1 text-info"></i>Recent Transactions</h6>
+                                <button class="btn btn-link text-primary p-0 fw-bold small text-decoration-none" @click="activeTab = 'transactions'">View All</button>
+                            </div>
+                            <div class="list-group list-group-flush">
+                                @forelse($transactions->take(3) as $txn)
+                                    <div class="list-group-item px-0 py-2 border-bottom d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-bold text-dark small">{{ ucwords(str_replace('_', ' ', $txn->type)) }}</div>
+                                            <small class="text-muted">{{ $txn->created_at ? $txn->created_at->format('M d, Y') : 'Recent' }}</small>
+                                        </div>
+                                        <span class="fw-bold {{ in_array($txn->type, ['deposit', 'receive_funds', 'affiliate_earning', 'roi_payout']) ? 'text-success' : 'text-danger' }} small">
+                                            {{ in_array($txn->type, ['deposit', 'receive_funds', 'affiliate_earning', 'roi_payout']) ? '+' : '-' }}${{ number_format($txn->amount, 2) }}
+                                        </span>
+                                    </div>
+                                @empty
+                                    <div class="py-4 text-center text-muted small">No transactions yet.</div>
+                                @endforelse
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -390,42 +545,244 @@
                 </div>
             </div>
 
-            <!-- OTHER TABS (Wallet, Portfolio, Marketplace, Transactions) -->
-            <div x-show="activeTab === 'wallet'" x-transition>
-                <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
-                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-wallet2 text-primary me-2"></i>My Wallet Balance</h5>
-                    <h2 class="fw-bold text-success mb-2">${{ number_format($walletBalance, 2) }}</h2>
-                    <p class="text-muted small">Your funds are ready for real estate property share investments or instant peer transfers.</p>
+            <!-- INVEST TAB -->
+            <div x-show="activeTab === 'invest'" x-transition>
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1">Invest in Properties</h4>
+                        <p class="text-muted mb-0 small">Purchase fractional shares in premium real estate projects.</p>
+                    </div>
+                </div>
+                <div class="row g-4">
+                    @forelse($properties as $prop)
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border-0 rounded-4 shadow-sm overflow-hidden bg-white">
+                                <div style="height:180px; overflow:hidden; position:relative;">
+                                    <img src="{{ $prop->image_url ?? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop' }}" alt="{{ $prop->title }}" style="width:100%; height:100%; object-fit:cover;">
+                                    <span class="badge position-absolute top-0 end-0 m-2 rounded-pill fw-bold" style="background:#2563eb; font-size:0.75rem;">{{ $prop->roi_percentage }}% ROI</span>
+                                </div>
+                                <div class="card-body p-3">
+                                    <h6 class="fw-bold text-dark mb-1">{{ $prop->title }}</h6>
+                                    <p class="small text-muted mb-2"><i class="bi bi-geo-alt me-1"></i>{{ $prop->location }}</p>
+                                    <div class="d-flex justify-content-between small mb-3">
+                                        <span class="text-muted">Share Price</span>
+                                        <strong class="text-dark">${{ number_format($prop->price_per_share, 2) }}</strong>
+                                    </div>
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between small text-muted mb-1">
+                                            <span>Funding</span>
+                                            <span>{{ $prop->total_shares > 0 ? round((($prop->total_shares - $prop->available_shares) / $prop->total_shares) * 100) : 0 }}%</span>
+                                        </div>
+                                        <div class="progress rounded-pill" style="height:6px;">
+                                            <div class="progress-bar bg-primary" style="width:{{ $prop->total_shares > 0 ? round((($prop->total_shares - $prop->available_shares) / $prop->total_shares) * 100) : 0 }}%;"></div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;" @click="openFinanceForm('deposit')">
+                                        <i class="bi bi-lightning-charge me-1"></i> Invest Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-12 text-center py-5 text-muted">
+                            <i class="bi bi-building fs-1 d-block mb-2 opacity-25"></i>
+                            No active properties available at this time.
+                        </div>
+                    @endforelse
                 </div>
             </div>
 
-            <div x-show="activeTab === 'marketplace'" x-transition>
-                <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
-                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-building text-primary me-2"></i>Available Property Share Marketplace</h5>
-                    <div class="row g-4">
-                        @foreach($properties as $prop)
-                            <div class="col-md-6 col-lg-4">
-                                <div class="card h-100 border-0 rounded-4 shadow-sm bg-light overflow-hidden">
-                                    <img src="{{ $prop->image_url ?? 'https://radiantdreamrealty.com/frontend/images/home/house-1.jpg' }}" height="180" style="object-fit:cover;">
-                                    <div class="card-body p-3">
-                                        <h6 class="fw-bold text-dark mb-1">{{ $prop->title }}</h6>
-                                        <p class="small text-muted mb-2"><i class="bi bi-geo-alt me-1"></i>{{ $prop->location }}</p>
-                                        <div class="d-flex justify-content-between small fw-bold mb-3">
-                                            <span>Share Price: ${{ number_format($prop->price_per_share, 2) }}</span>
-                                            <span class="text-success">{{ $prop->roi_percentage }}% ROI</span>
-                                        </div>
-                                        <button class="btn btn-primary btn-sm w-100 fw-bold" style="background:#2563eb;" @click="openBuyModal({{ json_encode($prop) }})">Buy Shares</button>
+            <!-- MY INVESTMENTS TAB -->
+            <div x-show="activeTab === 'my_investments'" x-transition>
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-1">My Investments</h4>
+                    <p class="text-muted mb-0 small">Track all your active and completed property share investments.</p>
+                </div>
+                <div class="row g-3">
+                    @forelse($userInvestments as $inv)
+                        <div class="col-lg-6">
+                            <div class="card border-0 rounded-4 shadow-sm bg-white p-3">
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px; height:48px; background:#eff6ff;">
+                                        <i class="bi bi-building text-primary fs-4"></i>
+                                    </div>
+                                    <div class="flex-grow-1 overflow-hidden">
+                                        <h6 class="fw-bold text-dark mb-0 text-truncate">{{ $inv->property->title ?? 'Property Investment' }}</h6>
+                                        <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ $inv->property->location ?? 'Location' }}</small>
+                                    </div>
+                                    <span class="badge rounded-pill fw-bold px-3 py-1 {{ $inv->status === 'active' ? 'bg-success bg-opacity-15 text-success' : 'bg-secondary bg-opacity-15 text-secondary' }}">
+                                        {{ ucfirst($inv->status) }}
+                                    </span>
+                                </div>
+                                <div class="row g-2 text-center">
+                                    <div class="col-4 p-2 rounded-3 bg-light">
+                                        <div class="small text-muted">Shares</div>
+                                        <div class="fw-bold text-dark">{{ $inv->shares_bought }}</div>
+                                    </div>
+                                    <div class="col-4 p-2 rounded-3 bg-light">
+                                        <div class="small text-muted">Invested</div>
+                                        <div class="fw-bold text-dark">${{ number_format($inv->total_amount, 2) }}</div>
+                                    </div>
+                                    <div class="col-4 p-2 rounded-3 bg-light">
+                                        <div class="small text-muted">ROI Earned</div>
+                                        <div class="fw-bold text-success">${{ number_format($inv->roi_earned, 2) }}</div>
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
+                        </div>
+                    @empty
+                        <div class="col-12">
+                            <div class="card border-0 rounded-4 shadow-sm bg-white p-5 text-center">
+                                <i class="bi bi-pie-chart fs-1 text-muted opacity-25 d-block mb-3"></i>
+                                <h5 class="fw-bold text-dark mb-2">No Investments Yet</h5>
+                                <p class="text-muted small mb-4">Browse available properties and purchase fractional shares to start earning ROI.</p>
+                                <button class="btn btn-primary fw-bold px-4 py-2 rounded-3 mx-auto" style="background:#2563eb; max-width:200px;" @click="activeTab = 'invest'">
+                                    <i class="bi bi-lightning-charge me-1"></i> Start Investing
+                                </button>
+                            </div>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- DEPOSIT TAB -->
+            <div x-show="activeTab === 'deposit'" x-transition>
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-1">Deposit Funds</h4>
+                    <p class="text-muted mb-0 small">Submit a finance request to deposit funds into your wallet.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-5">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center" style="width:48px; height:48px; background:#eff6ff;">
+                                    <i class="bi bi-wallet2 text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted small">Available Balance</div>
+                                    <h4 class="fw-bold text-dark mb-0">${{ number_format($walletBalance, 2) }}</h4>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary fw-bold w-100 py-2 rounded-3" style="background:#2563eb;" @click="showFinanceModal = true">
+                                <i class="bi bi-plus-circle me-1"></i> New Deposit Request
+                            </button>
+                        </div>
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                            <h6 class="fw-bold text-dark mb-3">Accepted Methods</h6>
+                            <div class="d-flex align-items-center gap-2 p-2 rounded-3 mb-2" style="background:#f8fafc;"><i class="bi bi-bank2 text-primary"></i><span class="small fw-semibold text-dark">Bank Transfer</span></div>
+                            <div class="d-flex align-items-center gap-2 p-2 rounded-3 mb-2" style="background:#f8fafc;"><i class="bi bi-credit-card text-primary"></i><span class="small fw-semibold text-dark">Credit / Debit Card</span></div>
+                            <div class="d-flex align-items-center gap-2 p-2 rounded-3 mb-2" style="background:#f8fafc;"><i class="bi bi-globe2 text-primary"></i><span class="small fw-semibold text-dark">Wire Transfer</span></div>
+                            <div class="d-flex align-items-center gap-2 p-2 rounded-3" style="background:#f8fafc;"><i class="bi bi-currency-bitcoin text-warning"></i><span class="small fw-semibold text-dark">Cryptocurrency (USDT, BTC, ETH...)</span></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                            <h6 class="fw-bold text-dark mb-3">Recent Deposit Requests</h6>
+                            @forelse($deposits->take(5) as $dep)
+                                <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                                    <div>
+                                        <div class="fw-bold text-dark small">{{ $dep->currency ?? 'PHP' }} {{ number_format($dep->amount, 2) }}</div>
+                                        <div class="text-muted" style="font-size:0.78rem;">{{ $dep->deposit_code }} &middot; {{ $dep->created_at?->format('M d, Y') }}</div>
+                                    </div>
+                                    @if($dep->status === 'completed')
+                                        <span class="badge bg-success bg-opacity-15 text-success fw-bold rounded-pill px-2">Completed</span>
+                                    @elseif($dep->status === 'awaiting_payment')
+                                        <button class="btn btn-primary btn-sm fw-bold rounded-pill px-3 py-1" style="background:#2563eb; font-size:0.78rem;" @click="showInstructionsModal({{ json_encode($dep) }})">Pay Now</button>
+                                    @elseif($dep->status === 'evidence_submitted')
+                                        <span class="badge bg-info bg-opacity-15 text-info fw-bold rounded-pill px-2">Under Review</span>
+                                    @else
+                                        <span class="badge bg-warning bg-opacity-15 text-warning fw-bold rounded-pill px-2">Pending</span>
+                                    @endif
+                                </div>
+                            @empty
+                                <div class="py-4 text-center text-muted small">No deposit requests yet.</div>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- WITHDRAW TAB -->
+            <div x-show="activeTab === 'withdraw'" x-transition>
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-1">Withdraw Funds</h4>
+                    <p class="text-muted mb-0 small">Request a withdrawal from your available wallet balance.</p>
+                </div>
+                <div class="row g-4 justify-content-center">
+                    <div class="col-lg-6">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                            <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-3" style="background:#f0fdf4;">
+                                <i class="bi bi-wallet2 text-success fs-3"></i>
+                                <div>
+                                    <div class="text-muted small">Available to Withdraw</div>
+                                    <h3 class="fw-bold text-success mb-0">${{ number_format($walletBalance, 2) }}</h3>
+                                </div>
+                            </div>
+                            <form action="{{ route('withdraw.store') }}" method="POST">
+                                @csrf
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-dark small">Withdrawal Amount (USD)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text fw-bold text-primary">$</span>
+                                        <input type="number" step="0.01" min="10" name="amount" class="form-control fw-bold" placeholder="0.00" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-dark small">Withdrawal Method</label>
+                                    <select name="withdrawal_method" class="form-select">
+                                        <option value="bank_transfer">Bank Transfer</option>
+                                        <option value="GCash">GCash</option>
+                                        <option value="Maya">Maya</option>
+                                        <option value="wire_transfer">Wire Transfer</option>
+                                        <option value="crypto">Cryptocurrency</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-dark small">Account / Wallet Details</label>
+                                    <textarea name="account_details" class="form-control" rows="2" placeholder="Bank name, account number, account name..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary fw-bold w-100 py-2 rounded-3" style="background:#2563eb;">
+                                    <i class="bi bi-arrow-up-circle me-1"></i> Submit Withdrawal Request
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BROWSE PROPERTIES TAB -->
+            <div x-show="activeTab === 'marketplace'" x-transition>
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-1">Browse Properties</h4>
+                    <p class="text-muted mb-0 small">Explore all available real estate investment opportunities.</p>
+                </div>
+                <div class="row g-4">
+                    @foreach($properties as $prop)
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border-0 rounded-4 shadow-sm bg-white overflow-hidden">
+                                <img src="{{ $prop->image_url ?? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop' }}" height="180" style="object-fit:cover; width:100%;">
+                                <div class="card-body p-3">
+                                    <h6 class="fw-bold text-dark mb-1">{{ $prop->title }}</h6>
+                                    <p class="small text-muted mb-2"><i class="bi bi-geo-alt me-1"></i>{{ $prop->location }}</p>
+                                    <div class="d-flex justify-content-between small fw-bold mb-3">
+                                        <span>Share Price: ${{ number_format($prop->price_per_share, 2) }}</span>
+                                        <span class="text-success">{{ $prop->roi_percentage }}% ROI</span>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm w-100 fw-bold" style="background:#2563eb;" @click="activeTab = 'invest'">View Details</button>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- TRANSACTIONS TAB -->
             <div x-show="activeTab === 'transactions'" x-transition>
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-1">Transaction History</h4>
+                    <p class="text-muted mb-0 small">Complete ledger of all your account activity.</p>
+                </div>
                 <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
-                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-clock-history text-primary me-2"></i>Transaction Ledger</h5>
                     <div class="table-responsive">
                         <table class="table align-middle">
                             <thead class="table-light">
@@ -441,10 +798,143 @@
                                         <td class="text-muted small">{{ $txn->created_at ? $txn->created_at->format('M d, Y') : '' }}</td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="5" class="text-center text-muted">No transactions.</td></tr>
+                                    <tr><td colspan="5" class="text-center text-muted py-4">No transactions yet.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NOTIFICATIONS TAB -->
+            <div x-show="activeTab === 'notifications'" x-transition>
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-1">Notifications</h4>
+                    <p class="text-muted mb-0 small">Important updates about your finance requests and investments.</p>
+                </div>
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                    @php $awaitingDeps = $deposits->where('status', 'awaiting_payment'); @endphp
+                    @forelse($awaitingDeps as $dep)
+                        <div class="d-flex align-items-start gap-3 p-3 rounded-3 mb-2" style="background:#fffbeb; border:1px solid #fde68a;">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 mt-1" style="width:36px; height:36px; background:#fef3c7;">
+                                <i class="bi bi-bell-fill" style="color:#d97706;"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold text-dark small mb-1">Payment Instructions Ready &mdash; {{ $dep->deposit_code }}</div>
+                                <div class="text-muted" style="font-size:0.8rem;">Your request for <strong>{{ $dep->currency ?? 'PHP' }} {{ number_format($dep->amount, 2) }}</strong> has been approved. Complete payment before it expires.</div>
+                                <button class="btn btn-sm btn-primary fw-bold mt-2 rounded-pill px-3" style="background:#2563eb; font-size:0.8rem;" @click="showInstructionsModal({{ json_encode($dep) }})">
+                                    <i class="bi bi-wallet2 me-1"></i> View &amp; Pay
+                                </button>
+                            </div>
+                            <small class="text-muted flex-shrink-0" style="font-size:0.75rem;">{{ $dep->created_at?->diffForHumans() }}</small>
+                        </div>
+                    @empty
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-bell-slash fs-1 d-block mb-2 opacity-25"></i>
+                            <div class="fw-semibold">No new notifications</div>
+                            <small>You're all caught up!</small>
+                        </div>
+                    @endforelse
+                    @foreach($deposits->where('status', 'completed') as $dep)
+                        <div class="d-flex align-items-start gap-3 p-3 rounded-3 mb-2" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 mt-1" style="width:36px; height:36px; background:#dcfce7;">
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold text-dark small mb-1">Deposit Confirmed &mdash; {{ $dep->deposit_code }}</div>
+                                <div class="text-muted" style="font-size:0.8rem;"><strong>{{ $dep->currency ?? 'PHP' }} {{ number_format($dep->amount, 2) }}</strong> credited to your wallet.</div>
+                            </div>
+                            <small class="text-muted flex-shrink-0" style="font-size:0.75rem;">{{ $dep->updated_at?->diffForHumans() }}</small>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- REFERRALS TAB -->
+            <div x-show="activeTab === 'referrals'" x-transition>
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-1">Referrals</h4>
+                    <p class="text-muted mb-0 small">Invite friends to invest and earn affiliate commissions.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-7">
+                        <div class="card border-0 rounded-4 shadow-sm p-4 mb-4" style="background: linear-gradient(135deg, #0b1329 0%, #1e3a8a 100%); color:#fff;">
+                            <h5 class="fw-bold text-white mb-1"><i class="bi bi-people-fill me-2"></i>Your Referral Code</h5>
+                            <p class="small mb-3" style="color:#93c5fd;">Share this code with friends. Earn a commission for every investor you refer.</p>
+                            <div class="d-flex align-items-center gap-2 p-3 rounded-3" style="background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1);">
+                                <code class="fs-5 fw-bold text-white flex-grow-1">{{ $user->affiliate_code ?? 'RAD0000' }}</code>
+                                <button class="btn btn-sm fw-bold px-3 rounded-pill" style="background:#2563eb; color:#fff;" onclick="navigator.clipboard.writeText('{{ $user->affiliate_code ?? '' }}'); alert('Referral code copied!')">
+                                    <i class="bi bi-copy me-1"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                            <h6 class="fw-bold text-dark mb-3">Share Your Referral Link</h6>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" value="{{ url('/') }}?ref={{ $user->affiliate_code ?? 'RAD0000' }}" readonly>
+                                <button class="btn btn-outline-primary fw-bold" onclick="navigator.clipboard.writeText('{{ url('/') }}?ref={{ $user->affiliate_code ?? '' }}'); alert('Link copied!')"><i class="bi bi-copy"></i></button>
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="https://wa.me/?text=Join+Radiant+Dream+Realty%21+Use+my+code+{{ $user->affiliate_code ?? '' }}" target="_blank" class="btn btn-success btn-sm fw-bold rounded-pill px-3"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>
+                                <a href="https://twitter.com/intent/tweet?text=Invest+in+real+estate%21+{{ url('/') }}?ref={{ $user->affiliate_code ?? '' }}" target="_blank" class="btn btn-dark btn-sm fw-bold rounded-pill px-3"><i class="bi bi-twitter-x me-1"></i>Twitter/X</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4 text-center">
+                            <i class="bi bi-cash-coin fs-1 text-primary mb-2"></i>
+                            <div class="text-muted small mb-1">Total Affiliate Earnings</div>
+                            <h2 class="fw-bold text-success mb-0">${{ number_format($affiliateEarnings, 2) }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROFILE & KYC TAB -->
+            <div x-show="activeTab === 'profile_kyc'" x-transition>
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-1">Profile &amp; KYC</h4>
+                    <p class="text-muted mb-0 small">Manage your personal information and identity verification.</p>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-person-circle text-primary me-2"></i>Personal Information</h6>
+                            <div class="d-flex align-items-center gap-3 mb-4">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold fs-3 text-white flex-shrink-0" style="width:60px; height:60px; background: linear-gradient(135deg, #2563eb, #1d4ed8);">
+                                    {{ strtoupper(substr($user->name ?? 'IN', 0, 2)) }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ $user->name ?? 'Investor Name' }}</div>
+                                    <div class="text-muted small">{{ $user->email ?? 'investor@email.com' }}</div>
+                                    <span class="badge rounded-pill mt-1" style="background:#eff6ff; color:#2563eb; font-size:0.72rem;">Account ID: {{ $user->account_id ?? 'RDR-000000' }}</span>
+                                </div>
+                            </div>
+                            <div class="row g-2 small">
+                                <div class="col-6"><div class="p-2 rounded-3" style="background:#f8fafc;"><div class="text-muted">Wallet Balance</div><div class="fw-bold text-success">${{ number_format($walletBalance, 2) }}</div></div></div>
+                                <div class="col-6"><div class="p-2 rounded-3" style="background:#f8fafc;"><div class="text-muted">Active Investments</div><div class="fw-bold text-dark">{{ $activeProjectsCount }}</div></div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-shield-check text-success me-2"></i>KYC Verification</h6>
+                            <div class="p-3 rounded-3 mb-3 d-flex align-items-center gap-3" style="background:#fffbeb; border:1px solid #fde68a;">
+                                <i class="bi bi-exclamation-triangle-fill" style="color:#d97706; font-size:1.3rem;"></i>
+                                <div><div class="fw-bold small" style="color:#92400e;">KYC Pending</div><div class="text-muted" style="font-size:0.78rem;">Identity verification required to unlock higher deposit limits.</div></div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between small fw-semibold mb-1"><span>Profile Completion</span><span>60%</span></div>
+                                <div class="progress rounded-pill" style="height:8px;"><div class="progress-bar bg-primary" style="width:60%;"></div></div>
+                            </div>
+                            <div class="list-group list-group-flush small">
+                                <div class="list-group-item px-0 d-flex align-items-center justify-content-between"><span><i class="bi bi-check-circle-fill text-success me-2"></i>Email Verified</span><span class="badge bg-success bg-opacity-10 text-success fw-bold">Done</span></div>
+                                <div class="list-group-item px-0 d-flex align-items-center justify-content-between"><span><i class="bi bi-check-circle-fill text-success me-2"></i>Account Created</span><span class="badge bg-success bg-opacity-10 text-success fw-bold">Done</span></div>
+                                <div class="list-group-item px-0 d-flex align-items-center justify-content-between"><span><i class="bi bi-clock text-warning me-2"></i>ID Document Upload</span><span class="badge bg-warning bg-opacity-15 text-warning fw-bold">Pending</span></div>
+                                <div class="list-group-item px-0 d-flex align-items-center justify-content-between"><span><i class="bi bi-clock text-warning me-2"></i>Selfie Verification</span><span class="badge bg-warning bg-opacity-15 text-warning fw-bold">Pending</span></div>
+                            </div>
+                            <button class="btn btn-primary fw-bold w-100 py-2 rounded-3 mt-3" style="background:#2563eb;"><i class="bi bi-upload me-1"></i> Submit KYC Documents</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -454,8 +944,9 @@
 </div>
 
 <!-- ========================================== -->
-<!-- STEP 2 MODAL: FINANCE REQUEST FORM (From Image) -->
+<!-- STEP 2 MODAL: FINANCE REQUEST FORM -->
 <!-- ========================================== -->
+
 <div x-show="showFinanceModal" x-cloak class="custom-modal-backdrop">
     <div class="custom-modal-card p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -684,6 +1175,59 @@
     </div>
 </div>
 
+<!-- Buy Shares Modal -->
+<div x-show="selectedProperty" x-cloak class="custom-modal-backdrop">
+    <div class="custom-modal-card p-4" style="max-width:500px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold me-2">Property Investment</span>
+                <h5 class="fw-bold text-dark mb-0 mt-1" x-text="selectedProperty?.title"></h5>
+            </div>
+            <button type="button" class="btn-close" @click="selectedProperty = null"></button>
+        </div>
+        <div class="p-3 rounded-3 bg-light border mb-3">
+            <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">Location</span><strong class="text-dark" x-text="selectedProperty?.location"></strong></div>
+            <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">Price Per Share</span><strong class="text-dark" x-text="'$' + parseFloat(selectedProperty?.price_per_share || 0).toFixed(2)"></strong></div>
+            <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">ROI</span><strong class="text-success" x-text="(selectedProperty?.roi_percentage || 0) + '%'"></strong></div>
+            <div class="d-flex justify-content-between small"><span class="text-muted">Available Shares</span><strong class="text-dark" x-text="selectedProperty?.available_shares"></strong></div>
+        </div>
+        <form action="{{ route('buy-shares.store') }}" method="POST">
+            @csrf
+            <input type="hidden" name="property_id" :value="selectedProperty?.id">
+            <div class="mb-3">
+                <label class="form-label fw-bold text-dark small">Number of Shares to Buy</label>
+                <input type="number" name="shares" min="1" class="form-control fw-bold" placeholder="1" x-model="buySharesQty" @input="buyTotal = buySharesQty * (selectedProperty?.price_per_share || 0)" required>
+            </div>
+            <div class="p-3 rounded-3 mb-3" style="background:#eff6ff; border:1px solid #bfdbfe;">
+                <div class="d-flex justify-content-between small fw-bold">
+                    <span class="text-muted">Total Cost</span>
+                    <span class="text-primary fs-5" x-text="'$' + parseFloat(buyTotal || 0).toFixed(2)">$0.00</span>
+                </div>
+                <div class="text-muted mt-1" style="font-size:0.78rem;">Your wallet: <strong class="text-success">${{ number_format($walletBalance, 2) }}</strong></div>
+            </div>
+            <button type="submit" class="btn btn-primary fw-bold w-100 py-2 rounded-3" style="background:#2563eb;">
+                <i class="bi bi-lightning-charge me-1"></i> Confirm Purchase
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Receive Funds Modal -->
+<div x-show="openReceiveModal" x-cloak class="custom-modal-backdrop">
+    <div class="custom-modal-card p-4 text-center">
+        <h5 class="fw-bold text-dark mb-2">Receive Funds</h5>
+        <p class="text-muted small mb-3">Share your receiving details with another investor or peer.</p>
+        <div class="p-3 bg-light rounded-3 border mb-3">
+            <span class="text-muted small d-block mb-1">Account ID</span>
+            <h4 class="fw-bold text-primary mb-0">{{ $user->account_id ?? 'RDR-884920' }}</h4>
+            <span class="text-muted small d-block mt-2">Email Address</span>
+            <strong class="text-dark">{{ $user->email ?? 'investor@radiantrealty.com' }}</strong>
+        </div>
+        <button class="btn btn-primary w-100 fw-bold py-2 mb-2" style="background:#2563eb;" @click="shareAccountDetails()">Share Credentials</button>
+        <button class="btn btn-outline-secondary w-100 fw-bold py-2" @click="openReceiveModal = false">Close</button>
+    </div>
+</div>
+
 <!-- Alpine JS Dashboard Engine -->
 <script>
     function userDashboardEngine() {
@@ -695,9 +1239,18 @@
             selectedDepInstruction: null,
             evidenceFileName: '',
             openReceiveModal: false,
+            selectedProperty: null,
+            buySharesQty: 1,
+            buyTotal: 0,
 
             openFinanceForm(type) {
                 this.showFinanceModal = true;
+            },
+
+            openBuyModal(prop) {
+                this.selectedProperty = prop;
+                this.buySharesQty = 1;
+                this.buyTotal = parseFloat(prop.price_per_share || 0);
             },
 
             showInstructionsModal(dep) {
@@ -705,8 +1258,14 @@
             },
 
             copyText(text) {
-                navigator.clipboard.writeText(text);
-                alert('Copied to clipboard: ' + text);
+                navigator.clipboard.writeText(text).then(() => {
+                    // Show a brief toast instead of alert
+                    const toast = document.createElement('div');
+                    toast.textContent = 'Copied!';
+                    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1d4ed8;color:#fff;padding:10px 20px;border-radius:8px;font-weight:600;font-size:0.85rem;z-index:999999;box-shadow:0 4px 20px rgba(0,0,0,0.2);';
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 2000);
+                });
             },
 
             shareAccountDetails() {
