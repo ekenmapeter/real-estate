@@ -71,7 +71,8 @@
     }
 </style>
 
-<div class="container-fluid px-0" x-data="adminDashboardEngine()">
+<div x-data="adminDashboardEngine()">
+<div class="container-fluid px-0">
     <div class="row g-0">
 
         <!-- Left Admin Dark Navy Sidebar -->
@@ -164,9 +165,6 @@
                         <span class="text-uppercase fw-bold text-purple small" style="color: #7c3aed;">ADMIN PANEL – FINANCE REQUESTS</span>
                         <h3 class="fw-bold text-dark mb-0">Finance Requests</h3>
                     </div>
-                    <a href="{{ route('dashboard') }}" class="btn btn-outline-primary btn-sm fw-bold rounded-3">
-                        <i class="bi bi-arrow-left me-1"></i> Switch to User View
-                    </a>
                 </div>
 
                 <!-- Filter Controls (From Image) -->
@@ -234,8 +232,8 @@
                                         </td>
                                         <td><span class="badge bg-primary bg-opacity-10 text-primary fw-bold">Deposit</span></td>
                                         <td class="small">{{ $dep->country ?? 'Philippines' }}</td>
-                                        <td class="fw-bold small">{{ $dep->currency ?? 'PHP' }}</td>
-                                        <td class="fw-bold text-dark">{{ number_format($dep->amount, 2) }}</td>
+                                        <td class="fw-bold small">USD</td>
+                                        <td class="fw-bold text-dark">${{ number_format($dep->amount, 2) }}</td>
                                         <td class="small fw-semibold">{{ ucwords(str_replace('_', ' ', $dep->payment_method)) }}</td>
                                         <td>
                                             @if($dep->status === 'completed')
@@ -415,6 +413,166 @@
                 </div>
             </div>
 
+            <!-- USERS TAB -->
+            <div x-show="activeAdminTab === 'users'" x-transition>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <span class="text-uppercase fw-bold text-purple small" style="color: #7c3aed;">USER MANAGEMENT</span>
+                        <h3 class="fw-bold text-dark mb-0">All Users</h3>
+                    </div>
+                    <span class="badge fw-semibold rounded-pill px-3 py-2" style="background:#f1f5f9; color:#475569;">{{ $totalUsersCount }} registered users</span>
+                </div>
+
+                @php
+                    $usersKycVerified = $users->where('kyc_status', 'approved')->count();
+                    $usersWalletTotal = $users->sum('wallet_balance');
+                    $usersInvestedTotal = $users->sum(fn($u) => $u->investments->sum('total_amount'));
+                @endphp
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center text-white flex-shrink-0" style="width:42px;height:42px;background:linear-gradient(135deg,#2563eb,#1d4ed8);font-size:1.1rem;"><i class="bi bi-people-fill"></i></div>
+                                <div><small class="text-muted d-block" style="font-size:0.7rem;">TOTAL USERS</small><strong class="text-dark fs-5">{{ $totalUsersCount }}</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center text-white flex-shrink-0" style="width:42px;height:42px;background:linear-gradient(135deg,#22c55e,#16a34a);font-size:1.1rem;"><i class="bi bi-shield-check"></i></div>
+                                <div><small class="text-muted d-block" style="font-size:0.7rem;">KYC VERIFIED</small><strong class="text-dark fs-5">{{ $usersKycVerified }}</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center text-white flex-shrink-0" style="width:42px;height:42px;background:linear-gradient(135deg,#f59e0b,#d97706);font-size:1.1rem;"><i class="bi bi-wallet2"></i></div>
+                                <div><small class="text-muted d-block" style="font-size:0.7rem;">WALLET BALANCE</small><strong class="text-dark fs-5">${{ number_format($usersWalletTotal, 2) }}</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center text-white flex-shrink-0" style="width:42px;height:42px;background:linear-gradient(135deg,#7c3aed,#6d28d9);font-size:1.1rem;"><i class="bi bi-graph-up-arrow"></i></div>
+                                <div><small class="text-muted d-block" style="font-size:0.7rem;">TOTAL INVESTED</small><strong class="text-dark fs-5">${{ number_format($usersInvestedTotal, 2) }}</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-3 mb-4 users-card">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-5">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control" placeholder="Search name, email or account ID..." x-model="usersSearch" @input="recountUsers($el)">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select form-select-sm" x-model="usersKycFilter" @change="recountUsers($el)">
+                                <option value="all">All KYC Statuses</option>
+                                <option value="approved">Approved</option>
+                                <option value="pending">Pending</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="none">Not Submitted</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select form-select-sm" x-model="usersSortBy" @change="sortUsers()">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="invested_high">Highest Invested</option>
+                                <option value="wallet_high">Highest Wallet</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <span class="small text-muted fw-semibold">Showing <span x-text="usersVisible">0</span> / {{ $users->count() }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 rounded-4 shadow-sm bg-white overflow-hidden">
+                    <div class="table-responsive" id="usersTableWrap">
+                        <table class="table align-middle table-hover">
+                            <thead class="table-light">
+                                <tr class="text-uppercase small text-muted">
+                                    <th>User</th>
+                                    <th>Account ID</th>
+                                    <th>Wallet</th>
+                                    <th>Invested</th>
+                                    <th>Activity</th>
+                                    <th>KYC</th>
+                                    <th>Joined</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($users as $userRow)
+                                    <tr data-user-row data-created="{{ $userRow->created_at?->timestamp ?? 0 }}" data-invested="{{ $userRow->investments->sum('total_amount') }}" data-wallet="{{ $userRow->wallet_balance ?? 0 }}" x-data="{ user: {{ json_encode($userRow) }} }" x-show="userMatches(user)" x-transition>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style="width:36px; height:36px; background:linear-gradient(135deg,#2563eb,#1d4ed8); font-size:0.75rem;">
+                                                    {{ strtoupper(substr($userRow->name ?? 'U', 0, 2)) }}
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold text-dark" style="font-size:0.9rem;">{{ $userRow->name }}</div>
+                                                    <small class="text-muted">{{ $userRow->email }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge fw-semibold rounded-pill px-2 py-1" style="background:#eff6ff; color:#2563eb; font-size:0.7rem;">{{ $userRow->account_id ?? 'N/A' }}</span></td>
+                                        <td class="fw-bold text-dark">${{ number_format($userRow->wallet_balance ?? 0, 2) }}</td>
+                                        <td class="fw-bold" style="color:#7c3aed;">${{ number_format($userRow->investments->sum('total_amount'), 2) }}</td>
+                                        <td>
+                                            <span class="d-inline-flex align-items-center gap-2 text-muted small">
+                                                <span class="badge fw-semibold rounded-pill px-2 py-1" style="background:#f1f5f9; color:#475569; font-size:0.66rem;" title="Deposits">{{ $userRow->deposits->count() }} D</span>
+                                                <span class="badge fw-semibold rounded-pill px-2 py-1" style="background:#f1f5f9; color:#475569; font-size:0.66rem;" title="Withdrawals">{{ $userRow->withdrawals->count() }} W</span>
+                                                <span class="badge fw-semibold rounded-pill px-2 py-1" style="background:#f1f5f9; color:#475569; font-size:0.66rem;" title="Referrals">{{ $userRow->referrals->count() }} R</span>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if($userRow->kyc_status === 'approved')
+                                                <span class="badge bg-success bg-opacity-15 text-success fw-bold px-2 py-1 rounded-pill" style="font-size:0.68rem;">Approved</span>
+                                            @elseif($userRow->kyc_status === 'pending')
+                                                <span class="badge bg-warning text-dark fw-bold px-2 py-1 rounded-pill" style="font-size:0.68rem;">Pending</span>
+                                            @elseif($userRow->kyc_status === 'rejected')
+                                                <span class="badge bg-danger bg-opacity-15 text-danger fw-bold px-2 py-1 rounded-pill" style="font-size:0.68rem;">Rejected</span>
+                                            @else
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary fw-bold px-2 py-1 rounded-pill" style="font-size:0.68rem;">Not Submitted</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-muted small">{{ $userRow->created_at?->format('M d, Y') }}</td>
+                                        <td class="text-end">
+                                            <div class="d-flex justify-content-end gap-1">
+                                                <button class="btn btn-sm btn-outline-primary fw-bold" @click="openUserPreview(user)">
+                                                    <i class="bi bi-eye me-1"></i> Preview
+                                                </button>
+                                                <form action="{{ route('admin.users.impersonate', $userRow->id) }}" method="POST">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm fw-bold text-white" style="background:#7c3aed; border:none;" onclick="return confirm('Impersonate {{ addslashes($userRow->name) }}? You will be logged in as this user.')">
+                                                        <i class="bi bi-person-workspace me-1"></i> Impersonate
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="text-center py-5" style="color:#94a3b8;">
+                                            <i class="bi bi-people fs-2 d-block mb-2 opacity-25"></i>
+                                            <span style="font-size:0.9rem;">No users registered yet.</span>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- KYC REVIEWS TAB -->
             <div x-show="activeAdminTab === 'kyc_reviews'" x-transition>
                 <div class="mb-4">
@@ -579,7 +737,7 @@
             <div class="col-md-6">
                 <div class="p-3 rounded-3 border bg-white h-100">
                     <h6 class="fw-bold text-dark border-bottom pb-2 mb-2" style="font-size:0.85rem;">Request Information</h6>
-                    <div class="small text-muted mb-1">Amount: <strong class="text-dark" x-text="(selectedDepForReview?.currency || 'PHP') + ' ' + (selectedDepForReview?.amount ? parseFloat(selectedDepForReview?.amount).toFixed(2) : '4,990.00')">₱4,990.00</strong></div>
+                    <div class="small text-muted mb-1">Amount: <strong class="text-dark" x-text="'$ ' + (selectedDepForReview?.amount ? parseFloat(selectedDepForReview?.amount).toFixed(2) : '4,990.00')">$4,990.00</strong></div>
                     <div class="small text-muted mb-1">Payment Method: <strong class="text-dark" x-text="selectedDepForReview?.payment_method || 'GCash'">GCash</strong></div>
                     <div class="small text-muted mb-1">Account Name: <strong class="text-dark" x-text="selectedDepForReview?.sender_account_name || 'John Smith'">John Smith</strong></div>
                     <div class="small text-muted">GCash Number: <strong class="text-dark" x-text="selectedDepForReview?.sender_account_number || '0917 123 4567'">0917 123 4567</strong></div>
@@ -621,6 +779,156 @@
     </div>
 </div>
 
+<!-- ========================================== -->
+<!-- USER PREVIEW MODAL (Admin View) -->
+<!-- ========================================== -->
+<div x-show="selectedUserForPreview" x-cloak class="custom-modal-backdrop">
+    <div class="custom-modal-card p-4" style="max-width: 860px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h5 class="fw-bold text-dark mb-0">User Preview</h5>
+                <small class="text-muted">Full activity overview for <strong class="text-primary" x-text="selectedUserForPreview?.name">John Smith</strong> (<span x-text="selectedUserForPreview?.account_id || 'N/A'">N/A</span>)</small>
+            </div>
+            <button type="button" class="btn-close" @click="selectedUserForPreview = null"></button>
+        </div>
+
+        <div class="row g-2 mb-3">
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-3 border bg-white h-100">
+                    <small class="text-muted d-block" style="font-size:0.68rem;">WALLET BALANCE</small>
+                    <strong class="text-dark" style="font-size:1.05rem;" x-text="'$' + Number(selectedUserForPreview?.wallet_balance || 0).toFixed(2)">$0.00</strong>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-3 border bg-white h-100">
+                    <small class="text-muted d-block" style="font-size:0.68rem;">TOTAL INVESTED</small>
+                    <strong class="text-dark" style="font-size:1.05rem;" x-text="'$' + totalInvestedPreview.toFixed(2)">$0.00</strong>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-3 border bg-white h-100">
+                    <small class="text-muted d-block" style="font-size:0.68rem;">REFERRALS</small>
+                    <strong class="text-dark" style="font-size:1.05rem;" x-text="selectedUserForPreview?.referrals?.length || 0">0</strong>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-3 border bg-white h-100">
+                    <small class="text-muted d-block" style="font-size:0.68rem;">AFFILIATE EARNINGS</small>
+                    <strong class="text-success" style="font-size:1.05rem;" x-text="'$' + Number(selectedUserForPreview?.affiliate_earnings || 0).toFixed(2)">$0.00</strong>
+                </div>
+            </div>
+        </div>
+
+        <ul class="nav nav-pills nav-fill mb-3" style="font-size:0.8rem;">
+            <li class="nav-item"><button class="nav-link fw-bold" :class="previewTab === 'investments' ? 'active' : ''" @click="previewTab = 'investments'" style="color:#475569;">Investments</button></li>
+            <li class="nav-item"><button class="nav-link fw-bold" :class="previewTab === 'deposits' ? 'active' : ''" @click="previewTab = 'deposits'" style="color:#475569;">Deposits</button></li>
+            <li class="nav-item"><button class="nav-link fw-bold" :class="previewTab === 'withdrawals' ? 'active' : ''" @click="previewTab = 'withdrawals'" style="color:#475569;">Withdrawals</button></li>
+            <li class="nav-item"><button class="nav-link fw-bold" :class="previewTab === 'transactions' ? 'active' : ''" @click="previewTab = 'transactions'" style="color:#475569;">Transactions</button></li>
+        </ul>
+
+        <div style="max-height: 340px; overflow-y: auto;">
+            <template x-if="previewTab === 'investments'">
+                <table class="table align-middle small mb-0">
+                    <thead class="table-light">
+                        <tr class="text-uppercase text-muted" style="font-size:0.65rem;">
+                            <th>Property</th><th>Shares</th><th>Amount</th><th>ROI Earned</th><th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="inv in (selectedUserForPreview?.investments || [])" :key="inv.id">
+                            <tr>
+                                <td class="fw-bold text-dark" x-text="inv.property?.title || '—'"></td>
+                                <td x-text="inv.shares_bought"></td>
+                                <td x-text="'$' + Number(inv.total_amount).toFixed(2)"></td>
+                                <td x-text="'$' + Number(inv.roi_earned || 0).toFixed(2)"></td>
+                                <td><span class="badge fw-semibold rounded-pill px-2 py-1" style="font-size:0.65rem;" :style="inv.status === 'active' ? 'background:#f0fdf4; color:#16a34a;' : 'background:#f1f5f9; color:#64748b;'" x-text="inv.status || 'active'"></span></td>
+                            </tr>
+                        </template>
+                        <tr x-show="!selectedUserForPreview?.investments?.length"><td colspan="5" class="text-center text-muted py-4">No investments yet.</td></tr>
+                    </tbody>
+                </table>
+            </template>
+
+            <template x-if="previewTab === 'deposits'">
+                <table class="table align-middle small mb-0">
+                    <thead class="table-light">
+                        <tr class="text-uppercase text-muted" style="font-size:0.65rem;">
+                            <th>Code</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="dep in (selectedUserForPreview?.deposits || [])" :key="dep.id">
+                            <tr>
+                                <td class="fw-bold text-primary" x-text="dep.deposit_code"></td>
+                                <td class="fw-bold text-dark" x-text="'$' + Number(dep.amount).toFixed(2)"></td>
+                                <td x-text="(dep.payment_method || '').replace(/_/g, ' ')"></td>
+                                <td><span class="badge fw-semibold rounded-pill px-2 py-1" style="font-size:0.65rem;" :style="dep.status === 'completed' ? 'background:#f0fdf4; color:#16a34a;' : 'background:#fffbeb; color:#d97706;'" x-text="(dep.status || 'pending').replace(/_/g, ' ')"></span></td>
+                                <td class="text-muted" x-text="dep.created_at ? dep.created_at.split('T')[0] : '—'"></td>
+                            </tr>
+                        </template>
+                        <tr x-show="!selectedUserForPreview?.deposits?.length"><td colspan="5" class="text-center text-muted py-4">No deposits yet.</td></tr>
+                    </tbody>
+                </table>
+            </template>
+
+            <template x-if="previewTab === 'withdrawals'">
+                <table class="table align-middle small mb-0">
+                    <thead class="table-light">
+                        <tr class="text-uppercase text-muted" style="font-size:0.65rem;">
+                            <th>Code</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="wd in (selectedUserForPreview?.withdrawals || [])" :key="wd.id">
+                            <tr>
+                                <td class="fw-bold text-primary" x-text="wd.withdrawal_code"></td>
+                                <td class="fw-bold text-dark" x-text="'$' + Number(wd.amount).toFixed(2)"></td>
+                                <td x-text="(wd.withdrawal_method || '').replace(/_/g, ' ')"></td>
+                                <td><span class="badge fw-semibold rounded-pill px-2 py-1" style="font-size:0.65rem;" :style="wd.status === 'approved' ? 'background:#f0fdf4; color:#16a34a;' : 'background:#fffbeb; color:#d97706;'" x-text="(wd.status || 'pending').replace(/_/g, ' ')"></span></td>
+                                <td class="text-muted" x-text="wd.created_at ? wd.created_at.split('T')[0] : '—'"></td>
+                            </tr>
+                        </template>
+                        <tr x-show="!selectedUserForPreview?.withdrawals?.length"><td colspan="5" class="text-center text-muted py-4">No withdrawals yet.</td></tr>
+                    </tbody>
+                </table>
+            </template>
+
+            <template x-if="previewTab === 'transactions'">
+                <table class="table align-middle small mb-0">
+                    <thead class="table-light">
+                        <tr class="text-uppercase text-muted" style="font-size:0.65rem;">
+                            <th>Reference</th><th>Type</th><th>Amount</th><th>Description</th><th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="tx in (selectedUserForPreview?.transactions || [])" :key="tx.id">
+                            <tr>
+                                <td class="fw-bold text-primary" x-text="tx.reference"></td>
+                                <td x-text="(tx.type || '').replace(/_/g, ' ')"></td>
+                                <td class="fw-bold text-dark" x-text="'$' + Number(tx.amount).toFixed(2)"></td>
+                                <td class="text-muted" x-text="tx.description || '—'"></td>
+                                <td><span class="badge fw-semibold rounded-pill px-2 py-1" style="font-size:0.65rem;" :style="tx.status === 'completed' ? 'background:#f0fdf4; color:#16a34a;' : 'background:#f1f5f9; color:#64748b;'" x-text="tx.status || '—'"></span></td>
+                            </tr>
+                        </template>
+                        <tr x-show="!selectedUserForPreview?.transactions?.length"><td colspan="5" class="text-center text-muted py-4">No transactions yet.</td></tr>
+                    </tbody>
+                </table>
+            </template>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <form :action="'/admin/users/' + (selectedUserForPreview?.id || '') + '/impersonate'" method="POST">
+                @csrf
+                <button type="submit" class="btn fw-bold px-4 text-white" style="background:#7c3aed; border:none;">
+                    <i class="bi bi-person-workspace me-1"></i> Impersonate User
+                </button>
+            </form>
+            <button type="button" class="btn btn-outline-secondary fw-bold px-4" @click="selectedUserForPreview = null">Close</button>
+        </div>
+    </div>
+</div>
+</div>
+
 <script>
     function adminDashboardEngine() {
         return {
@@ -630,6 +938,13 @@
             searchQuery: '',
             selectedDepForInstruction: null,
             selectedDepForReview: null,
+            selectedUserForPreview: null,
+            previewTab: 'investments',
+            totalInvestedPreview: 0,
+            usersSearch: '',
+            usersKycFilter: 'all',
+            usersSortBy: 'newest',
+            usersVisible: {{ $users->count() }},
 
             openInstructionModal(dep) {
                 this.selectedDepForInstruction = dep;
@@ -637,6 +952,46 @@
 
             openReviewModal(dep) {
                 this.selectedDepForReview = dep;
+            },
+
+            openUserPreview(user) {
+                this.selectedUserForPreview = user;
+                this.previewTab = 'investments';
+                this.totalInvestedPreview = (user.investments || []).reduce((sum, inv) => sum + parseFloat(inv.total_amount || 0), 0);
+            },
+
+            userMatches(user) {
+                const q = (this.usersSearch || '').trim().toLowerCase();
+                const matchesQuery = !q
+                    || (user.name || '').toLowerCase().includes(q)
+                    || (user.email || '').toLowerCase().includes(q)
+                    || (user.account_id || '').toLowerCase().includes(q);
+                const kyc = user.kyc_status || 'none';
+                const matchesKyc = this.usersKycFilter === 'all' || kyc === this.usersKycFilter;
+                return matchesQuery && matchesKyc;
+            },
+
+            recountUsers(el) {
+                const rows = document.querySelectorAll('#usersTableWrap tbody tr[data-user-row]');
+                let visible = 0;
+                rows.forEach(r => { if (r.style.display !== 'none') visible++; });
+                this.usersVisible = visible;
+            },
+
+            sortUsers() {
+                const wrap = document.getElementById('usersTableWrap');
+                const tbody = wrap ? wrap.querySelector('tbody') : null;
+                if (!tbody) return;
+                const rows = Array.from(tbody.querySelectorAll('tr[data-user-row]'));
+                const key = this.usersSortBy;
+                const val = (r) => {
+                    if (key === 'newest') return -parseFloat(r.dataset.created || 0);
+                    if (key === 'oldest') return parseFloat(r.dataset.created || 0);
+                    if (key === 'invested_high') return -parseFloat(r.dataset.invested || 0);
+                    if (key === 'wallet_high') return -parseFloat(r.dataset.wallet || 0);
+                    return 0;
+                };
+                rows.sort((a, b) => val(a) - val(b)).forEach(r => tbody.appendChild(r));
             }
         }
     }

@@ -25,16 +25,7 @@ class AdminDashboardController extends Controller
         /** @var User $admin */
         $admin = Auth::user();
 
-        // If not admin, switch user to admin for preview/testing
-        if (!$admin || $admin->role !== 'admin') {
-            $adminUser = User::where('role', 'admin')->notExpired()->first();
-            if ($adminUser) {
-                Auth::login($adminUser);
-                $admin = $adminUser;
-            }
-        }
-
-        if ($admin && $admin->isExpired()) {
+        if ($admin->isExpired()) {
             Auth::logout();
             return redirect()->route('login')->with('error', 'Your admin account has expired. Please contact support.');
         }
@@ -47,7 +38,10 @@ class AdminDashboardController extends Controller
         $allDeposits = Deposit::with('user')->orderBy('created_at', 'desc')->take(20)->get();
         $allWithdrawals = Withdrawal::with('user')->orderBy('created_at', 'desc')->take(20)->get();
         $properties = Property::orderBy('created_at', 'desc')->get();
-        $users = User::orderBy('created_at', 'desc')->get();
+        $users = User::with(['investments.property', 'deposits', 'withdrawals', 'transactions', 'referrals'])
+            ->where('role', 'user')
+            ->orderBy('created_at', 'desc')
+            ->get();
         $kycPendingUsers = User::where('kyc_status', 'pending')->whereNotNull('kyc_document_path')->orderBy('kyc_submitted_at', 'desc')->get();
         $referrers = User::whereHas('referrals')->with('referrals')->withCount('referrals')->orderBy('affiliate_earnings', 'desc')->get();
 
@@ -199,6 +193,7 @@ class AdminDashboardController extends Controller
             'roi_percentage' => 'required|numeric|min:0',
             'image_url' => 'nullable|string',
             'description' => 'nullable|string',
+            'status' => 'nullable|string|in:active,sold_out,upcoming',
         ]);
 
         Property::create([
@@ -212,27 +207,59 @@ class AdminDashboardController extends Controller
             'investment_duration_months' => $request->investment_duration_months ?? 12,
             'image_url' => $request->image_url ?: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1000&auto=format&fit=crop',
             'description' => $request->description,
-            'status' => 'active',
+            'status' => $request->status ?: 'active',
         ]);
 
-        return redirect()->back()->with('success', 'New housing property listing created successfully!');
+        return redirect()->route('admin.dashboard', ['tab' => 'properties'])->with('success', 'New housing property listing created successfully!');
     }
 
     public function updateProperty(Request $request, $id)
     {
         $request->validate([
-            'roi_percentage' => 'required|numeric|min:0|max:1000',
+            'title' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'category' => 'required|string',
             'price_per_share' => 'required|numeric|min:1',
+            'total_shares' => 'required|integer|min:1',
+            'roi_percentage' => 'required|numeric|min:0|max:1000',
             'investment_duration_months' => 'required|integer|min:1',
+            'image_url' => 'nullable|string',
+            'description' => 'nullable|string',
+            'status' => 'nullable|string|in:active,sold_out,upcoming',
         ]);
 
         $property = Property::findOrFail($id);
-        $property->roi_percentage = $request->roi_percentage;
+        $property->title = $request->title;
+        $property->location = $request->location;
+        $property->category = $request->category;
         $property->price_per_share = $request->price_per_share;
+        $property->total_shares = $request->total_shares;
+        $property->available_shares = min($request->total_shares, $property->available_shares);
+        $property->roi_percentage = $request->roi_percentage;
         $property->investment_duration_months = $request->investment_duration_months;
+        $property->image_url = $request->image_url;
+        $property->description = $request->description;
+        $property->status = $request->status ?: $property->status;
         $property->save();
 
-        return redirect()->back()->with('success', 'Property "' . $property->title . '" settings updated. Daily ROI cron will use the new values.');
+        return redirect()->route('admin.dashboard', ['tab' => 'properties'])->with('success', 'Property "' . $property->title . '" updated successfully.');
+    }
+
+    public function editProperty($id)
+    {
+        $property = Property::findOrFail($id);
+
+        return view('admin.property-edit', compact('property'));
+    }
+
+    public function deleteProperty($id)
+    {
+        $property = Property::findOrFail($id);
+        $investmentsCount = $property->investments()->count();
+
+        $property->delete();
+
+        return redirect()->back()->with('success', 'Property "' . $property->title . '" deleted' . ($investmentsCount > 0 ? " (along with $investmentsCount linked investment record(s))" : '') . '.');
     }
 
     public function awardReferralBonus(Request $request)
@@ -258,6 +285,42 @@ class AdminDashboardController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Referral bonus of $' . number_format($request->amount, 2) . ' awarded to ' . $user->name . '!');
+    }
+
+    public function impersonate($id)
+    {
+        $targetUser = User::where('role', 'user')->findOrFail($id);
+
+        session([
+            'admin_original_id' => Auth::id(),
+            'impersonating' => true,
+        ]);
+
+        Auth::login($targetUser);
+        $request = request();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('dashboard')->with('success', 'You are now viewing the platform as ' . $targetUser->name . '.');
+    }
+
+    public function stopImpersonation()
+    {
+        $adminId = session('admin_original_id');
+
+        if ($adminId) {
+            $admin = User::find($adminId);
+
+            session()->forget(['admin_original_id', 'impersonating']);
+
+            if ($admin) {
+                Auth::login($admin);
+                request()->session()->regenerateToken();
+
+                return redirect()->route('admin.dashboard')->with('success', 'You have returned to the admin panel.');
+            }
+        }
+
+        return redirect()->route('login');
     }
 
     public function approveKyc($id)

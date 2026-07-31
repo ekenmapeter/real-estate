@@ -59,6 +59,7 @@ class User extends Authenticatable
             'wallet_balance' => 'decimal:2',
             'affiliate_earnings' => 'decimal:2',
             'expires_at' => 'datetime',
+            'kyc_submitted_at' => 'datetime',
             'kyc_verified' => 'boolean',
         ];
     }

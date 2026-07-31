@@ -25,7 +25,7 @@ Route::post('/buy-shares', [UserDashboardController::class, 'buyShares'])->name(
 Route::post('/kyc/submit', [UserDashboardController::class, 'submitKyc'])->name('kyc.submit');
 
 // Admin Platform Management Dashboard
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::post('/deposit/instructions/{id}', [AdminDashboardController::class, 'sendInstructions'])->name('deposit.instructions');
     Route::post('/deposit/approve/{id}', [AdminDashboardController::class, 'approveDeposit'])->name('deposit.approve');
@@ -33,11 +33,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/withdrawal/approve/{id}', [AdminDashboardController::class, 'approveWithdrawal'])->name('withdrawal.approve');
     Route::post('/withdrawal/reject/{id}', [AdminDashboardController::class, 'rejectWithdrawal'])->name('withdrawal.reject');
     Route::post('/property/store', [AdminDashboardController::class, 'storeProperty'])->name('property.store');
+    Route::get('/property/{id}/edit', [AdminDashboardController::class, 'editProperty'])->name('property.edit');
     Route::post('/property/update/{id}', [AdminDashboardController::class, 'updateProperty'])->name('property.update');
+    Route::post('/property/delete/{id}', [AdminDashboardController::class, 'deleteProperty'])->name('property.delete');
     Route::post('/referral-bonus', [AdminDashboardController::class, 'awardReferralBonus'])->name('referral-bonus');
     Route::post('/kyc/approve/{id}', [AdminDashboardController::class, 'approveKyc'])->name('kyc.approve');
     Route::post('/kyc/reject/{id}', [AdminDashboardController::class, 'rejectKyc'])->name('kyc.reject');
+    Route::post('/users/{id}/impersonate', [AdminDashboardController::class, 'impersonate'])->name('users.impersonate');
 });
+
+// Stop impersonation - must be outside the admin middleware group so the impersonated user can leave
+Route::post('/admin/impersonate/stop', [AdminDashboardController::class, 'stopImpersonation'])->name('admin.impersonate.stop');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

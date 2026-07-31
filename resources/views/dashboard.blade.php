@@ -284,6 +284,24 @@
         <!-- Main Dashboard Body Area -->
         <div class="col-lg-9 col-md-8 p-3 p-lg-4" style="min-height: calc(100vh - 70px); background: #f8fafc;">
 
+            @if(session('impersonating'))
+                <div class="alert alert-warning alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4 d-flex align-items-center justify-content-between" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-workspace fs-4 me-3" style="color:#d97706;"></i>
+                        <div>
+                            <strong class="d-block">Admin Preview Mode</strong>
+                            <span class="small">You are viewing this dashboard as <strong>{{ Auth::user()->name }}</strong> ({{ Auth::user()->email }}). All actions are performed on this user's account.</span>
+                        </div>
+                    </div>
+                    <form method="POST" action="{{ route('admin.impersonate.stop') }}" class="ms-3 flex-shrink-0">
+                        @csrf
+                        <button type="submit" class="btn btn-sm fw-bold px-3" style="background:#d97706; color:#fff; border:none;">
+                            <i class="bi bi-arrow-left me-1"></i> Return to Admin
+                        </button>
+                    </form>
+                </div>
+            @endif
+
             <!-- Flash Alert Notification -->
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm border-0 mb-4 d-flex align-items-center" role="alert">
