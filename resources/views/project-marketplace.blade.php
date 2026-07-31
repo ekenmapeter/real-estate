@@ -84,7 +84,7 @@
                 <span>Est. Yield: <b class="text-success">{{ $prop->roi_percentage }}% p.a.</b></span>
               </div>
 
-              <a href="{{ route('dashboard') }}" class="btn btn-warning text-dark fw-bold w-100 py-2 rounded-3 shadow-sm">
+              <a href="{{ route('property.show', $prop) }}" class="btn btn-warning text-dark fw-bold w-100 py-2 rounded-3 shadow-sm">
                 <i class="bi bi-cart-plus me-1"></i> Buy Shares
               </a>
             </div>

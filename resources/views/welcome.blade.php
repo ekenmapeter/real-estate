@@ -176,7 +176,7 @@
         </div>
 
         <div class="cta-container mb-4">
-          <a href="{{ route('register') }}" class="btn btn-primary w-100 py-3 fw-bold mb-3 shadow" style="background: #2756fd; border: none; font-size: 1rem; border-radius: 8px;">
+            <a href="{{ route('register') }}" class="btn btn-primary w-100 py-3 fw-bold mb-3 shadow" style="background: #2756fd; border: none; font-size: 1rem; border-radius: 8px;">
             Join Our Global Investor Network
           </a>
 
@@ -403,7 +403,7 @@
                   <small class="text-muted d-block">Valuation</small>
                   <span class="fw-bold text-primary fs-5">${{ number_format($totalValuation, 2) }}</span>
                 </div>
-                <a href="{{ route('dashboard') }}" class="btn btn-sm btn-primary fw-bold px-3 py-2 rounded-3">Invest / Co-Own</a>
+                <a href="{{ route('property.show', $prop) }}" class="btn btn-sm btn-primary fw-bold px-3 py-2 rounded-3">Invest / Co-Own</a>
               </div>
             </div>
           </div>
@@ -472,7 +472,7 @@
                   <small class="text-muted d-block" style="font-size: 0.75rem;">Total Valuation</small>
                   <h5 class="fw-bold text-primary mb-0">${{ number_format($totalVal, 2) }}</h5>
                 </div>
-                <a href="{{ route('dashboard') }}" class="btn btn-sm btn-outline-primary fw-bold px-3 py-2 rounded-3">
+                <a href="{{ route('property.show', $prop) }}" class="btn btn-sm btn-outline-primary fw-bold px-3 py-2 rounded-3">
                   Co-Own Now <i class="bi bi-arrow-right"></i>
                 </a>
               </div>

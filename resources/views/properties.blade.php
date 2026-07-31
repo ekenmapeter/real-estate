@@ -118,7 +118,7 @@
                   <small class="text-muted d-block" style="font-size:0.75rem;">Total Asset Value</small>
                   <h5 class="fw-bold text-primary mb-0">${{ number_format($totalValuation, 2) }}</h5>
                 </div>
-                <a href="{{ route('dashboard') }}" class="btn btn-sm btn-primary fw-bold px-3 py-2 rounded-3" style="background:#2756fd;">Co-Own Now</a>
+                <a href="{{ route('property.show', $prop) }}" class="btn btn-sm btn-primary fw-bold px-3 py-2 rounded-3" style="background:#2756fd;">Co-Own Now</a>
               </div>
             </div>
           </div>

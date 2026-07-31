@@ -103,8 +103,17 @@
                 <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'users' }" @click.prevent="activeAdminTab = 'users'">
                     <i class="bi bi-people-fill"></i> Users
                 </a>
+                <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'kyc_reviews' }" @click.prevent="activeAdminTab = 'kyc_reviews'">
+                    <i class="bi bi-shield-check"></i> KYC Reviews
+                    @if($kycPendingUsers->count() > 0)
+                        <span class="badge bg-warning text-dark ms-auto rounded-pill">{{ $kycPendingUsers->count() }}</span>
+                    @endif
+                </a>
                 <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'withdrawals' }" @click.prevent="activeAdminTab = 'withdrawals'">
                     <i class="bi bi-arrow-up-right-circle"></i> Withdrawals
+                </a>
+                <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'referrals' }" @click.prevent="activeAdminTab = 'referrals'">
+                    <i class="bi bi-gift-fill"></i> Referral Bonuses
                 </a>
                 <a href="{{ route('dashboard') }}" class="nav-link-admin text-info">
                     <i class="bi bi-person-workspace"></i> User View Dashboard
@@ -297,6 +306,173 @@
                         <button type="submit" class="btn btn-primary fw-bold px-4 py-2 rounded-3" style="background:#2563eb;">Publish Listing</button>
                     </form>
                 </div>
+
+                <div class="card border-0 rounded-4 shadow-sm bg-white overflow-hidden mb-4">
+                    <div class="px-4 pt-4 pb-0 d-flex align-items-center justify-content-between">
+                        <h6 class="fw-bold mb-0" style="color:#0f172a;"><i class="bi bi-building me-2" style="color:#2563eb;"></i>All Property Listings</h6>
+                        <span class="badge fw-semibold rounded-pill px-2 py-1" style="background:#f1f5f9; color:#475569; font-size:0.68rem;">{{ $properties->count() }} listings</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0" style="border-collapse:separate; border-spacing:0;">
+                            <thead>
+                                <tr style="background:#f8fafc;">
+                                    <th class="px-4 py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">PROPERTY</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">SHARE PRICE</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">ROI %</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">DURATION</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">SHARES LEFT</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">UPDATE SETTINGS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($properties as $prop)
+                                    <tr style="border-bottom:1px solid #f1f5f9;">
+                                        <td class="px-4 py-3">
+                                            <div class="fw-bold small text-dark">{{ $prop->title }}</div>
+                                            <small class="text-muted" style="font-size:0.7rem;">{{ $prop->location }}</small>
+                                            <span class="badge fw-semibold rounded-pill ms-1" style="background:{{ $prop->status === 'active' ? '#f0fdf4' : '#f1f5f9' }}; color:{{ $prop->status === 'active' ? '#16a34a' : '#64748b' }}; font-size:0.62rem;">{{ $prop->status }}</span>
+                                        </td>
+                                        <td class="py-3"><span class="small fw-semibold text-dark">${{ number_format($prop->price_per_share, 2) }}</span></td>
+                                        <td class="py-3"><span class="fw-bold" style="color:#7c3aed;">{{ $prop->roi_percentage }}%</span></td>
+                                        <td class="py-3"><span class="small text-muted">{{ $prop->investment_duration_months }} months</span></td>
+                                        <td class="py-3"><span class="small text-muted">{{ $prop->available_shares }} / {{ $prop->total_shares }}</span></td>
+                                        <td class="py-3">
+                                            <form action="{{ route('admin.property.update', $prop->id) }}" method="POST" class="d-flex align-items-center gap-1">
+                                                @csrf
+                                                <input type="number" step="0.1" min="0" name="roi_percentage" class="form-control form-control-sm" style="width:70px; font-size:0.75rem;" value="{{ $prop->roi_percentage }}" title="ROI %">
+                                                <input type="number" step="0.01" min="1" name="price_per_share" class="form-control form-control-sm" style="width:80px; font-size:0.75rem;" value="{{ $prop->price_per_share }}" title="Share price">
+                                                <input type="number" min="1" name="investment_duration_months" class="form-control form-control-sm" style="width:60px; font-size:0.75rem;" value="{{ $prop->investment_duration_months }}" title="Duration (months)">
+                                                <button type="submit" class="btn btn-sm fw-bold rounded-pill px-2" style="background:#2563eb; color:#fff; border:none; font-size:0.7rem;" title="Save settings"><i class="bi bi-check-lg"></i></button>
+                                            </form>
+                                            <small class="text-muted d-block mt-1" style="font-size:0.62rem;">ROI % &middot; Price &middot; Months</small>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="6" class="text-center py-5" style="color:#94a3b8;"><i class="bi bi-building fs-2 d-block mb-2 opacity-25"></i><span style="font-size:0.9rem;">No properties yet.</span></td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REFERRAL BONUSES TAB -->
+            <div x-show="activeAdminTab === 'referrals'" x-transition>
+                <div class="mb-4">
+                    <h2 class="fw-bold mb-1" style="font-size:1.6rem; color:#0f172a;">Referral Bonuses</h2>
+                    <p class="mb-0" style="font-size:0.95rem; font-weight:500; color:#475569;">Award referral bonuses to users who have referred new investors.</p>
+                </div>
+                <div class="card border-0 rounded-4 shadow-sm bg-white overflow-hidden">
+                    <div class="px-4 pt-4 pb-0 d-flex align-items-center justify-content-between">
+                        <h6 class="fw-bold mb-0" style="color:#0f172a;"><i class="bi bi-gift-fill me-2" style="color:#7c3aed;"></i>Users with Referrals</h6>
+                        <span class="badge fw-semibold rounded-pill px-2 py-1" style="background:#f1f5f9; color:#475569; font-size:0.68rem;">{{ $referrers->count() }} referrers</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0" style="border-collapse:separate; border-spacing:0;">
+                            <thead>
+                                <tr style="background:#f8fafc;">
+                                    <th class="px-4 py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">USER</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">CODE</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">REFERRALS</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">EARNINGS</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">AWARD BONUS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($referrers as $refUser)
+                                    <tr style="border-bottom:1px solid #f1f5f9;">
+                                        <td class="px-4 py-3">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style="width:36px; height:36px; background:linear-gradient(135deg,#7c3aed,#6d28d9); font-size:0.75rem;">
+                                                    {{ strtoupper(substr($refUser->name ?? 'U', 0, 2)) }}
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold small text-dark">{{ $refUser->name }}</div>
+                                                    <small class="text-muted" style="font-size:0.7rem;">{{ $refUser->email }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-3"><span class="badge fw-semibold rounded-pill px-2 py-1" style="background:#f3e8ff; color:#7c3aed; font-size:0.72rem;">{{ $refUser->affiliate_code ?? '—' }}</span></td>
+                                        <td class="py-3"><span class="fw-bold">{{ $refUser->referrals_count }}</span></td>
+                                        <td class="py-3"><span class="fw-bold text-success">${{ number_format($refUser->affiliate_earnings ?? 0, 2) }}</span></td>
+                                        <td class="py-3">
+                                            <form action="{{ route('admin.referral-bonus') }}" method="POST" class="d-flex align-items-center gap-2">
+                                                @csrf
+                                                <input type="hidden" name="user_id" value="{{ $refUser->id }}">
+                                                <input type="number" step="0.01" min="0.01" name="amount" class="form-control form-control-sm" style="width:100px; font-size:0.8rem;" placeholder="Amount" required>
+                                                <button type="submit" class="btn btn-sm fw-bold rounded-pill px-3" style="background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff; border:none; font-size:0.72rem;">
+                                                    <i class="bi bi-gift me-1"></i> Award
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="5" class="text-center py-5" style="color:#94a3b8;"><i class="bi bi-gift fs-2 d-block mb-2 opacity-25"></i><span style="font-size:0.9rem;">No users with referrals yet.</span></td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KYC REVIEWS TAB -->
+            <div x-show="activeAdminTab === 'kyc_reviews'" x-transition>
+                <div class="mb-4">
+                    <h2 class="fw-bold mb-1" style="font-size:1.6rem; color:#0f172a;">KYC Reviews</h2>
+                    <p class="mb-0" style="font-size:0.95rem; font-weight:500; color:#475569;">Review and approve or reject user KYC document submissions.</p>
+                </div>
+                @forelse($kycPendingUsers as $kycUser)
+                    <div class="card border-0 rounded-4 shadow-sm bg-white overflow-hidden mb-3">
+                        <div class="p-4">
+                            <div class="d-flex align-items-start justify-content-between gap-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style="width:42px; height:42px; background:linear-gradient(135deg,#2563eb,#1d4ed8); font-size:0.85rem;">
+                                        {{ strtoupper(substr($kycUser->name ?? 'U', 0, 2)) }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ $kycUser->name }}</div>
+                                        <div class="small text-muted">{{ $kycUser->email }} &middot; {{ $kycUser->account_id ?? 'N/A' }}</div>
+                                        <span class="badge fw-semibold rounded-pill mt-1" style="background:#fffbeb; color:#d97706; font-size:0.68rem;">Submitted {{ $kycUser->kyc_submitted_at?->diffForHumans() }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3 mt-3">
+                                <div class="col-md-6">
+                                    <label class="small fw-bold text-muted mb-1 d-block">ID Document</label>
+                                    <a href="{{ asset('storage/' . $kycUser->kyc_document_path) }}" target="_blank" class="btn btn-outline-primary btn-sm fw-bold rounded-3 w-100">
+                                        <i class="bi bi-eye me-1"></i> View Document
+                                    </a>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small fw-bold text-muted mb-1 d-block">Selfie</label>
+                                    <a href="{{ asset('storage/' . $kycUser->kyc_selfie_path) }}" target="_blank" class="btn btn-outline-primary btn-sm fw-bold rounded-3 w-100">
+                                        <i class="bi bi-eye me-1"></i> View Selfie
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 mt-3 flex-wrap">
+                                <form action="{{ route('admin.kyc.approve', $kycUser->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm fw-bold rounded-pill px-3" style="background:#22c55e; color:#fff; border:none;">
+                                        <i class="bi bi-check-lg me-1"></i> Approve
+                                    </button>
+                                </form>
+                                <form action="{{ route('admin.kyc.reject', $kycUser->id) }}" method="POST" class="d-flex align-items-center gap-2">
+                                    @csrf
+                                    <input type="text" name="reason" class="form-control form-control-sm" style="width:200px; font-size:0.8rem;" placeholder="Rejection reason" required>
+                                    <button type="submit" class="btn btn-sm fw-bold rounded-pill px-3" style="background:#ef4444; color:#fff; border:none;">
+                                        <i class="bi bi-x-lg me-1"></i> Reject
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="card border-0 rounded-4 shadow-sm bg-white p-5 text-center" style="color:#94a3b8;">
+                        <i class="bi bi-shield-check fs-1 d-block mb-2 opacity-25"></i>
+                        <span style="font-size:0.9rem;">No pending KYC reviews.</span>
+                    </div>
+                @endforelse
             </div>
 
         </div>

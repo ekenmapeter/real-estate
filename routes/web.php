@@ -3,9 +3,14 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\PropertyController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    $ref = request()->query('ref');
+    if ($ref) {
+        return redirect()->route('register', ['ref' => $ref]);
+    }
     $properties = \App\Models\Property::where('status', 'active')->orderBy('id', 'desc')->get();
     return view('welcome', compact('properties'));
 });
@@ -17,6 +22,7 @@ Route::post('/deposit/evidence/{id}', [UserDashboardController::class, 'uploadEv
 Route::post('/withdraw', [UserDashboardController::class, 'withdraw'])->name('withdraw.store');
 Route::post('/send-funds', [UserDashboardController::class, 'sendFunds'])->name('send-funds.store');
 Route::post('/buy-shares', [UserDashboardController::class, 'buyShares'])->name('buy-shares.store');
+Route::post('/kyc/submit', [UserDashboardController::class, 'submitKyc'])->name('kyc.submit');
 
 // Admin Platform Management Dashboard
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -27,6 +33,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/withdrawal/approve/{id}', [AdminDashboardController::class, 'approveWithdrawal'])->name('withdrawal.approve');
     Route::post('/withdrawal/reject/{id}', [AdminDashboardController::class, 'rejectWithdrawal'])->name('withdrawal.reject');
     Route::post('/property/store', [AdminDashboardController::class, 'storeProperty'])->name('property.store');
+    Route::post('/property/update/{id}', [AdminDashboardController::class, 'updateProperty'])->name('property.update');
+    Route::post('/referral-bonus', [AdminDashboardController::class, 'awardReferralBonus'])->name('referral-bonus');
+    Route::post('/kyc/approve/{id}', [AdminDashboardController::class, 'approveKyc'])->name('kyc.approve');
+    Route::post('/kyc/reject/{id}', [AdminDashboardController::class, 'rejectKyc'])->name('kyc.reject');
 });
 
 Route::middleware('auth')->group(function () {
@@ -35,23 +45,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/properties', function (\Illuminate\Http\Request $request) {
-    $query = \App\Models\Property::query();
-    if ($search = $request->input('search')) {
-        $query->where(function($q) use ($search) {
-            $q->where('title', 'like', "%{$search}%")
-              ->orWhere('location', 'like', "%{$search}%")
-              ->orWhere('category', 'like', "%{$search}%");
-        });
-    }
-    if ($category = $request->input('category')) {
-        if ($category !== 'all') {
-            $query->where('category', 'like', "%{$category}%");
-        }
-    }
-    $properties = $query->orderBy('id', 'desc')->get();
-    return view('properties', compact('properties'));
-});
+Route::get('/properties', [PropertyController::class, 'index']);
+Route::get('/property/{property}', [PropertyController::class, 'show'])->name('property.show');
 
 Route::get('/list-property', function () {
     return view('list-property');

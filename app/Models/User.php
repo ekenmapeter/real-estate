@@ -27,6 +27,13 @@ class User extends Authenticatable
         'affiliate_code',
         'affiliate_earnings',
         'expires_at',
+        'kyc_verified',
+        'kyc_document_path',
+        'kyc_selfie_path',
+        'kyc_status',
+        'kyc_submitted_at',
+        'kyc_rejected_reason',
+        'referred_by',
     ];
 
     /**
@@ -52,6 +59,7 @@ class User extends Authenticatable
             'wallet_balance' => 'decimal:2',
             'affiliate_earnings' => 'decimal:2',
             'expires_at' => 'datetime',
+            'kyc_verified' => 'boolean',
         ];
     }
 
@@ -73,6 +81,16 @@ class User extends Authenticatable
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function referrer()
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
+
+    public function referrals()
+    {
+        return $this->hasMany(User::class, 'referred_by');
     }
 
     public function scopeNotExpired($query)

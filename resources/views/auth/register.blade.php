@@ -57,6 +57,9 @@
 
           <form method="POST" action="{{ route('register') }}" id="registerForm">
             @csrf
+            @if(request('ref'))
+                <input type="hidden" name="ref" value="{{ request('ref') }}">
+            @endif
 
             <!-- User Name -->
             <div class="mb-3">
@@ -119,24 +122,7 @@
               <a href="{{ route('login') }}" class="text-primary fw-bold text-decoration-none small ms-1">Sign In</a>
             </div>
 
-            <!-- Social Login Divider -->
-            <div class="position-relative text-center mb-3">
-              <hr class="text-muted opacity-25">
-              <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">or login with</span>
-            </div>
-
-            <!-- Social Login Buttons -->
-            <div class="d-flex gap-2">
-              <a href="#" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2 rounded-3 small fw-semibold">
-                <i class="bi bi-google text-danger"></i> Google
-              </a>
-              <a href="#" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2 rounded-3 small fw-semibold">
-                <i class="bi bi-facebook text-primary"></i> Facebook
-              </a>
-              <a href="#" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2 rounded-3 small fw-semibold">
-                <i class="bi bi-apple text-dark"></i> Apple
-              </a>
-            </div>
+           
 
           </form>
         </div>
