@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Properties for Sale & Rent | Radiant Dream Realty')
+@section('title', 'Properties for Sale | Radiant Dream Realty')
 
 @section('content')
 <!-- Properties Hero Section -->
@@ -10,15 +10,15 @@
       <!-- Left Column: Content -->
       <div class="col-lg-6 col-md-12 text-start reveal-on-scroll delay-1">
         <h1 class="title-large text-white mb-3" style="font-size: clamp(2.4rem, 4.5vw, 3.6rem); line-height: 1.15; font-weight: 900; letter-spacing: -0.5px;">
-          EXPLORE LUXURY<br><span style="color: #60a5fa; text-shadow: 0 0 20px rgba(96,165,250,0.4);">HOMES & ESTATES</span>
+          BUY PREMIUM<br><span style="color: #60a5fa; text-shadow: 0 0 20px rgba(96,165,250,0.4);">HOMES & ESTATES</span>
         </h1>
-        <h5 class="text-white-50 fw-bold mb-3" style="font-weight: 700;">Buy, Rent, or Co-Own Prime Global Real Estate.</h5>
+        <h5 class="text-white-50 fw-bold mb-3" style="font-weight: 700;">Own Prime Global Real Estate Outright.</h5>
         <p class="subtitle text-white-50 body-2 mb-4" style="font-size: 1.15rem; line-height: 1.65; font-weight: 500;">
-          Browse verified residential estates, beachfront villas, and high-yield commercial investment properties across 5 continents with full legal transparency.
+          Browse verified residential estates, beachfront villas, and commercial properties across 5 continents and purchase them directly — one-time payment, full ownership.
         </p>
         <div class="mt-4 d-flex flex-wrap gap-3 align-items-center">
-          <a href="#propertySearch" class="tf-btn primary shadow-lg fw-bold" style="min-width: 175px; padding: 15px 30px; font-size: 1.05rem; border-radius: 8px; font-weight: 800;">Browse Listings</a>
-          <a href="{{ url('/list-property') }}" class="tf-btn glass-panel text-white fw-bold" style="min-width: 175px; padding: 15px 30px; font-size: 1.05rem; border-radius: 8px; font-weight: 700;">List Property</a>
+          <a href="#propertySearch" class="tf-btn primary shadow-lg fw-bold" style="min-width: 175px; padding: 15px 30px; font-size: 1.05rem; border-radius: 8px; font-weight: 800;">Browse Properties</a>
+          <a href="{{ route('invest.index') }}" class="tf-btn glass-panel text-white fw-bold" style="min-width: 175px; padding: 15px 30px; font-size: 1.05rem; border-radius: 8px; font-weight: 700;">Invest in Projects</a>
         </div>
       </div>
 
@@ -78,8 +78,9 @@
     <div class="row g-4">
       @forelse($properties as $prop)
         @php
-          $totalValuation = $prop->price_per_share * $prop->total_shares;
-          $fundedPercent = $prop->total_shares > 0 ? round((($prop->total_shares - $prop->available_shares) / $prop->total_shares) * 100) : 0;
+          $price = $prop->purchasePrice();
+          $sold = $prop->status === 'sold_out';
+          $isSaved = in_array($prop->id, $savedPropertyIds);
         @endphp
         <div class="col-lg-4 col-md-6 reveal-on-scroll delay-1">
           <div class="card h-100 border-0 glass-card rounded-4 overflow-hidden">
@@ -87,8 +88,20 @@
               <img src="{{ $prop->image_url ?? 'https://radiantdreamrealty.com/frontend/images/home/house-7.jpg' }}" class="card-img-top" alt="{{ $prop->title }}" style="height: 230px; object-fit: cover;">
               <div class="position-absolute top-0 start-0 m-3 d-flex gap-2">
                 <span class="badge bg-primary">{{ $prop->category }}</span>
-                <span class="badge bg-success">{{ $prop->roi_percentage }}% Target ROI</span>
+                <span class="badge {{ $sold ? 'bg-secondary' : 'bg-success' }}">{{ $sold ? 'Sold' : 'For Sale' }}</span>
               </div>
+              @auth
+                <form action="{{ route('property.save', $prop) }}" method="POST" class="position-absolute top-0 end-0 m-2">
+                  @csrf
+                  <button type="submit" class="btn btn-sm rounded-circle border-0 shadow-sm save-btn {{ $isSaved ? 'saved' : 'bg-white' }}" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;" title="{{ $isSaved ? 'Remove from saved' : 'Save property' }}">
+                    <i class="bi {{ $isSaved ? 'bi-bookmark-fill' : 'bi-bookmark' }}" style="font-size:1rem;"></i>
+                  </button>
+                </form>
+              @else
+                <a href="{{ route('login') }}" class="btn btn-sm bg-white rounded-circle border-0 shadow-sm position-absolute top-0 end-0 m-2" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;" title="Sign in to save">
+                  <i class="bi bi-bookmark" style="font-size:1rem;"></i>
+                </a>
+              @endauth
               <div class="position-absolute bottom-0 start-0 w-100 p-2 text-white" style="background: linear-gradient(transparent, rgba(0,0,0,0.75)); font-size: 0.85rem;">
                 <i class="bi bi-geo-alt me-1"></i> {{ $prop->location }}
               </div>
@@ -97,28 +110,30 @@
               <h5 class="fw-bold mb-2" style="color: #1a3c5e;">{{ $prop->title }}</h5>
               <p class="text-muted small mb-3">{{ Str::limit($prop->description, 90) }}</p>
 
-              <!-- Progress bar -->
-              <div class="mb-3">
-                <div class="d-flex justify-content-between small fw-bold mb-1">
-                  <span>Funded: {{ $fundedPercent }}%</span>
-                  <span class="text-primary">${{ number_format($prop->price_per_share, 2) }} / Share</span>
-                </div>
-                <div class="progress" style="height: 8px;">
-                  <div class="progress-bar bg-primary" style="width: {{ $fundedPercent }}%;"></div>
-                </div>
-              </div>
-
               <div class="d-flex justify-content-between text-muted small border-bottom pb-3 mb-3">
-                <span><i class="bi bi-pie-chart me-1"></i> Available: <b>{{ $prop->available_shares }}</b></span>
-                <span><i class="bi bi-calendar-check me-1"></i> Duration: <b>{{ $prop->investment_duration_months }} Mos</b></span>
+                <span><i class="bi bi-house-door me-1"></i> {{ $prop->category }}</span>
+                <span><i class="bi bi-shield-check me-1 text-success"></i> Verified</span>
               </div>
 
-              <div class="d-flex justify-content-between align-items-center">
+              <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
-                  <small class="text-muted d-block" style="font-size:0.75rem;">Total Asset Value</small>
-                  <h5 class="fw-bold text-primary mb-0">${{ number_format($totalValuation, 2) }}</h5>
+                  <small class="text-muted d-block" style="font-size:0.75rem;">Purchase Price</small>
+                  <h5 class="fw-bold text-primary mb-0">${{ number_format($price, 2) }}</h5>
                 </div>
-                <a href="{{ route('property.show', $prop) }}" class="btn btn-sm btn-primary fw-bold px-3 py-2 rounded-3" style="background:#2756fd;">Co-Own Now</a>
+                @if($sold)
+                  <button class="btn btn-secondary btn-sm fw-bold px-3 py-2 rounded-3" disabled>Sold</button>
+                @else
+                  <a href="{{ route('property.show', $prop) }}" class="btn btn-sm btn-primary fw-bold px-3 py-2 rounded-3" style="background:#2756fd;">Buy Now</a>
+                @endif
+              </div>
+
+              <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('property.show', $prop) }}" class="btn btn-outline-primary btn-sm fw-bold rounded-3 flex-fill project-action-btn">
+                  <i class="bi bi-info-circle me-1"></i> More Info
+                </a>
+                <button type="button" class="btn btn-outline-primary btn-sm fw-bold rounded-3 flex-fill project-action-btn" onclick="shareContent('{{ $prop->title }}', '{{ route('property.show', $prop) }}', 'Buy this property')">
+                  <i class="bi bi-share me-1"></i> Share
+                </button>
               </div>
             </div>
           </div>

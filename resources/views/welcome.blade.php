@@ -357,41 +357,41 @@
   </div>
 </section>
 
-<!-- 6. Project Marketplace Preview -->
+<!-- 6. Investment Projects Preview -->
 <section class="py-5" style="background: #ffffff;">
   <div class="container">
     <div class="d-flex justify-content-between align-items-end mb-4">
       <div>
-        <span class="text-primary fw-bold text-uppercase" style="font-size: 0.85rem;">Project Marketplace</span>
+        <span class="text-primary fw-bold text-uppercase" style="font-size: 0.85rem;">Investment Projects</span>
         <h3 class="fw-bold mb-0" style="color: #1a3c5e;">Explore Our Latest Projects</h3>
       </div>
-      <a href="{{ url('/project-marketplace') }}" class="btn btn-outline-primary fw-bold btn-sm">View All Projects <i class="bi bi-arrow-right"></i></a>
+      <a href="{{ url('/invest') }}" class="btn btn-outline-primary fw-bold btn-sm">View All Projects <i class="bi bi-arrow-right"></i></a>
     </div>
 
     <div class="row g-4">
-      @forelse($properties->take(3) as $prop)
+      @forelse($projects->take(3) as $proj)
         @php
-          $fundedPercent = $prop->total_shares > 0 ? round((($prop->total_shares - $prop->available_shares) / $prop->total_shares) * 100) : 0;
-          $totalValuation = $prop->price_per_share * $prop->total_shares;
+          $fundedPercent = $proj->fundedPercent();
+          $raisedAmount = $proj->raisedAmount();
         @endphp
         <div class="col-lg-4 col-md-6">
           <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
             <div class="position-relative">
-              <img src="{{ $prop->image_url ?? 'https://radiantdreamrealty.com/frontend/images/home/house-1.jpg' }}" class="card-img-top" alt="{{ $prop->title }}" style="height: 220px; object-fit: cover;">
+              <img src="{{ $proj->image_url ?? 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1000&auto=format&fit=crop' }}" class="card-img-top" alt="{{ $proj->title }}" style="height: 220px; object-fit: cover;">
               <div class="position-absolute top-0 start-0 m-3 d-flex gap-2">
-                <span class="badge bg-primary">{{ $prop->category ?? 'Co-Ownership' }}</span>
-                <span class="badge bg-success">{{ $prop->roi_percentage }}% ROI</span>
+                <span class="badge bg-primary">{{ $proj->category ?? 'Development' }}</span>
+                <span class="badge bg-success">{{ $proj->expected_return_percentage }}% Return</span>
               </div>
             </div>
             <div class="card-body p-4">
-              <h5 class="card-title fw-bold" style="color: #1a3c5e;">{{ $prop->title }}</h5>
-              <p class="text-muted small mb-3"><i class="bi bi-geo-alt me-1"></i> {{ $prop->location }}</p>
+              <h5 class="card-title fw-bold" style="color: #1a3c5e;">{{ $proj->title }}</h5>
+              <p class="text-muted small mb-3"><i class="bi bi-geo-alt me-1"></i> {{ $proj->location }}</p>
 
               <!-- Funding Progress -->
               <div class="mb-3">
                 <div class="d-flex justify-content-between small fw-bold mb-1">
                   <span>Funded: {{ $fundedPercent }}%</span>
-                  <span class="text-primary">${{ number_format($prop->price_per_share, 2) }} / Share</span>
+                  <span class="text-primary">${{ number_format($raisedAmount, 0) }} / ${{ number_format($proj->target_amount, 0) }}</span>
                 </div>
                 <div class="progress" style="height: 8px;">
                   <div class="progress-bar bg-primary" style="width: {{ $fundedPercent }}%;"></div>
@@ -400,17 +400,17 @@
 
               <div class="d-flex justify-content-between align-items-center border-top pt-3">
                 <div>
-                  <small class="text-muted d-block">Valuation</small>
-                  <span class="fw-bold text-primary fs-5">${{ number_format($totalValuation, 2) }}</span>
+                  <small class="text-muted d-block">Min. Investment</small>
+                  <span class="fw-bold text-primary fs-5">${{ number_format($proj->minimum_investment, 2) }}</span>
                 </div>
-                <a href="{{ route('property.show', $prop) }}" class="btn btn-sm btn-primary fw-bold px-3 py-2 rounded-3">Invest / Co-Own</a>
+                <a href="{{ route('project.show', $proj) }}" class="btn btn-sm btn-primary fw-bold px-3 py-2 rounded-3">Invest Now</a>
               </div>
             </div>
           </div>
         </div>
       @empty
         <div class="col-12 text-center py-4">
-          <p class="text-muted">No active property projects available at the moment.</p>
+          <p class="text-muted">No active investment projects available at the moment.</p>
         </div>
       @endforelse
     </div>
@@ -447,7 +447,7 @@
     <div class="row g-4 mb-4">
       @forelse($properties as $prop)
         @php
-          $totalVal = $prop->price_per_share * $prop->total_shares;
+          $propPrice = $prop->purchasePrice();
         @endphp
         <div class="col-lg-4 col-md-6">
           <div class="card h-100 border-0 rounded-4 shadow-sm overflow-hidden bg-white">
@@ -455,7 +455,11 @@
               <img src="{{ $prop->image_url ?? 'https://radiantdreamrealty.com/frontend/images/home/house-7.jpg' }}" class="card-img-top" alt="{{ $prop->title }}" style="height: 230px; object-fit: cover;">
               <div class="position-absolute top-0 start-0 m-3 d-flex gap-2">
                 <span class="badge bg-primary">{{ $prop->category }}</span>
-                <span class="badge bg-success">Verified</span>
+                @if($prop->status === 'sold_out')
+                  <span class="badge bg-secondary">Sold</span>
+                @else
+                  <span class="badge bg-success">Verified</span>
+                @endif
               </div>
               <div class="position-absolute bottom-0 start-0 w-100 p-2 text-white" style="background: linear-gradient(transparent, rgba(0,0,0,0.7)); font-size: 0.85rem;">
                 <i class="bi bi-geo-alt me-1"></i> {{ $prop->location }}
@@ -464,16 +468,16 @@
             <div class="card-body p-4">
               <h5 class="fw-bold mb-2" style="color: #1a3c5e;">{{ $prop->title }}</h5>
               <div class="d-flex justify-content-between text-muted small border-bottom pb-3 mb-3">
-                <span><i class="bi bi-pie-chart me-1"></i> Price/Share: <b>${{ number_format($prop->price_per_share, 2) }}</b></span>
+                <span><i class="bi bi-tag me-1"></i> Price: <b>${{ number_format($propPrice, 2) }}</b></span>
                 <span><i class="bi bi-graph-up me-1"></i> ROI: <b class="text-success">{{ $prop->roi_percentage }}%</b></span>
               </div>
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <small class="text-muted d-block" style="font-size: 0.75rem;">Total Valuation</small>
-                  <h5 class="fw-bold text-primary mb-0">${{ number_format($totalVal, 2) }}</h5>
+                  <small class="text-muted d-block" style="font-size: 0.75rem;">Full Purchase</small>
+                  <h5 class="fw-bold text-primary mb-0">${{ number_format($propPrice, 2) }}</h5>
                 </div>
                 <a href="{{ route('property.show', $prop) }}" class="btn btn-sm btn-outline-primary fw-bold px-3 py-2 rounded-3">
-                  Co-Own Now <i class="bi bi-arrow-right"></i>
+                  Buy Now <i class="bi bi-arrow-right"></i>
                 </a>
               </div>
             </div>

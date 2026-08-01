@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\InvestController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -12,7 +13,8 @@ Route::get('/', function () {
         return redirect()->route('register', ['ref' => $ref]);
     }
     $properties = \App\Models\Property::where('status', 'active')->orderBy('id', 'desc')->get();
-    return view('welcome', compact('properties'));
+    $projects = \App\Models\Project::where('status', 'active')->orderBy('id', 'desc')->get();
+    return view('welcome', compact('properties', 'projects'));
 });
 
 // User Investment Dashboard
@@ -21,8 +23,13 @@ Route::post('/deposit', [UserDashboardController::class, 'deposit'])->name('depo
 Route::post('/deposit/evidence/{id}', [UserDashboardController::class, 'uploadEvidence'])->name('deposit.evidence');
 Route::post('/withdraw', [UserDashboardController::class, 'withdraw'])->name('withdraw.store');
 Route::post('/send-funds', [UserDashboardController::class, 'sendFunds'])->name('send-funds.store');
-Route::post('/buy-shares', [UserDashboardController::class, 'buyShares'])->name('buy-shares.store');
+Route::post('/property/{property}/purchase', [UserDashboardController::class, 'purchaseProperty'])->name('property.purchase');
 Route::post('/kyc/submit', [UserDashboardController::class, 'submitKyc'])->name('kyc.submit');
+Route::post('/profile/update-info', [UserDashboardController::class, 'updateProfile'])->name('profile.update_info');
+Route::post('/credit-swap/create', [UserDashboardController::class, 'createCreditSwap'])->name('credit-swap.create');
+Route::post('/credit-swap/{id}/buy', [UserDashboardController::class, 'buyCreditSwap'])->name('credit-swap.buy');
+Route::post('/credit-swap/{id}/release', [UserDashboardController::class, 'releaseCreditSwap'])->name('credit-swap.release');
+Route::post('/credit-swap/{id}/cancel', [UserDashboardController::class, 'cancelCreditSwap'])->name('credit-swap.cancel');
 
 // Admin Platform Management Dashboard
 Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
@@ -36,6 +43,10 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::get('/property/{id}/edit', [AdminDashboardController::class, 'editProperty'])->name('property.edit');
     Route::post('/property/update/{id}', [AdminDashboardController::class, 'updateProperty'])->name('property.update');
     Route::post('/property/delete/{id}', [AdminDashboardController::class, 'deleteProperty'])->name('property.delete');
+    Route::post('/project/store', [AdminDashboardController::class, 'storeProject'])->name('project.store');
+    Route::get('/project/{id}/edit', [AdminDashboardController::class, 'editProject'])->name('project.edit');
+    Route::post('/project/update/{id}', [AdminDashboardController::class, 'updateProject'])->name('project.update');
+    Route::post('/project/delete/{id}', [AdminDashboardController::class, 'deleteProject'])->name('project.delete');
     Route::post('/referral-bonus', [AdminDashboardController::class, 'awardReferralBonus'])->name('referral-bonus');
     Route::post('/kyc/approve/{id}', [AdminDashboardController::class, 'approveKyc'])->name('kyc.approve');
     Route::post('/kyc/reject/{id}', [AdminDashboardController::class, 'rejectKyc'])->name('kyc.reject');
@@ -51,16 +62,27 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/properties', [PropertyController::class, 'index']);
+Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
 Route::get('/property/{property}', [PropertyController::class, 'show'])->name('property.show');
+Route::middleware('auth')->group(function () {
+    Route::post('/property/{property}/save', [PropertyController::class, 'toggleSave'])->name('property.save');
+});
+
+// Invest in Projects
+Route::get('/invest', [InvestController::class, 'index'])->name('invest.index');
+Route::get('/project/{project}', [InvestController::class, 'show'])->name('project.show');
+Route::get('/project/{project}/download', [InvestController::class, 'downloadDocument'])->name('project.download');
+Route::middleware('auth')->group(function () {
+    Route::post('/project/{project}/save', [InvestController::class, 'toggleSave'])->name('project.save');
+    Route::post('/project/{project}/invest', [InvestController::class, 'invest'])->name('project.invest');
+});
 
 Route::get('/list-property', function () {
     return view('list-property');
 });
 
 Route::get('/project-marketplace', function () {
-    $properties = \App\Models\Property::where('status', 'active')->orderBy('id', 'desc')->get();
-    return view('project-marketplace', compact('properties'));
+    return redirect()->route('invest.index');
 });
 
 Route::get('/team', function () {

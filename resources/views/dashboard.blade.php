@@ -36,7 +36,7 @@
                             <i class="bi bi-wallet2 text-white" style="font-size:2.2rem;"></i>
                         </div>
                         <h4 class="fw-bold mb-1" style="color:#0f172a;">Fund Your Wallet</h4>
-                        <p class="text-muted small mb-3" style="font-size:0.85rem;">Go to the Deposit tab to add funds. Once your wallet is funded, you can start buying shares in premium real estate properties.</p>
+                        <p class="text-muted small mb-3" style="font-size:0.85rem;">Go to the Deposit tab to add funds. Once your wallet is funded, you can invest in projects or purchase premium properties directly.</p>
                         <button class="btn fw-bold px-4 py-2 rounded-3 text-white" style="background:linear-gradient(135deg,#10b981,#059669);" @click="tourStep = 3">Next</button>
                     </div>
                 </template>
@@ -46,7 +46,7 @@
                             <i class="bi bi-building text-white" style="font-size:2.2rem;"></i>
                         </div>
                         <h4 class="fw-bold mb-1" style="color:#0f172a;">Browse & Invest</h4>
-                        <p class="text-muted small mb-3" style="font-size:0.85rem;">Check out available properties in the Marketplace. Each property shows share price, ROI, and lets you invest with just a few clicks.</p>
+                        <p class="text-muted small mb-3" style="font-size:0.85rem;">Browse projects in the Invest tab with flexible minimums, or purchase properties outright from Browse Properties — all from your wallet balance.</p>
                         <button class="btn fw-bold px-4 py-2 rounded-3 text-white" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);" @click="tourStep = 4">Next</button>
                     </div>
                 </template>
@@ -230,6 +230,12 @@
                 <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'invest' }" @click.prevent="activeTab = 'invest'">
                     <i class="bi bi-lightning-charge-fill"></i> Invest
                 </a>
+                <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'saved_projects' }" @click.prevent="activeTab = 'saved_projects'">
+                    <i class="bi bi-bookmark-star-fill"></i> Saved Projects
+                    @if($savedProjects->count() > 0)
+                        <span class="badge ms-auto rounded-pill" style="background:#f59e0b; color:#1a1a1a; font-size:0.7rem;">{{ $savedProjects->count() }}</span>
+                    @endif
+                </a>
                 <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'marketplace' }" @click.prevent="activeTab = 'marketplace'">
                     <i class="bi bi-building"></i> Browse Properties
                 </a>
@@ -244,6 +250,9 @@
                 </a>
                 <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'withdraw' }" @click.prevent="activeTab = 'withdraw'">
                     <i class="bi bi-arrow-up-circle-fill"></i> Withdraw
+                </a>
+                <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'credit_swap' }" @click.prevent="activeTab = 'credit_swap'">
+                    <i class="bi bi-arrow-repeat text-warning"></i> Credit Swap (P2P)
                 </a>
                 <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'transactions' }" @click.prevent="activeTab = 'transactions'">
                     <i class="bi bi-arrow-down-up"></i> Transactions
@@ -266,6 +275,39 @@
 
                 <!-- DIVIDER -->
                 <hr class="border-secondary opacity-20 my-3">
+
+                <!-- GROW YOUR WEALTH CTA -->
+                <div class="mx-1 mb-3 rounded-3 p-3" style="background:linear-gradient(135deg,#1e3a8a,#2563eb); border:1px solid rgba(255,255,255,0.1);">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="bi bi-graph-up-arrow text-warning" style="font-size:1rem;"></i>
+                        <span class="fw-bold text-white small">Grow Your Wealth</span>
+                    </div>
+                    <p class="text-white mb-2" style="font-size:0.72rem; opacity:0.8; line-height:1.4;">Start investing today and watch your portfolio grow.</p>
+                    <button class="btn btn-warning btn-sm fw-bold w-100 rounded-3" style="font-size:0.75rem;" @click="activeTab = 'invest'">
+                        <i class="bi bi-lightning-fill me-1"></i> Invest Now
+                    </button>
+                </div>
+
+                <!-- LANGUAGE & APPEARANCE -->
+                <div class="px-1 mb-3" x-data="{ lang: 'en', darkMode: false }">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small fw-semibold" style="color:#94a3b8; letter-spacing:0.05em; font-size:0.7rem;">LANGUAGE</span>
+                        <select x-model="lang" class="form-select form-select-sm border-0 rounded-2 fw-semibold" style="background:#1e293b; color:#e2e8f0; font-size:0.72rem; width:auto; padding:2px 6px; cursor:pointer;">
+                            <option value="en">🇺🇸 English</option>
+                            <option value="es">🇪🇸 Español</option>
+                            <option value="zh">🇨🇳 中文</option>
+                            <option value="ar">🇸🇦 Arabic</option>
+                            <option value="ph">🇵🇭 Filipino</option>
+                        </select>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span class="small fw-semibold" style="color:#94a3b8; letter-spacing:0.05em; font-size:0.7rem;">APPEARANCE</span>
+                        <button @click="darkMode = !darkMode; document.documentElement.setAttribute('data-bs-theme', darkMode ? 'dark' : 'light')" class="btn btn-sm rounded-pill d-flex align-items-center gap-1 fw-bold" :style="darkMode ? 'background:#334155; color:#f8fafc;' : 'background:#334155; color:#94a3b8;'" style="font-size:0.72rem; padding:3px 10px; border:none;">
+                            <i class="bi" :class="darkMode ? 'bi-sun-fill text-warning' : 'bi-moon-fill'"></i>
+                            <span x-text="darkMode ? 'Light' : 'Dark'"></span>
+                        </button>
+                    </div>
+                </div>
 
                 <!-- VIEW SITE & LOGOUT -->
                 <a href="{{ url('/') }}" class="nav-link-sidebar" target="_blank">
@@ -330,6 +372,7 @@
                 <div class="d-flex gap-1" style="white-space: nowrap;">
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'overview' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'overview'">Dashboard</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'invest' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'invest'">Invest</button>
+                    <button class="btn btn-sm fw-semibold" :class="activeTab === 'saved_projects' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'saved_projects'">Saved</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'marketplace' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'marketplace'">Browse</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'my_investments' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'my_investments'">My Investments</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'deposit' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'deposit'">Deposit</button>
@@ -366,13 +409,32 @@
                         </div>
                         <div class="rounded-4 p-4 text-white position-relative overflow-hidden flex-fill" style="min-width:320px; background:linear-gradient(135deg,#1a3c5e 0%,#2563eb 50%,#1d4ed8 100%); box-shadow:0 8px 32px rgba(37,99,235,0.3);">
                             <div class="position-absolute top-0 end-0 opacity-10" style="font-size:6rem; line-height:1; transform:rotate(15deg) translate(10px,-10px);"><i class="bi bi-credit-card-fill"></i></div>
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="small fw-bold" style="letter-spacing:0.1em; color:#fff;">TOTAL BALANCE</span>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="small fw-bold" style="letter-spacing:0.1em; color:rgba(255,255,255,0.75);">WALLET BALANCE</span>
                                 <i class="bi bi-wallet2 fs-5"></i>
                             </div>
-                            <h2 class="fw-bold mb-3 text-white" style="font-size:2.4rem; letter-spacing:-0.5px;">${{ number_format(($walletBalance + $totalInvested), 2) }}</h2>
+                            <h2 class="fw-bold mb-1 text-white" style="font-size:2.4rem; letter-spacing:-0.5px;">${{ number_format($walletBalance, 2) }}</h2>
+                            <div class="small mb-3" style="color:rgba(255,255,255,0.55); font-size:0.75rem;">Available to deposit, withdraw &amp; invest</div>
                             <hr class="mb-3" style="border-color:rgba(255,255,255,0.15);">
                             <div class="d-flex gap-3 flex-wrap">
+                                <div class="d-flex align-items-center gap-2 flex-fill">
+                                    <div class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width:32px; height:32px; background:rgba(255,255,255,0.12);">
+                                        <i class="bi bi-arrow-down-circle fs-6"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-white" style="font-size:0.8rem; line-height:1.2;">${{ number_format($totalDeposits, 2) }}</div>
+                                        <small style="font-size:0.65rem; opacity:0.7;">Total Deposited</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 flex-fill">
+                                    <div class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width:32px; height:32px; background:rgba(255,255,255,0.12);">
+                                        <i class="bi bi-arrow-up-circle fs-6"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-white" style="font-size:0.8rem; line-height:1.2;">${{ number_format($totalWithdrawals, 2) }}</div>
+                                        <small style="font-size:0.65rem; opacity:0.7;">Total Withdrawn</small>
+                                    </div>
+                                </div>
                                 <div class="d-flex align-items-center gap-2 flex-fill">
                                     <div class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width:32px; height:32px; background:rgba(255,255,255,0.12);">
                                         <i class="bi bi-building fs-6"></i>
@@ -380,24 +442,6 @@
                                     <div>
                                         <div class="fw-bold text-white" style="font-size:0.8rem; line-height:1.2;">${{ number_format($totalInvested, 2) }}</div>
                                         <small style="font-size:0.65rem; opacity:0.7;">Total Invested</small>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center gap-2 flex-fill">
-                                    <div class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width:32px; height:32px; background:rgba(255,255,255,0.12);">
-                                        <i class="bi bi-graph-up-arrow fs-6"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fw-bold text-white" style="font-size:0.8rem; line-height:1.2;">${{ number_format($totalRoiEarned, 2) }}</div>
-                                        <small style="font-size:0.65rem; opacity:0.7;">Total Earned</small>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center gap-2 flex-fill">
-                                    <div class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width:32px; height:32px; background:rgba(255,255,255,0.12);">
-                                        <i class="bi bi-pie-chart-fill fs-6"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fw-bold text-white" style="font-size:0.8rem; line-height:1.2;">{{ $activeProjectsCount }}</div>
-                                        <small style="font-size:0.65rem; opacity:0.7;">Active Investments</small>
                                     </div>
                                 </div>
                             </div>
@@ -497,9 +541,9 @@
                 </div>
 
                 <!-- 3 Summary Lists (Notifications, Active Investments, Recent Transactions) -->
-                <div class="row">
+                <div class="row g-4">
                     <!-- Recent Notifications / Activity Log -->
-                    <div class="col">
+                    <div class="col-12 col-md-4">
                         <div class="card border-0 rounded-4 shadow-sm bg-white p-4 h-100">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="fw-bold text-dark mb-0"><i class="bi bi-activity me-1 text-primary"></i>Recent Activity</h6>
@@ -540,7 +584,7 @@
                     </div>
 
                     <!-- Active Investments -->
-                    <div class="col">
+                    <div class="col-12 col-md-4">
                         <div class="card border-0 rounded-4 shadow-sm bg-white p-4 h-100">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="fw-bold text-dark mb-0"><i class="bi bi-pie-chart me-1 text-success"></i>Active Investments</h6>
@@ -563,7 +607,7 @@
                     </div>
 
                     <!-- Recent Transactions -->
-                    <div class="col">
+                    <div class="col-12 col-md-4">
                         <div class="card border-0 rounded-4 shadow-sm bg-white p-4 h-100">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="fw-bold text-dark mb-0"><i class="bi bi-arrow-down-up me-1 text-info"></i>Recent Transactions</h6>
@@ -655,48 +699,251 @@
                 </div>
             </div>
 
-            <!-- INVEST TAB -->
+            <!-- INVEST TAB (Projects) -->
             <div x-show="activeTab === 'invest'" x-transition>
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <div>
-                        <h4 class="fw-bold text-dark mb-1">Invest in Properties</h4>
-                        <p class="text-muted mb-0 small">Purchase fractional shares in premium real estate projects.</p>
+                        <h4 class="fw-bold text-dark mb-1">Invest in Projects</h4>
+                        <p class="text-muted mb-0 small">Browse available development projects. View details, download documents, save and share projects, then invest with a flexible amount.</p>
+                    </div>
+                    <a href="{{ route('invest.index') }}" class="btn btn-outline-primary btn-sm fw-bold rounded-3 flex-shrink-0">
+                        <i class="bi bi-box-arrow-up-right me-1"></i> Browse All Projects
+                    </a>
+                </div>
+
+                <!-- PROJECT WORKFLOW & SEND/RECEIVE CALLOUT BANNER -->
+                <div class="card border-0 rounded-4 shadow-sm mb-4" style="background:linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); color:#fff;">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center g-3">
+                            <div class="col-lg-8">
+                                <span class="badge bg-warning text-dark fw-bold rounded-pill px-3 py-1.5 mb-2 fs-6"><i class="bi bi-info-circle me-1"></i> How Investment Projects Work</span>
+                                <h5 class="fw-bold text-white mb-2">Fund Wallet &rarr; Buy Shares &rarr; Project Ends &amp; Returns to Wallet Balance</h5>
+                                <p class="text-white-50 small mb-0" style="line-height:1.6;">
+                                    Deposit funds to your wallet to buy shares in admin-listed development projects. Once a project duration matures, your full investment capital plus accumulated ROI returns straight to your <strong>Wallet Balance</strong>. You can then withdraw, reinvest, or send to peers via internal P2P transfers.
+                                </p>
+                            </div>
+                            <div class="col-lg-4 text-lg-end">
+                                <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                                    <button class="btn btn-sm btn-light fw-bold rounded-3 text-primary" @click="openReceiveModal = true">
+                                        <i class="bi bi-box-arrow-in-down me-1"></i> Receive Funds
+                                    </button>
+                                    <button class="btn btn-sm btn-warning fw-bold rounded-3 text-dark" @click="activeTab = 'credit_swap'">
+                                        <i class="bi bi-arrow-repeat me-1"></i> Credit Swap (P2P)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="row g-4">
-                    @forelse($properties as $prop)
+                    @forelse($projects as $proj)
+                        @php
+                            $projRaised = $proj->raisedAmount();
+                            $projFunded = $proj->fundedPercent();
+                            $projSaved = in_array($proj->id, $savedProjectIds);
+                            $projActive = $proj->isActiveWindow();
+                            $projEndsAt = $proj->endsAt() ? $proj->endsAt()->timestamp : 0;
+                            $projStatus = [
+                                'active' => ['bg-success', 'Ongoing'],
+                                'completed' => ['bg-primary', 'Completed'],
+                                'closed' => ['bg-secondary', 'Closed'],
+                            ];
+                            $projStatusCls = $projStatus[$proj->status] ?? ['bg-secondary', ucfirst($proj->status)];
+                        @endphp
                         <div class="col-md-6 col-lg-4">
                             <div class="card h-100 border-0 rounded-4 shadow-sm overflow-hidden bg-white">
                                 <div style="height:180px; overflow:hidden; position:relative;">
-                                    <img src="{{ $prop->image_url ?? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop' }}" alt="{{ $prop->title }}" style="width:100%; height:100%; object-fit:cover;">
-                                    <span class="badge position-absolute top-0 end-0 m-2 rounded-pill fw-bold" style="background:#2563eb; font-size:0.75rem;">{{ $prop->roi_percentage }}% ROI</span>
+                                    <img src="{{ $proj->image_url ?? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop' }}" alt="{{ $proj->title }}" style="width:100%; height:100%; object-fit:cover;">
+                                    <span class="badge position-absolute top-0 start-0 m-2 rounded-pill fw-bold {{ $projStatusCls[0] }}" style="font-size:0.75rem;">{{ $projStatusCls[1] }}</span>
+                                    <span class="badge position-absolute top-0 start-0 m-2 mt-4 rounded-pill fw-bold" style="background:#f59e0b; font-size:0.75rem; color:#1a1a1a;">{{ $proj->expected_return_percentage }}% Return</span>
+                                    @auth
+                                        <form action="{{ route('project.save', $proj) }}" method="POST" class="position-absolute top-0 end-0 m-2">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm rounded-circle border-0 shadow-sm {{ $projSaved ? 'text-danger' : 'bg-white' }}" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center;" title="{{ $projSaved ? 'Remove from saved' : 'Save project' }}">
+                                                <i class="bi {{ $projSaved ? 'bi-bookmark-fill' : 'bi-bookmark' }}"></i>
+                                            </button>
+                                        </form>
+                                    @endauth
                                 </div>
                                 <div class="card-body p-3">
-                                    <h6 class="fw-bold text-dark mb-1">{{ $prop->title }}</h6>
-                                    <p class="small text-muted mb-2"><i class="bi bi-geo-alt me-1"></i>{{ $prop->location }}</p>
-                                    <div class="d-flex justify-content-between small mb-3">
-                                        <span class="text-muted">Share Price</span>
-                                        <strong class="text-dark">${{ number_format($prop->price_per_share, 2) }}</strong>
+                                    <h6 class="fw-bold text-dark mb-1">{{ $proj->title }}</h6>
+                                    <p class="small text-muted mb-1"><i class="bi bi-geo-alt me-1"></i>{{ $proj->location }}</p>
+                                    <div class="d-flex align-items-center justify-content-between small mb-2">
+                                        <span class="position-relative d-inline-flex align-items-center gap-1" style="white-space:nowrap;" title="{{ $proj->rating }} / 5 rating">
+                                            <span class="d-inline-flex gap-1 text-muted">
+                                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                            </span>
+                                            <span class="position-absolute top-0 start-0 d-inline-flex gap-1 overflow-hidden" style="width:{{ $proj->ratingWidth() }}%; color:#f59e0b;">
+                                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                            </span>
+                                            <b class="text-dark">{{ number_format((float) $proj->rating, 1) }}</b>
+                                        </span>
+                                        <span class="text-muted"><i class="bi bi-clock-history me-1" style="color:#f59e0b;"></i>{{ $proj->investment_duration_months }} mos</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between small mb-1">
+                                        <span class="text-muted">Min Invest</span>
+                                        <strong class="text-dark">${{ number_format($proj->minimum_investment, 2) }}</strong>
                                     </div>
                                     <div class="mb-2">
                                         <div class="d-flex justify-content-between small text-muted mb-1">
                                             <span>Funding</span>
-                                            <span>{{ $prop->total_shares > 0 ? round((($prop->total_shares - $prop->available_shares) / $prop->total_shares) * 100) : 0 }}%</span>
+                                            <span>${{ number_format($projRaised, 0) }} / ${{ number_format($proj->target_amount, 0) }} ({{ $projFunded }}%)</span>
                                         </div>
                                         <div class="progress rounded-pill" style="height:6px;">
-                                            <div class="progress-bar bg-primary" style="width:{{ $prop->total_shares > 0 ? round((($prop->total_shares - $prop->available_shares) / $prop->total_shares) * 100) : 0 }}%;"></div>
+                                            <div class="progress-bar" style="width:{{ $projFunded }}%; background:#f59e0b;"></div>
                                         </div>
                                     </div>
-                                    <a href="{{ route('property.show', $prop) }}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;">
-                                        <i class="bi bi-lightning-charge me-1"></i> Invest Now
-                                    </a>
+                                    @if($projActive && $projEndsAt > 0)
+                                        <div class="rounded-3 p-1 px-2 mb-2 d-flex align-items-center gap-2" style="background:#fffbeb; border:1px solid #fde68a;">
+                                            <i class="bi bi-hourglass-split small" style="color:#b45309;"></i>
+                                            <small class="fw-bold text-muted">Ends in</small>
+                                            <span class="ms-auto fw-bold text-danger" style="font-size:0.8rem;" data-countdown-ends="{{ $projEndsAt }}">--</span>
+                                        </div>
+                                    @endif
+                                    <div class="d-flex gap-2 mt-3">
+                                        <a href="{{ route('project.show', $proj) }}" class="btn btn-outline-primary btn-sm fw-bold rounded-3 flex-fill">
+                                            <i class="bi bi-info-circle me-1"></i> More Info
+                                        </a>
+                                        @if($proj->document_path)
+                                            <a href="{{ route('project.download', $proj) }}" class="btn btn-outline-primary btn-sm fw-bold rounded-3 flex-fill">
+                                                <i class="bi bi-file-earmark-arrow-down me-1"></i> Doc
+                                            </a>
+                                        @endif
+                                        <button type="button" class="btn btn-outline-primary btn-sm fw-bold rounded-3 flex-fill" onclick="shareContent('{{ $proj->title }}', '{{ route('project.show', $proj) }}', 'Invest in this project')">
+                                            <i class="bi bi-share me-1"></i> Share
+                                        </button>
+                                    </div>
+                                    @if($projActive)
+                                        <a href="{{ route('project.show', $proj) }}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-2" style="background:#2563eb;">
+                                            <i class="bi bi-lightning-charge me-1"></i> Invest Now
+                                        </a>
+                                    @else
+                                        <button class="btn btn-secondary btn-sm w-100 fw-bold rounded-3 mt-2" disabled>
+                                            <i class="bi bi-lock-fill me-1"></i> {{ $proj->status === 'completed' ? 'Completed' : 'Closed' }}
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     @empty
                         <div class="col-12 text-center py-5 text-muted">
-                            <i class="bi bi-building fs-1 d-block mb-2 opacity-25"></i>
-                            No active properties available at this time.
+                            <i class="bi bi-rocket-takeoff fs-1 d-block mb-2 opacity-25"></i>
+                            No active projects available at this time.
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- SAVED PROJECTS TAB -->
+            <div x-show="activeTab === 'saved_projects'" x-transition>
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1">Saved Projects</h4>
+                        <p class="text-muted mb-0 small">Projects you have saved to invest in later.</p>
+                    </div>
+                    @if($savedProjects->count() > 0)
+                        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2 rounded-pill">{{ $savedProjects->count() }} Saved</span>
+                    @endif
+                </div>
+                <div class="row g-4">
+                    @forelse($savedProjects as $proj)
+                        @php
+                            $projRaised = $proj->raisedAmount();
+                            $projFunded = $proj->fundedPercent();
+                            $projActive = $proj->isActiveWindow();
+                            $projEndsAt = $proj->endsAt() ? $proj->endsAt()->timestamp : 0;
+                            $projStatus = [
+                                'active' => ['bg-success', 'Ongoing'],
+                                'completed' => ['bg-primary', 'Completed'],
+                                'closed' => ['bg-secondary', 'Closed'],
+                            ];
+                            $projStatusCls = $projStatus[$proj->status] ?? ['bg-secondary', ucfirst($proj->status)];
+                        @endphp
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border-0 rounded-4 shadow-sm overflow-hidden bg-white">
+                                <div style="height:180px; overflow:hidden; position:relative;">
+                                    <img src="{{ $proj->image_url ?? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop' }}" alt="{{ $proj->title }}" style="width:100%; height:100%; object-fit:cover;">
+                                    <span class="badge position-absolute top-0 start-0 m-2 rounded-pill fw-bold {{ $projStatusCls[0] }}" style="font-size:0.75rem;">{{ $projStatusCls[1] }}</span>
+                                    <span class="badge position-absolute top-0 start-0 m-2 mt-4 rounded-pill fw-bold" style="background:#f59e0b; font-size:0.75rem; color:#1a1a1a;">{{ $proj->expected_return_percentage }}% Return</span>
+                                    <form action="{{ route('project.save', $proj) }}" method="POST" class="position-absolute top-0 end-0 m-2">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm rounded-circle border-0 shadow-sm bg-white" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center;" title="Remove from saved">
+                                            <i class="bi bi-bookmark-fill text-danger"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="card-body p-3">
+                                    <h6 class="fw-bold text-dark mb-1">{{ $proj->title }}</h6>
+                                    <p class="small text-muted mb-1"><i class="bi bi-geo-alt me-1"></i>{{ $proj->location }}</p>
+                                    <div class="d-flex align-items-center justify-content-between small mb-2">
+                                        <span class="position-relative d-inline-flex align-items-center gap-1" style="white-space:nowrap;" title="{{ $proj->rating }} / 5 rating">
+                                            <span class="d-inline-flex gap-1 text-muted">
+                                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                            </span>
+                                            <span class="position-absolute top-0 start-0 d-inline-flex gap-1 overflow-hidden" style="width:{{ $proj->ratingWidth() }}%; color:#f59e0b;">
+                                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                            </span>
+                                            <b class="text-dark">{{ number_format((float) $proj->rating, 1) }}</b>
+                                        </span>
+                                        <span class="text-muted"><i class="bi bi-clock-history me-1" style="color:#f59e0b;"></i>{{ $proj->investment_duration_months }} mos</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between small mb-1">
+                                        <span class="text-muted">Min Invest</span>
+                                        <strong class="text-dark">${{ number_format($proj->minimum_investment, 2) }}</strong>
+                                    </div>
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between small text-muted mb-1">
+                                            <span>Funding</span>
+                                            <span>${{ number_format($projRaised, 0) }} / ${{ number_format($proj->target_amount, 0) }} ({{ $projFunded }}%)</span>
+                                        </div>
+                                        <div class="progress rounded-pill" style="height:6px;">
+                                            <div class="progress-bar" style="width:{{ $projFunded }}%; background:#f59e0b;"></div>
+                                        </div>
+                                    </div>
+                                    @if($projActive && $projEndsAt > 0)
+                                        <div class="rounded-3 p-1 px-2 mb-2 d-flex align-items-center gap-2" style="background:#fffbeb; border:1px solid #fde68a;">
+                                            <i class="bi bi-hourglass-split small" style="color:#b45309;"></i>
+                                            <small class="fw-bold text-muted">Ends in</small>
+                                            <span class="ms-auto fw-bold text-danger" style="font-size:0.8rem;" data-countdown-ends="{{ $projEndsAt }}">--</span>
+                                        </div>
+                                    @endif
+                                    <div class="d-flex gap-2 mt-2">
+                                        <a href="{{ route('project.show', $proj) }}" class="btn btn-outline-primary btn-sm fw-bold rounded-3 flex-fill">
+                                            <i class="bi bi-info-circle me-1"></i> More Info
+                                        </a>
+                                        @if($proj->document_path)
+                                            <a href="{{ route('project.download', $proj) }}" class="btn btn-outline-primary btn-sm fw-bold rounded-3 flex-fill">
+                                                <i class="bi bi-file-earmark-arrow-down me-1"></i> Doc
+                                            </a>
+                                        @endif
+                                        <button type="button" class="btn btn-outline-primary btn-sm fw-bold rounded-3 flex-fill" onclick="shareContent('{{ $proj->title }}', '{{ route('project.show', $proj) }}', 'Invest in this project')">
+                                            <i class="bi bi-share me-1"></i> Share
+                                        </button>
+                                    </div>
+                                    @if($projActive)
+                                        <a href="{{ route('project.show', $proj) }}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-2" style="background:#2563eb;">
+                                            <i class="bi bi-lightning-charge me-1"></i> Invest Now
+                                        </a>
+                                    @else
+                                        <button class="btn btn-secondary btn-sm w-100 fw-bold rounded-3 mt-2" disabled>
+                                            <i class="bi bi-lock-fill me-1"></i> {{ $proj->status === 'completed' ? 'Completed' : 'Closed' }}
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-12">
+                            <div class="card border-0 rounded-4 shadow-sm bg-white p-5 text-center">
+                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width:64px; height:64px; background:#f1f5f9;">
+                                    <i class="bi bi-bookmark-star fs-2 text-muted"></i>
+                                </div>
+                                <h5 class="fw-bold text-dark mb-2">No Saved Projects</h5>
+                                <p class="text-muted small mb-4">Save projects you are interested in and they will appear here for quick access.</p>
+                                <button class="btn btn-primary fw-bold px-4 py-2 rounded-3 mx-auto" style="background:#2563eb; max-width:200px;" @click="activeTab = 'invest'">
+                                    <i class="bi bi-rocket-takeoff me-1"></i> Browse Projects
+                                </button>
+                            </div>
                         </div>
                     @endforelse
                 </div>
@@ -707,37 +954,40 @@
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <div>
                         <h2 class="fw-bold text-dark mb-1" style="font-size:1.6rem;">My Investments</h2>
-                        <p class="text-muted mb-0" style="font-size:0.95rem; font-weight:500;">Track all your active and completed property share investments.</p>
+                        <p class="text-muted mb-0" style="font-size:0.95rem; font-weight:500;">Track all your active and completed project investments and purchased properties.</p>
                     </div>
-                    @if($userInvestments->count() > 0)
-                        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2 rounded-pill">{{ $userInvestments->count() }} Total</span>
+                    @if($projectInvestments->count() > 0)
+                        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2 rounded-pill">{{ $projectInvestments->count() }} Project Investment(s)</span>
                     @endif
                 </div>
-                <div class="row g-3">
-                    @forelse($userInvestments as $inv)
+
+                @if($projectInvestments->count() > 0 || $purchases->count() > 0 || $userInvestments->count() > 0)
+                    <h6 class="fw-bold text-dark mb-3" style="font-size:0.95rem;"><i class="bi bi-rocket-takeoff me-2" style="color:#f59e0b;"></i>Project Investments</h6>
+                @endif
+                <div class="row g-3 mb-4">
+                    @forelse($projectInvestments as $inv)
                         @php
-                            $progressPct = $inv->total_amount > 0 ? min(100, round(($inv->roi_earned / $inv->total_amount) * 100)) : 0;
+                            $progressPct = $inv->expected_roi_amount > 0 ? min(100, round(($inv->roi_earned / $inv->expected_roi_amount) * 100)) : 0;
                         @endphp
                         <div class="col-lg-6">
                             <div class="card border-0 rounded-4 overflow-hidden h-100" style="box-shadow:0 4px 20px rgba(0,0,0,0.04);">
-                                <!-- Top Gradient Bar -->
-                                <div style="height:4px; background:linear-gradient(90deg, {{ $inv->status === 'active' ? '#2563eb,#3b82f6' : '#94a3b8,#cbd5e1' }});"></div>
+                                <div style="height:4px; background:linear-gradient(90deg, {{ $inv->status === 'active' ? '#f59e0b,#fbbf24' : '#94a3b8,#cbd5e1' }});"></div>
                                 <div class="p-3 bg-white">
                                     <div class="d-flex align-items-center gap-3 mb-3">
                                         <div class="flex-shrink-0 overflow-hidden rounded-3 border" style="width:56px; height:56px; border-color:#e2e8f0 !important; background:#f8fafc;">
-                                            @if($inv->property->image_url)
-                                                <img src="{{ $inv->property->image_url }}" alt="{{ $inv->property->title }}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
+                                            @if($inv->project->image_url)
+                                                <img src="{{ $inv->project->image_url }}" alt="{{ $inv->project->title }}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
                                             @else
-                                                <div class="d-flex align-items-center justify-content-center h-100" style="background:{{ $inv->status === 'active' ? '#eff6ff' : '#f1f5f9' }};">
-                                                    <i class="bi bi-building fs-5" style="color:{{ $inv->status === 'active' ? '#2563eb' : '#64748b' }};"></i>
+                                                <div class="d-flex align-items-center justify-content-center h-100" style="background:#fffbeb;">
+                                                    <i class="bi bi-rocket-takeoff fs-5" style="color:#d97706;"></i>
                                                 </div>
                                             @endif
                                         </div>
                                         <div class="flex-grow-1 overflow-hidden">
-                                            <h6 class="fw-bold mb-0 text-truncate" style="color:#0f172a;">{{ $inv->property->title ?? 'Property Investment' }}</h6>
-                                            <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ $inv->property->location ?? 'Location' }}</small>
+                                            <h6 class="fw-bold mb-0 text-truncate" style="color:#0f172a;">{{ $inv->project->title ?? 'Project Investment' }}</h6>
+                                            <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ $inv->project->location ?? 'Location' }}</small>
                                         </div>
-                                        <span class="badge rounded-pill fw-bold px-3 py-1 {{ $inv->status === 'active' ? 'bg-success text-white' : 'bg-secondary text-white' }}" style="font-size:0.75rem;">
+                                        <span class="badge rounded-pill fw-bold px-3 py-1 {{ $inv->status === 'active' ? 'bg-warning text-dark' : 'bg-secondary text-white' }}" style="font-size:0.75rem;">
                                             {{ ucfirst($inv->status) }}
                                         </span>
                                     </div>
@@ -745,18 +995,9 @@
                                         <div class="col-4">
                                             <div class="p-2 rounded-3 text-center" style="background:#f8fafc;">
                                                 <div class="d-flex align-items-center justify-content-center gap-1 mb-1">
-                                                    <i class="bi bi-pie-chart fs-6" style="color:#2563eb;"></i>
+                                                    <i class="bi bi-currency-dollar fs-6" style="color:#d97706;"></i>
                                                 </div>
-                                                <div class="fw-bold" style="color:#0f172a; font-size:0.95rem;">{{ $inv->shares_bought }}</div>
-                                                <small class="text-muted" style="font-size:0.68rem;">Shares</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="p-2 rounded-3 text-center" style="background:#f8fafc;">
-                                                <div class="d-flex align-items-center justify-content-center gap-1 mb-1">
-                                                    <i class="bi bi-currency-dollar fs-6" style="color:#2563eb;"></i>
-                                                </div>
-                                                <div class="fw-bold" style="color:#0f172a; font-size:0.95rem;">${{ number_format($inv->total_amount, 2) }}</div>
+                                                <div class="fw-bold" style="color:#0f172a; font-size:0.95rem;">${{ number_format($inv->amount, 2) }}</div>
                                                 <small class="text-muted" style="font-size:0.68rem;">Invested</small>
                                             </div>
                                         </div>
@@ -769,15 +1010,24 @@
                                                 <small class="text-muted" style="font-size:0.68rem;">ROI Earned</small>
                                             </div>
                                         </div>
+                                        <div class="col-4">
+                                            <div class="p-2 rounded-3 text-center" style="background:#f8fafc;">
+                                                <div class="d-flex align-items-center justify-content-center gap-1 mb-1">
+                                                    <i class="bi bi-bullseye fs-6" style="color:#9333ea;"></i>
+                                                </div>
+                                                <div class="fw-bold" style="color:#0f172a; font-size:0.95rem;">${{ number_format($inv->expected_roi_amount, 2) }}</div>
+                                                <small class="text-muted" style="font-size:0.68rem;">Expected</small>
+                                            </div>
+                                        </div>
                                     </div>
                                     @if($inv->status === 'active')
                                         <div class="mt-2">
                                             <div class="d-flex justify-content-between small">
                                                 <span class="text-muted" style="font-size:0.7rem;">ROI Progress</span>
-                                                <span class="fw-bold" style="font-size:0.7rem; color:#16a34a;">{{ $progressPct }}%</span>
+                                                <span class="fw-bold" style="font-size:0.7rem; color:#d97706;">{{ $progressPct }}%</span>
                                             </div>
                                             <div class="progress" style="height:4px; background:#e2e8f0;">
-                                                <div class="progress-bar rounded-pill" style="width:{{ $progressPct }}%; background:linear-gradient(90deg,#16a34a,#22c55e);"></div>
+                                                <div class="progress-bar rounded-pill" style="width:{{ $progressPct }}%; background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div>
                                             </div>
                                         </div>
                                     @endif
@@ -785,20 +1035,151 @@
                             </div>
                         </div>
                     @empty
-                        <div class="col-12">
-                            <div class="card border-0 rounded-4 shadow-sm bg-white p-5 text-center">
-                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width:64px; height:64px; background:#f1f5f9;">
-                                    <i class="bi bi-pie-chart fs-2 text-muted"></i>
+                        @if($purchases->count() === 0 && $userInvestments->count() === 0)
+                            <div class="col-12">
+                                <div class="card border-0 rounded-4 shadow-sm bg-white p-5 text-center">
+                                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width:64px; height:64px; background:#f1f5f9;">
+                                        <i class="bi bi-pie-chart fs-2 text-muted"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-2">No Investments Yet</h5>
+                                    <p class="text-muted small mb-4">Browse available projects and invest to start earning returns.</p>
+                                    <button class="btn btn-primary fw-bold px-4 py-2 rounded-3 mx-auto" style="background:#2563eb; max-width:200px;" @click="activeTab = 'invest'">
+                                        <i class="bi bi-lightning-charge me-1"></i> Start Investing
+                                    </button>
                                 </div>
-                                <h5 class="fw-bold text-dark mb-2">No Investments Yet</h5>
-                                <p class="text-muted small mb-4">Browse available properties and purchase fractional shares to start earning ROI.</p>
-                                <button class="btn btn-primary fw-bold px-4 py-2 rounded-3 mx-auto" style="background:#2563eb; max-width:200px;" @click="activeTab = 'invest'">
-                                    <i class="bi bi-lightning-charge me-1"></i> Start Investing
-                                </button>
                             </div>
-                        </div>
+                        @endif
                     @endforelse
                 </div>
+
+                @if($purchases->count() > 0)
+                    <h6 class="fw-bold text-dark mb-3" style="font-size:0.95rem;"><i class="bi bi-house-check me-2" style="color:#2563eb;"></i>Purchased Properties</h6>
+                    <div class="row g-3 mb-4">
+                        @foreach($purchases as $purchase)
+                            <div class="col-lg-6">
+                                <div class="card border-0 rounded-4 overflow-hidden h-100" style="box-shadow:0 4px 20px rgba(0,0,0,0.04);">
+                                    <div style="height:4px; background:linear-gradient(90deg, #2563eb,#3b82f6);"></div>
+                                    <div class="p-3 bg-white">
+                                        <div class="d-flex align-items-center gap-3 mb-3">
+                                            <div class="flex-shrink-0 overflow-hidden rounded-3 border" style="width:56px; height:56px; border-color:#e2e8f0 !important; background:#f8fafc;">
+                                                @if($purchase->property->image_url)
+                                                    <img src="{{ $purchase->property->image_url }}" alt="{{ $purchase->property->title }}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
+                                                @else
+                                                    <div class="d-flex align-items-center justify-content-center h-100" style="background:#eff6ff;">
+                                                        <i class="bi bi-building fs-5" style="color:#2563eb;"></i>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <div class="flex-grow-1 overflow-hidden">
+                                                <h6 class="fw-bold mb-0 text-truncate" style="color:#0f172a;">{{ $purchase->property->title ?? 'Property' }}</h6>
+                                                <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ $purchase->property->location ?? 'Location' }}</small>
+                                            </div>
+                                            <span class="badge rounded-pill fw-bold px-3 py-1 bg-success text-white" style="font-size:0.75rem;">
+                                                Owned
+                                            </span>
+                                        </div>
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <div class="p-2 rounded-3 text-center" style="background:#f8fafc;">
+                                                    <div class="d-flex align-items-center justify-content-center gap-1 mb-1">
+                                                        <i class="bi bi-currency-dollar fs-6" style="color:#2563eb;"></i>
+                                                    </div>
+                                                    <div class="fw-bold" style="color:#0f172a; font-size:0.95rem;">${{ number_format($purchase->amount, 2) }}</div>
+                                                    <small class="text-muted" style="font-size:0.68rem;">Purchase Price</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="p-2 rounded-3 text-center" style="background:#f8fafc;">
+                                                    <div class="d-flex align-items-center justify-content-center gap-1 mb-1">
+                                                        <i class="bi bi-calendar-check fs-6" style="color:#16a34a;"></i>
+                                                    </div>
+                                                    <div class="fw-bold" style="color:#0f172a; font-size:0.95rem;">{{ $purchase->created_at?->format('M d, Y') }}</div>
+                                                    <small class="text-muted" style="font-size:0.68rem;">Purchased On</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                @if($userInvestments->count() > 0)
+                    <h6 class="fw-bold text-dark mb-3" style="font-size:0.95rem;"><i class="bi bi-building me-2" style="color:#64748b;"></i>Legacy Property Share Investments</h6>
+                    <div class="row g-3">
+                        @foreach($userInvestments as $inv)
+                            @php
+                                $progressPct = $inv->total_amount > 0 ? min(100, round(($inv->roi_earned / $inv->total_amount) * 100)) : 0;
+                            @endphp
+                            <div class="col-lg-6">
+                                <div class="card border-0 rounded-4 overflow-hidden h-100" style="box-shadow:0 4px 20px rgba(0,0,0,0.04);">
+                                    <div style="height:4px; background:linear-gradient(90deg, {{ $inv->status === 'active' ? '#2563eb,#3b82f6' : '#94a3b8,#cbd5e1' }});"></div>
+                                    <div class="p-3 bg-white">
+                                        <div class="d-flex align-items-center gap-3 mb-3">
+                                            <div class="flex-shrink-0 overflow-hidden rounded-3 border" style="width:56px; height:56px; border-color:#e2e8f0 !important; background:#f8fafc;">
+                                                @if($inv->property->image_url)
+                                                    <img src="{{ $inv->property->image_url }}" alt="{{ $inv->property->title }}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
+                                                @else
+                                                    <div class="d-flex align-items-center justify-content-center h-100" style="background:{{ $inv->status === 'active' ? '#eff6ff' : '#f1f5f9' }};">
+                                                        <i class="bi bi-building fs-5" style="color:{{ $inv->status === 'active' ? '#2563eb' : '#64748b' }};"></i>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <div class="flex-grow-1 overflow-hidden">
+                                                <h6 class="fw-bold mb-0 text-truncate" style="color:#0f172a;">{{ $inv->property->title ?? 'Property Investment' }}</h6>
+                                                <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ $inv->property->location ?? 'Location' }}</small>
+                                            </div>
+                                            <span class="badge rounded-pill fw-bold px-3 py-1 {{ $inv->status === 'active' ? 'bg-success text-white' : 'bg-secondary text-white' }}" style="font-size:0.75rem;">
+                                                {{ ucfirst($inv->status) }}
+                                            </span>
+                                        </div>
+                                        <div class="row g-2">
+                                            <div class="col-4">
+                                                <div class="p-2 rounded-3 text-center" style="background:#f8fafc;">
+                                                    <div class="d-flex align-items-center justify-content-center gap-1 mb-1">
+                                                        <i class="bi bi-pie-chart fs-6" style="color:#2563eb;"></i>
+                                                    </div>
+                                                    <div class="fw-bold" style="color:#0f172a; font-size:0.95rem;">{{ $inv->shares_bought }}</div>
+                                                    <small class="text-muted" style="font-size:0.68rem;">Shares</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="p-2 rounded-3 text-center" style="background:#f8fafc;">
+                                                    <div class="d-flex align-items-center justify-content-center gap-1 mb-1">
+                                                        <i class="bi bi-currency-dollar fs-6" style="color:#2563eb;"></i>
+                                                    </div>
+                                                    <div class="fw-bold" style="color:#0f172a; font-size:0.95rem;">${{ number_format($inv->total_amount, 2) }}</div>
+                                                    <small class="text-muted" style="font-size:0.68rem;">Invested</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="p-2 rounded-3 text-center" style="background:#f8fafc;">
+                                                    <div class="d-flex align-items-center justify-content-center gap-1 mb-1">
+                                                        <i class="bi bi-graph-up-arrow fs-6" style="color:#16a34a;"></i>
+                                                    </div>
+                                                    <div class="fw-bold text-success" style="font-size:0.95rem;">${{ number_format($inv->roi_earned, 2) }}</div>
+                                                    <small class="text-muted" style="font-size:0.68rem;">ROI Earned</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @if($inv->status === 'active')
+                                            <div class="mt-2">
+                                                <div class="d-flex justify-content-between small">
+                                                    <span class="text-muted" style="font-size:0.7rem;">ROI Progress</span>
+                                                    <span class="fw-bold" style="font-size:0.7rem; color:#16a34a;">{{ $progressPct }}%</span>
+                                                </div>
+                                                <div class="progress" style="height:4px; background:#e2e8f0;">
+                                                    <div class="progress-bar rounded-pill" style="width:{{ $progressPct }}%; background:linear-gradient(90deg,#16a34a,#22c55e);"></div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
 
             <!-- DEPOSIT TAB -->
@@ -822,35 +1203,212 @@
                             </div>
                             <hr class="my-3" style="border-color:rgba(255,255,255,0.1);">
                             <button class="btn btn-primary fw-bold w-100 py-2 rounded-3 position-relative" style="background:#2563eb;" @click="showFinanceModal = true">
-                                <i class="bi bi-plus-circle me-1"></i> New Deposit Request
+                                <i class="bi bi-plus-circle me-1"></i> Quick Deposit Modal
                             </button>
                         </div>
                         <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
-                            <h6 class="fw-bold mb-3" style="color:#0f172a; font-size:0.85rem;">Accepted Methods</h6>
-                            <div class="d-flex flex-column gap-2">
-                                <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:#f8fafc;">
-                                    <div class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width:32px; height:32px; background:#eff6ff;"><i class="bi bi-bank2 text-primary"></i></div>
-                                    <span class="fw-semibold text-dark" style="font-size:0.85rem;">Bank Transfer</span>
+                            <h6 class="fw-bold mb-2" style="color:#0f172a; font-size:0.85rem;"><i class="bi bi-shield-check text-primary me-1.5"></i>Official Admin Payment Accounts</h6>
+                            <p class="text-muted small mb-3" style="font-size:0.75rem;">Transfer funds directly to our official company accounts below to fund your wallet balance.</p>
+                            <div class="d-flex flex-column gap-2.5">
+                                <div class="p-2.5 rounded-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-bold text-dark small"><i class="bi bi-bank2 text-primary me-1"></i> Bank Transfer / GCash</span>
+                                        <span class="badge bg-success bg-opacity-10 text-success fw-bold" style="font-size:0.65rem;">Active</span>
+                                    </div>
+                                    <div class="small text-muted mb-1">Account Name: <strong class="text-dark">RINNY P.</strong></div>
+                                    <div class="d-flex align-items-center justify-content-between bg-white p-1.5 rounded border">
+                                        <code class="fw-bold text-primary small">09658726718</code>
+                                        <button class="btn btn-sm btn-link p-0 text-primary fw-bold small text-decoration-none" @click="copyText('09658726718')">
+                                            <i class="bi bi-copy me-1"></i>Copy
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:#f8fafc;">
-                                    <div class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width:32px; height:32px; background:#eff6ff;"><i class="bi bi-credit-card text-primary"></i></div>
-                                    <span class="fw-semibold text-dark" style="font-size:0.85rem;">Credit / Debit Card</span>
+
+                                <div class="p-2.5 rounded-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-bold text-dark small"><i class="bi bi-globe2 text-primary me-1"></i> International Wire Transfer</span>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold" style="font-size:0.65rem;">SWIFT</span>
+                                    </div>
+                                    <div class="small text-muted mb-1">Account Name: <strong class="text-dark">Radiant Dream Realty Corp.</strong></div>
+                                    <div class="d-flex align-items-center justify-content-between bg-white p-1.5 rounded border">
+                                        <span class="small text-muted">SWIFT: <code class="fw-bold text-dark">RDRPHMM1XXXX</code></span>
+                                        <button class="btn btn-sm btn-link p-0 text-primary fw-bold small text-decoration-none" @click="copyText('RDRPHMM1XXXX')">
+                                            <i class="bi bi-copy me-1"></i>Copy
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:#f8fafc;">
-                                    <div class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width:32px; height:32px; background:#eff6ff;"><i class="bi bi-globe2 text-primary"></i></div>
-                                    <span class="fw-semibold text-dark" style="font-size:0.85rem;">Wire Transfer</span>
-                                </div>
-                                <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:#f8fafc;">
-                                    <div class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width:32px; height:32px; background:#fffbeb;"><i class="bi bi-currency-bitcoin text-warning"></i></div>
-                                    <span class="fw-semibold text-dark" style="font-size:0.85rem;">Cryptocurrency</span>
+
+                                <div class="p-2.5 rounded-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-bold text-dark small"><i class="bi bi-currency-bitcoin text-warning me-1"></i> USDT (TRC-20) Wallet</span>
+                                        <span class="badge bg-warning bg-opacity-20 text-warning-dark fw-bold" style="font-size:0.65rem;">Crypto</span>
+                                    </div>
+                                    <div class="small text-muted mb-1">Network: <strong class="text-dark">TRC-20</strong></div>
+                                    <div class="d-flex align-items-center justify-content-between bg-white p-1.5 rounded border">
+                                        <code class="fw-bold text-dark small text-truncate" style="max-width:180px;">TYd1kL9m8X7P2q4W3n5V6b7Z8x9C0v1B</code>
+                                        <button class="btn btn-sm btn-link p-0 text-primary fw-bold small text-decoration-none" @click="copyText('TYd1kL9m8X7P2q4W3n5V6b7Z8x9C0v1B')">
+                                            <i class="bi bi-copy me-1"></i>Copy
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-7">
+                    <div class="col-lg-7 d-flex flex-column gap-4">
+                        <!-- Deposit Details Form Card -->
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                            <h6 class="fw-bold mb-4" style="color:#0f172a;"><i class="bi bi-plus-circle-fill me-2" style="color:#2563eb;"></i>Submit Deposit Request</h6>
+                            <form action="{{ route('deposit.store') }}" method="POST" x-data="{ depMethod: 'bank_transfer' }">
+                                @csrf
+                                <!-- Payment Method Select -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small" style="color:#1e293b;">Payment Method <span style="color:#ef4444;">*</span></label>
+                                    <select class="form-select rounded-3 border-secondary-subtle" name="payment_method" x-model="depMethod" required>
+                                        <option value="bank_transfer">Bank Transfer / GCash</option>
+                                        <option value="credit_card">Credit / Debit Card</option>
+                                        <option value="wire_transfer">Wire Transfer</option>
+                                        <option value="crypto">Cryptocurrency (USDT / BTC)</option>
+                                    </select>
+                                </div>
+
+                                <!-- Admin Payment Account Destination Box inside Form -->
+                                <template x-if="depMethod === 'bank_transfer'">
+                                    <div class="p-3 mb-3 rounded-3 bg-primary bg-opacity-10 border border-primary border-opacity-25">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="fw-bold text-primary mb-0" style="font-size:0.82rem;"><i class="bi bi-bank2 me-1"></i> Admin Payment Account (Bank / GCash)</h6>
+                                            <span class="badge bg-primary text-white" style="font-size:0.65rem;">Admin Settings</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-1.5 small">
+                                            <span class="text-muted">Account Name:</span>
+                                            <strong class="text-dark">RINNY P.</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-1.5 small">
+                                            <span class="text-muted">Account Number:</span>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <code class="fw-bold text-primary">09658726718</code>
+                                                <button type="button" class="btn btn-sm btn-link p-0 text-primary" @click="copyText('09658726718')"><i class="bi bi-copy"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template x-if="depMethod === 'wire_transfer'">
+                                    <div class="p-3 mb-3 rounded-3 bg-primary bg-opacity-10 border border-primary border-opacity-25">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="fw-bold text-primary mb-0" style="font-size:0.82rem;"><i class="bi bi-globe2 me-1"></i> Admin Wire Transfer (SWIFT) Account</h6>
+                                            <span class="badge bg-primary text-white" style="font-size:0.65rem;">Admin Settings</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-1.5 small">
+                                            <span class="text-muted">Account Name:</span>
+                                            <strong class="text-dark">Radiant Dream Realty Corp.</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-1.5 small">
+                                            <span class="text-muted">SWIFT Code:</span>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <code class="fw-bold text-primary">RDRPHMM1XXXX</code>
+                                                <button type="button" class="btn btn-sm btn-link p-0 text-primary" @click="copyText('RDRPHMM1XXXX')"><i class="bi bi-copy"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template x-if="depMethod === 'crypto'">
+                                    <div class="p-3 mb-3 rounded-3 bg-warning bg-opacity-10 border border-warning border-opacity-25">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="fw-bold mb-0" style="font-size:0.82rem; color:#b45309;"><i class="bi bi-currency-bitcoin me-1"></i> Admin USDT (TRC-20) Wallet Address</h6>
+                                            <span class="badge bg-warning text-dark" style="font-size:0.65rem;">TRC20</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center small">
+                                            <span class="text-muted">Deposit Address:</span>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <code class="fw-bold text-dark text-truncate" style="max-width:180px;">TYd1kL9m8X7P2q4W3n5V6b7Z8x9C0v1B</code>
+                                                <button type="button" class="btn btn-sm btn-link p-0 text-primary" @click="copyText('TYd1kL9m8X7P2q4W3n5V6b7Z8x9C0v1B')"><i class="bi bi-copy"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Amount Field -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small" style="color:#1e293b;">Amount ($ USD) <span style="color:#ef4444;">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light text-muted border-secondary-subtle fw-bold">$</span>
+                                        <input type="number" step="0.01" min="10" name="amount" class="form-control rounded-end-3 border-secondary-subtle" placeholder="e.g. 500.00" required>
+                                    </div>
+                                    <small class="text-muted" style="font-size:0.72rem;">Minimum deposit amount is $10.00</small>
+                                </div>
+
+                                <!-- Dynamic fields based on method -->
+                                <template x-if="depMethod === 'credit_card'">
+                                    <div class="p-3 mb-3 rounded-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-semibold text-secondary mb-1">Cardholder Name</label>
+                                            <input type="text" name="card_name" class="form-control form-control-sm rounded-3" placeholder="John Doe">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-semibold text-secondary mb-1">Card Number</label>
+                                            <input type="text" name="card_number" class="form-control form-control-sm rounded-3" placeholder="4532 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 8921">
+                                        </div>
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label class="form-label small fw-semibold text-secondary mb-1">Expiry Date</label>
+                                                <input type="text" name="card_expiry" class="form-control form-control-sm rounded-3" placeholder="MM/YY">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label small fw-semibold text-secondary mb-1">CVV / CVC</label>
+                                                <input type="password" maxlength="4" name="card_cvv" class="form-control form-control-sm rounded-3" placeholder="123">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template x-if="depMethod === 'crypto'">
+                                    <div class="p-3 mb-3 rounded-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-semibold text-secondary mb-1">Crypto Network</label>
+                                            <select name="crypto_network_value" class="form-select form-select-sm rounded-3">
+                                                <option value="USDT-TRC20">USDT (TRC-20)</option>
+                                                <option value="USDT-ERC20">USDT (ERC-20)</option>
+                                                <option value="BTC">Bitcoin (BTC)</option>
+                                                <option value="ETH">Ethereum (ETH)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="form-label small fw-semibold text-secondary mb-1">Your Wallet Address (Sender)</label>
+                                            <input type="text" name="crypto_from_wallet" class="form-control form-control-sm rounded-3" placeholder="0x... or T...">
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template x-if="depMethod === 'bank_transfer' || depMethod === 'wire_transfer'">
+                                    <div class="p-3 mb-3 rounded-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-semibold text-secondary mb-1">Sender Account Name</label>
+                                            <input type="text" name="sender_account_name" class="form-control form-control-sm rounded-3" value="{{ $user->name ?? '' }}" placeholder="Account Holder Name">
+                                        </div>
+                                        <div>
+                                            <label class="form-label small fw-semibold text-secondary mb-1">Bank / Account Number</label>
+                                            <input type="text" name="sender_account_number" class="form-control form-control-sm rounded-3" placeholder="Account or IBAN Number">
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Notes field -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold small" style="color:#1e293b;">Additional Notes / Reference (Optional)</label>
+                                    <textarea name="notes" class="form-control rounded-3 border-secondary-subtle" rows="2" placeholder="Add any details for the finance admin team..."></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary fw-bold w-100 py-2.5 rounded-3 shadow-sm" style="background:#2563eb;">
+                                    <i class="bi bi-send-fill me-1.5"></i> Submit Deposit Request
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Recent Deposit Requests History -->
                         <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
                             <div class="d-flex align-items-center justify-content-between mb-3">
-                                <h6 class="fw-bold mb-0" style="color:#0f172a; font-size:0.9rem;">Recent Deposit Requests</h6>
+                                <h6 class="fw-bold mb-0" style="color:#0f172a; font-size:0.9rem;"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Deposit Requests</h6>
                                 @if($deposits->count() > 0)
                                     <span class="badge bg-primary bg-opacity-10 text-primary fw-bold rounded-pill px-2" style="font-size:0.7rem;">{{ $deposits->count() }}</span>
                                 @endif
@@ -862,8 +1420,8 @@
                                             <i class="bi {{ $dep->status === 'completed' ? 'bi-check-circle text-success' : ($dep->status === 'awaiting_payment' ? 'bi-clock text-warning' : 'bi-arrow-right text-secondary') }}"></i>
                                         </div>
                                         <div>
-                                            <div class="fw-bold" style="color:#0f172a; font-size:0.85rem;">{{ $dep->currency ?? 'PHP' }} {{ number_format($dep->amount, 2) }}</div>
-                                            <div class="text-muted" style="font-size:0.72rem;">{{ $dep->deposit_code }} &middot; {{ $dep->created_at?->format('M d, Y') }}</div>
+                                            <div class="fw-bold" style="color:#0f172a; font-size:0.85rem;">{{ $dep->currency ?? '$' }} {{ number_format($dep->amount, 2) }}</div>
+                                            <div class="text-muted" style="font-size:0.72rem;">{{ $dep->deposit_code }} &middot; {{ ucwords(str_replace('_', ' ', $dep->payment_method)) }} &middot; {{ $dep->created_at?->format('M d, Y') }}</div>
                                         </div>
                                     </div>
                                     @if($dep->status === 'completed')
@@ -896,6 +1454,32 @@
                     <p class="mb-0" style="font-size:0.95rem; font-weight:500; color:#475569;">Request a withdrawal from your available wallet balance.</p>
                 </div>
                 <div class="row g-4">
+                    
+                    <div class="col-lg-5">
+                        <div class="rounded-4 p-4 text-white position-relative overflow-hidden mb-4" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#334155 100%); box-shadow:0 8px 32px rgba(15,23,42,0.25);">
+                            <div class="position-absolute top-0 end-0 opacity-10" style="font-size:5rem; line-height:1; transform:rotate(15deg) translate(10px,-10px);"><i class="bi bi-wallet2"></i></div>
+                            <div class="position-relative">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small fw-bold" style="letter-spacing:0.1em; color:#fff;">AVAILABLE BALANCE</span>
+                                    <i class="bi bi-credit-card-2-front fs-5" style="color:#3b82f6;"></i>
+                                </div>
+                                <h2 class="fw-bold mb-0" style="font-size:2rem; letter-spacing:-0.02em; color:#fff;">${{ number_format($walletBalance, 2) }}</h2>
+                                <div class="d-flex align-items-center gap-2 mt-3">
+                                    <span class="badge fw-semibold rounded-pill px-2 py-1" style="background:rgba(34,197,94,0.15); color:#22c55e; font-size:0.7rem;"><i class="bi bi-arrow-up-short me-1"></i>Available</span>
+                                    <span class="small fw-bold" style="color:#fff;">withdrawal limit: $10,000</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                            <h6 class="fw-bold mb-3" style="color:#0f172a; font-size:0.85rem;"><i class="bi bi-info-circle me-2" style="color:#2563eb;"></i>Withdrawal Info</h6>
+                            <ul class="list-unstyled mb-0 small" style="color:#475569;">
+                                <li class="d-flex gap-2 mb-2"><i class="bi bi-clock text-primary flex-shrink-0 mt-1"></i><span>Processing takes 1–3 business days</span></li>
+                                <li class="d-flex gap-2 mb-2"><i class="bi bi-shield-check text-primary flex-shrink-0 mt-1"></i><span>KYC verification required for amounts over $1,000</span></li>
+                                <li class="d-flex gap-2 mb-2"><i class="bi bi-percent text-primary flex-shrink-0 mt-1"></i><span>No withdrawal fees for GCash &amp; Maya</span></li>
+                                <li class="d-flex gap-2"><i class="bi bi-currency-dollar text-primary flex-shrink-0 mt-1"></i><span>Bank transfers may incur a $2.50 fee</span></li>
+                            </ul>
+                        </div>
+                    </div>
                     <div class="col-lg-7">
                         <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
                             <h6 class="fw-bold mb-4" style="color:#0f172a;"><i class="bi bi-pencil-square me-2" style="color:#2563eb;"></i>Withdrawal Details</h6>
@@ -943,55 +1527,75 @@
                             </form>
                         </div>
                     </div>
-                    <div class="col-lg-5">
-                        <div class="rounded-4 p-4 text-white position-relative overflow-hidden mb-4" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#334155 100%); box-shadow:0 8px 32px rgba(15,23,42,0.25);">
-                            <div class="position-absolute top-0 end-0 opacity-10" style="font-size:5rem; line-height:1; transform:rotate(15deg) translate(10px,-10px);"><i class="bi bi-wallet2"></i></div>
-                            <div class="position-relative">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="small fw-bold" style="letter-spacing:0.1em; color:#fff;">AVAILABLE BALANCE</span>
-                                    <i class="bi bi-credit-card-2-front fs-5" style="color:#3b82f6;"></i>
-                                </div>
-                                <h2 class="fw-bold mb-0" style="font-size:2rem; letter-spacing:-0.02em; color:#fff;">${{ number_format($walletBalance, 2) }}</h2>
-                                <div class="d-flex align-items-center gap-2 mt-3">
-                                    <span class="badge fw-semibold rounded-pill px-2 py-1" style="background:rgba(34,197,94,0.15); color:#22c55e; font-size:0.7rem;"><i class="bi bi-arrow-up-short me-1"></i>Available</span>
-                                    <span class="small fw-bold" style="color:#fff;">withdrawal limit: $10,000</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
-                            <h6 class="fw-bold mb-3" style="color:#0f172a; font-size:0.85rem;"><i class="bi bi-info-circle me-2" style="color:#2563eb;"></i>Withdrawal Info</h6>
-                            <ul class="list-unstyled mb-0 small" style="color:#475569;">
-                                <li class="d-flex gap-2 mb-2"><i class="bi bi-clock text-primary flex-shrink-0 mt-1"></i><span>Processing takes 1–3 business days</span></li>
-                                <li class="d-flex gap-2 mb-2"><i class="bi bi-shield-check text-primary flex-shrink-0 mt-1"></i><span>KYC verification required for amounts over $1,000</span></li>
-                                <li class="d-flex gap-2 mb-2"><i class="bi bi-percent text-primary flex-shrink-0 mt-1"></i><span>No withdrawal fees for GCash &amp; Maya</span></li>
-                                <li class="d-flex gap-2"><i class="bi bi-currency-dollar text-primary flex-shrink-0 mt-1"></i><span>Bank transfers may incur a $2.50 fee</span></li>
-                            </ul>
-                        </div>
-                    </div>
                 </div>
             </div>
 
-            <!-- BROWSE PROPERTIES TAB -->
+            <!-- BROWSE PROPERTIES TAB (Buy Directly) -->
             <div x-show="activeTab === 'marketplace'" x-transition>
-                <div class="mb-4">
-                    <h4 class="fw-bold text-dark mb-1">Browse Properties</h4>
-                    <p class="text-muted mb-0 small">Explore all available real estate investment opportunities.</p>
+                <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1">Browse Properties</h4>
+                        <p class="text-muted mb-0 small">Explore available properties. Save them to your list, share them, or purchase directly with a one-time payment.</p>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn fw-bold rounded-3 me-1" :class="propFilter === 'all' ? 'btn-primary' : 'btn-light border'" @click="propFilter = 'all'">
+                            <i class="bi bi-grid me-1"></i> All
+                        </button>
+                        <button type="button" class="btn fw-bold rounded-3" :class="propFilter === 'saved' ? 'btn-primary' : 'btn-light border'" @click="propFilter = 'saved'">
+                            <i class="bi bi-bookmark-fill me-1"></i> Saved
+                            @if(count($savedPropertyIds) > 0)
+                                <span class="badge bg-warning text-dark ms-1 rounded-pill">{{ count($savedPropertyIds) }}</span>
+                            @endif
+                        </button>
+                    </div>
                 </div>
                 <div class="row g-4">
                     @foreach($properties as $prop)
-                        <div class="col-md-6 col-lg-4">
+                        @php
+                            $propPrice = $prop->purchasePrice();
+                            $propSold = $prop->status === 'sold_out';
+                            $propSaved = in_array($prop->id, $savedPropertyIds);
+                        @endphp
+                        <div class="col-md-6 col-lg-4" x-show="propFilter === 'all' || {{ $propSaved ? 'true' : 'false' }}">
                             <div class="card h-100 border-0 rounded-4 shadow-sm bg-white overflow-hidden">
-                                <img src="{{ $prop->image_url ?? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop' }}" height="180" style="object-fit:cover; width:100%;">
+                                <div style="height:180px; overflow:hidden; position:relative;">
+                                    <a href="{{ route('property.show', $prop) }}">
+                                        <img src="{{ $prop->image_url ?? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop' }}" alt="{{ $prop->title }}" style="width:100%; height:100%; object-fit:cover;">
+                                    </a>
+                                    <span class="badge position-absolute top-0 start-0 m-2 rounded-pill fw-bold {{ $propSold ? 'bg-secondary' : 'bg-success' }}" style="font-size:0.75rem;">{{ $propSold ? 'Sold' : 'For Sale' }}</span>
+                                    @auth
+                                        <form action="{{ route('property.save', $prop) }}" method="POST" class="position-absolute top-0 end-0 m-2">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm rounded-circle border-0 shadow-sm {{ $propSaved ? 'text-danger' : 'bg-white' }}" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center;" title="{{ $propSaved ? 'Remove from saved' : 'Save property' }}">
+                                                <i class="bi {{ $propSaved ? 'bi-bookmark-fill' : 'bi-bookmark' }}"></i>
+                                            </button>
+                                        </form>
+                                    @endauth
+                                </div>
                                 <div class="card-body p-3">
-                                    <h6 class="fw-bold text-dark mb-1">{{ $prop->title }}</h6>
+                                    <h6 class="fw-bold text-dark mb-1"><a href="{{ route('property.show', $prop) }}" class="text-decoration-none text-dark">{{ $prop->title }}</a></h6>
                                     <p class="small text-muted mb-2"><i class="bi bi-geo-alt me-1"></i>{{ $prop->location }}</p>
                                     <div class="d-flex justify-content-between small fw-bold mb-3">
-                                        <span>Share Price: ${{ number_format($prop->price_per_share, 2) }}</span>
-                                        <span class="text-success">{{ $prop->roi_percentage }}% ROI</span>
+                                        <span>Price: <span class="text-primary">${{ number_format($propPrice, 2) }}</span></span>
+                                        <span class="text-success">{{ $prop->category }}</span>
                                     </div>
-                                    <a href="{{ route('property.show', $prop) }}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;">
-                                        <i class="bi bi-lightning-charge me-1"></i> Invest Now
-                                    </a>
+                                    <div class="d-flex gap-2 mb-2">
+                                        <a href="{{ route('property.show', $prop) }}" class="btn btn-outline-primary btn-sm fw-bold rounded-3 flex-fill">
+                                            <i class="bi bi-info-circle me-1"></i> More Info
+                                        </a>
+                                        <button type="button" class="btn btn-outline-primary btn-sm fw-bold rounded-3 flex-fill" onclick="shareContent('{{ $prop->title }}', '{{ route('property.show', $prop) }}', 'Buy this property')">
+                                            <i class="bi bi-share me-1"></i> Share
+                                        </button>
+                                    </div>
+                                    @if($propSold)
+                                        <button class="btn btn-secondary btn-sm w-100 fw-bold rounded-3 mt-1" disabled>
+                                            <i class="bi bi-check-circle me-1"></i> Sold
+                                        </button>
+                                    @else
+                                        <a href="{{ route('property.show', $prop) }}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-1" style="background:#2563eb;">
+                                            <i class="bi bi-house-check me-1"></i> Buy Now
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -1003,7 +1607,7 @@
             <div x-show="activeTab === 'transactions'" x-transition>
                 @php
                     $txnCredits = $transactions->whereIn('type', ['deposit', 'receive_funds', 'affiliate_earning', 'roi_payout']);
-                    $txnDebits = $transactions->whereIn('type', ['withdrawal', 'property_investment', 'send_funds']);
+                    $txnDebits = $transactions->whereIn('type', ['withdrawal', 'property_investment', 'project_investment', 'property_purchase', 'send_funds']);
                     $totalCredits = $txnCredits->sum('amount');
                     $totalDebits = $txnDebits->sum('amount');
                     $txnCount = $transactions->count();
@@ -1092,6 +1696,7 @@
                                     <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">AMOUNT</th>
                                     <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">STATUS</th>
                                     <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">DATE</th>
+                                    <th class="px-4 py-3 small fw-bold text-muted text-end" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">RECEIPT</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1114,9 +1719,14 @@
                                             </span>
                                         </td>
                                         <td class="py-3 text-muted small" style="font-size:0.78rem; white-space:nowrap;">{{ $txn->created_at ? $txn->created_at->format('M d, Y') : '' }}</td>
+                                        <td class="px-4 py-3 text-end" @click.stop>
+                                            <button type="button" class="btn btn-sm btn-outline-primary fw-bold px-2.5 py-1 rounded-3" style="font-size:0.72rem;" @click="openTxnPreview({{ $i }}); setTimeout(() => printTransactionReceipt(), 150);">
+                                                <i class="bi bi-printer me-1"></i> Receipt
+                                            </button>
+                                        </td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="5" class="text-center py-5" style="color:#94a3b8;"><i class="bi bi-inbox fs-2 d-block mb-2 opacity-25"></i><span style="font-size:0.9rem;">No transactions yet.</span></td></tr>
+                                    <tr><td colspan="6" class="text-center py-5" style="color:#94a3b8;"><i class="bi bi-inbox fs-2 d-block mb-2 opacity-25"></i><span style="font-size:0.9rem;">No transactions yet.</span></td></tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -1250,24 +1860,99 @@
                 </div>
                 <div class="row g-4">
                     <div class="col-lg-6">
-                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
-                            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-person-circle text-primary me-2"></i>Personal Information</h6>
-                            <div class="d-flex align-items-center gap-3 mb-4">
-                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold fs-3 text-white flex-shrink-0" style="width:60px; height:60px; background: linear-gradient(135deg, #2563eb, #1d4ed8);">
-                                    {{ strtoupper(substr($user->name ?? 'IN', 0, 2)) }}
+                        <div class="card border-0 rounded-4 shadow-sm bg-white p-4" x-data="{ editing: false }">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-person-circle text-primary me-2"></i>Personal Information</h6>
+                                <button class="btn btn-sm fw-bold rounded-3 px-3"
+                                    :class="editing ? 'btn-outline-secondary' : 'btn-outline-primary'"
+                                    @click="editing = !editing"
+                                    style="font-size:0.8rem;">
+                                    <i class="bi" :class="editing ? 'bi-x-lg' : 'bi-pencil-square'"></i>
+                                    <span x-text="editing ? ' Cancel' : ' Edit Profile'"></span>
+                                </button>
+                            </div>
+
+                            {{-- VIEW MODE --}}
+                            <div x-show="!editing" x-transition>
+                                <div class="d-flex align-items-center gap-3 mb-4">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold fs-3 text-white flex-shrink-0" style="width:64px; height:64px; background: linear-gradient(135deg, #2563eb, #1d4ed8);">
+                                        {{ strtoupper(substr($user->name ?? 'IN', 0, 2)) }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark fs-6">{{ $user->name ?? 'Investor Name' }}</div>
+                                        <div class="text-muted small">{{ $user->email ?? 'investor@email.com' }}</div>
+                                        <span class="badge rounded-pill mt-1" style="background:#eff6ff; color:#2563eb; font-size:0.72rem;">Account ID: {{ $user->account_id ?? 'RDR-000000' }}</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div class="fw-bold text-dark">{{ $user->name ?? 'Investor Name' }}</div>
-                                    <div class="text-muted small">{{ $user->email ?? 'investor@email.com' }}</div>
-                                    <span class="badge rounded-pill mt-1" style="background:#eff6ff; color:#2563eb; font-size:0.72rem;">Account ID: {{ $user->account_id ?? 'RDR-000000' }}</span>
+                                <div class="row g-2 small">
+                                    <div class="col-6"><div class="p-2 rounded-3" style="background:#f8fafc;"><div class="text-muted">Wallet Balance</div><div class="fw-bold text-success">${{ number_format($walletBalance, 2) }}</div></div></div>
+                                    <div class="col-6"><div class="p-2 rounded-3" style="background:#f8fafc;"><div class="text-muted">Active Investments</div><div class="fw-bold text-dark">{{ $activeProjectsCount }}</div></div></div>
+                                </div>
+                                <div class="mt-3 pt-3 border-top small text-muted">
+                                    <div class="d-flex justify-content-between"><span>Member Since</span><span class="fw-semibold text-dark">{{ $user->created_at?->format('M d, Y') ?? 'N/A' }}</span></div>
+                                    <div class="d-flex justify-content-between mt-1"><span>KYC Status</span>
+                                        <span class="fw-semibold {{ $user->kyc_verified ? 'text-success' : 'text-warning' }}">
+                                            {{ $user->kyc_verified ? 'Verified' : 'Pending' }}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="row g-2 small">
-                                <div class="col-6"><div class="p-2 rounded-3" style="background:#f8fafc;"><div class="text-muted">Wallet Balance</div><div class="fw-bold text-success">${{ number_format($walletBalance, 2) }}</div></div></div>
-                                <div class="col-6"><div class="p-2 rounded-3" style="background:#f8fafc;"><div class="text-muted">Active Investments</div><div class="fw-bold text-dark">{{ $activeProjectsCount }}</div></div></div>
+
+                            {{-- EDIT MODE --}}
+                            <div x-show="editing" x-transition>
+                                @if(session('success') && str_contains(session('success'), 'Profile'))
+                                    <div class="alert alert-success border-0 rounded-3 small py-2 mb-3">
+                                        <i class="bi bi-check-circle-fill me-1"></i> {{ session('success') }}
+                                    </div>
+                                @endif
+                                @if($errors->any())
+                                    <div class="alert alert-danger border-0 rounded-3 small py-2 mb-3">
+                                        <ul class="mb-0 ps-3">@foreach($errors->all() as $err)<li>{{ $err }}</li>@endforeach</ul>
+                                    </div>
+                                @endif
+
+                                <form action="{{ route('profile.update_info') }}" method="POST" id="profile-edit-form">
+                                    @csrf
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold small text-dark">Full Name <span class="text-danger">*</span></label>
+                                        <input type="text" name="name" class="form-control rounded-3 @error('name') is-invalid @enderror"
+                                            value="{{ old('name', $user->name) }}" placeholder="Your full name" required>
+                                        @error('name')<div class="invalid-feedback small">{{ $message }}</div>@enderror
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold small text-dark">Email Address <span class="text-danger">*</span></label>
+                                        <input type="email" name="email" class="form-control rounded-3 @error('email') is-invalid @enderror"
+                                            value="{{ old('email', $user->email) }}" placeholder="your@email.com" required>
+                                        @error('email')<div class="invalid-feedback small">{{ $message }}</div>@enderror
+                                    </div>
+
+                                    <hr class="my-3">
+                                    <p class="small text-muted mb-2 fw-semibold">Change Password <span class="fw-normal">(leave blank to keep current)</span></p>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold small text-dark">New Password</label>
+                                        <input type="password" name="password" class="form-control rounded-3 @error('password') is-invalid @enderror"
+                                            placeholder="Minimum 8 characters" autocomplete="new-password">
+                                        @error('password')<div class="invalid-feedback small">{{ $message }}</div>@enderror
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label fw-semibold small text-dark">Confirm New Password</label>
+                                        <input type="password" name="password_confirmation" class="form-control rounded-3"
+                                            placeholder="Repeat new password" autocomplete="new-password">
+                                    </div>
+
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary fw-bold w-100 rounded-3 py-2" style="background:#2563eb; border:none;">
+                                            <i class="bi bi-save me-1"></i> Save Changes
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
+
                     <div class="col-lg-6">
                         <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
                             <h6 class="fw-bold text-dark mb-3"><i class="bi bi-shield-check text-success me-2"></i>KYC Verification</h6>
@@ -1355,6 +2040,165 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CREDIT SWAP (P2P) TAB -->
+            <div x-show="activeTab === 'credit_swap'" x-transition>
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <div>
+                        <h2 class="fw-bold mb-1" style="font-size:1.7rem; color:#0f172a;"><i class="bi bi-arrow-repeat text-warning me-2"></i>Credit Swap Marketplace</h2>
+                        <p class="mb-0 text-muted" style="font-size:0.95rem;">Peer-to-peer credit exchange. Sell your wallet credits for cash/bank transfer or deposit by buying credits directly from peers.</p>
+                    </div>
+                    <button class="btn btn-warning fw-bold px-4 py-2 rounded-3 shadow-sm text-dark d-flex align-items-center gap-1.5" @click="showCreateSwapModal = true">
+                        <i class="bi bi-plus-circle-fill"></i> Post Credit Swap Offer
+                    </button>
+                </div>
+
+                <!-- Info Box -->
+                <div class="p-3.5 rounded-4 mb-4 text-white position-relative overflow-hidden" style="background:linear-gradient(135deg, #0b1329 0%, #1e3a8a 100%); border:1px solid rgba(255,255,255,0.1);">
+                    <div class="row align-items-center g-3">
+                        <div class="col-lg-8">
+                            <h6 class="fw-bold text-warning mb-1"><i class="bi bi-shield-check me-1"></i> How Credit Swap Escrow Works</h6>
+                            <p class="small mb-0 text-white-50" style="line-height:1.5;">
+                                <strong>1. Seller Posts Offer:</strong> Credits are held securely in escrow from your wallet balance.<br>
+                                <strong>2. Buyer Pays Offline:</strong> Buyer transfers cash/bank transfer directly to seller's payment account.<br>
+                                <strong>3. Credits Released:</strong> Seller verifies payment receipt and clicks <em>Release Credits</em> to instantly transfer wallet funds to Buyer.
+                            </p>
+                        </div>
+                        <div class="col-lg-4 text-lg-end">
+                            <div class="p-3 rounded-3 bg-white bg-opacity-10 text-white text-center">
+                                <span class="small text-white-50 d-block mb-1">Your Spendable Wallet</span>
+                                <h4 class="fw-bold text-warning mb-0">${{ number_format($walletBalance, 2) }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Swap Offers Grid -->
+                <div class="mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-shop text-primary me-2"></i>Available Credit Swap Offers</h5>
+                    <div class="row g-3">
+                        @forelse($creditSwaps->where('status', 'active') as $swap)
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card border-0 rounded-4 shadow-sm bg-white p-3.5 h-100 position-relative">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge fw-bold px-2.5 py-1 rounded-pill" style="background:#eff6ff; color:#2563eb; font-size:0.7rem;">
+                                            <i class="bi bi-tag-fill me-1"></i> {{ $swap->reference }}
+                                        </span>
+                                        <span class="badge bg-success bg-opacity-15 text-success fw-bold px-2 py-1 rounded-pill" style="font-size:0.68rem;">Active Offer</span>
+                                    </div>
+                                    <h3 class="fw-bold text-dark mb-1">${{ number_format($swap->amount, 2) }} <small class="fs-6 text-muted fw-normal">Credit</small></h3>
+                                    <div class="small text-muted mb-2">
+                                        <i class="bi bi-person-circle text-primary me-1"></i> Seller: <strong class="text-dark">{{ $swap->seller->name ?? 'Investor' }}</strong>
+                                    </div>
+                                    <div class="p-2 rounded-3 bg-light border small mb-3">
+                                        <div class="text-muted" style="font-size:0.72rem;">Accepts Payment via:</div>
+                                        <div class="fw-bold text-primary" style="font-size:0.8rem;"><i class="bi bi-credit-card me-1"></i> {{ ucwords(str_replace('_', ' ', $swap->payment_method)) }}</div>
+                                        <div class="text-secondary text-truncate" style="font-size:0.75rem;">Account: {{ $swap->payment_details }}</div>
+                                    </div>
+                                    <div class="mt-auto">
+                                        @if($user && $swap->user_id === $user->id)
+                                            <button class="btn btn-outline-secondary btn-sm w-100 fw-bold rounded-3" disabled><i class="bi bi-person-check me-1"></i> Your Listing</button>
+                                        @else
+                                            <form action="{{ route('credit-swap.buy', $swap->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold rounded-3 py-2" style="background:#2563eb;" onclick="return confirm('Request to buy ${{ number_format($swap->amount, 2) }} credits from {{ $swap->seller->name }}? You will be given payment instructions to send money directly to seller.')">
+                                                    <i class="bi bi-cart-plus me-1"></i> Buy Credit (${{ number_format($swap->amount, 2) }})
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-12">
+                                <div class="card border-0 rounded-4 shadow-sm bg-white p-5 text-center text-muted">
+                                    <i class="bi bi-arrow-repeat fs-1 d-block mb-2 text-warning opacity-50"></i>
+                                    <h6 class="fw-bold text-dark">No Active Credit Swaps Yet</h6>
+                                    <p class="small mb-3">Be the first to post a credit swap offer or sell your wallet credits for cash.</p>
+                                    <div>
+                                        <button class="btn btn-primary btn-sm fw-bold px-4 py-2 rounded-3" style="background:#2563eb;" @click="showCreateSwapModal = true">
+                                            <i class="bi bi-plus-lg me-1"></i> Post Swap Offer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                <!-- My Credit Swaps & Requests Section -->
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-journal-text me-2 text-primary"></i>My Credit Swap Activity</h6>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0" style="font-size:0.85rem;">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th class="py-2.5">REF</th>
+                                    <th class="py-2.5">ROLE</th>
+                                    <th class="py-2.5">AMOUNT</th>
+                                    <th class="py-2.5">PAYMENT METHOD</th>
+                                    <th class="py-2.5">COUNTERPARTY</th>
+                                    <th class="py-2.5">STATUS</th>
+                                    <th class="py-2.5 text-end">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($creditSwaps->filter(fn($s) => $s->user_id === $user->id || $s->buyer_id === $user->id) as $mySwap)
+                                    @php
+                                        $isSeller = $mySwap->user_id === $user->id;
+                                    @endphp
+                                    <tr>
+                                        <td><code class="fw-bold text-primary">{{ $mySwap->reference }}</code></td>
+                                        <td>
+                                            <span class="badge fw-bold px-2 py-1 rounded-pill" style="{{ $isSeller ? 'background:#eff6ff; color:#2563eb;' : 'background:#f0fdf4; color:#16a34a;' }}">
+                                                {{ $isSeller ? 'Seller' : 'Buyer' }}
+                                            </span>
+                                        </td>
+                                        <td class="fw-bold">${{ number_format($mySwap->amount, 2) }}</td>
+                                        <td>{{ ucwords(str_replace('_', ' ', $mySwap->payment_method)) }}</td>
+                                        <td>
+                                            @if($isSeller)
+                                                {{ $mySwap->buyer ? $mySwap->buyer->name : 'Waiting for Buyer' }}
+                                            @else
+                                                {{ $mySwap->seller ? $mySwap->seller->name : 'Seller' }}
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <span class="badge fw-bold px-2 py-1 rounded-pill" style="{{ $mySwap->status === 'completed' ? 'background:#f0fdf4; color:#16a34a;' : ($mySwap->status === 'pending_payment' ? 'background:#fffbeb; color:#d97706;' : ($mySwap->status === 'active' ? 'background:#eff6ff; color:#2563eb;' : 'background:#fef2f2; color:#dc2626;')) }}">
+                                                {{ ucfirst(str_replace('_', ' ', $mySwap->status)) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            @if($isSeller && in_array($mySwap->status, ['active', 'pending_payment']))
+                                                <form action="{{ route('credit-swap.release', $mySwap->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-success fw-bold px-2.5 py-1 rounded-3 me-1" onclick="return confirm('Confirm that you have received payment for this Credit Swap? This will instantly transfer ${{ number_format($mySwap->amount, 2) }} credits to the buyer.')">
+                                                        <i class="bi bi-check-circle me-1"></i> Release Credits
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('credit-swap.cancel', $mySwap->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger fw-bold px-2.5 py-1 rounded-3" onclick="return confirm('Cancel this Credit Swap listing and return escrowed credits to your wallet?')">
+                                                        Cancel
+                                                    </button>
+                                                </form>
+                                            @elseif(!$isSeller && $mySwap->status === 'pending_payment')
+                                                <span class="text-warning fw-bold small"><i class="bi bi-clock me-1"></i> Awaiting Seller Release</span>
+                                            @else
+                                                <span class="text-muted small">--</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4 text-muted">No Credit Swap history yet.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -1579,38 +2423,32 @@
     </div>
 </div>
 
-<!-- Buy Shares Modal -->
+<!-- Buy Property Modal -->
 <div x-show="selectedProperty" x-cloak class="custom-modal-backdrop">
     <div class="custom-modal-card p-4" style="max-width:500px;">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold me-2">Property Investment</span>
+                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold me-2">Property Purchase</span>
                 <h5 class="fw-bold text-dark mb-0 mt-1" x-text="selectedProperty?.title"></h5>
             </div>
             <button type="button" class="btn-close" @click="selectedProperty = null"></button>
         </div>
         <div class="p-3 rounded-3 bg-light border mb-3">
             <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">Location</span><strong class="text-dark" x-text="selectedProperty?.location"></strong></div>
-            <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">Price Per Share</span><strong class="text-dark" x-text="'$' + parseFloat(selectedProperty?.price_per_share || 0).toFixed(2)"></strong></div>
-            <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">ROI</span><strong class="text-success" x-text="(selectedProperty?.roi_percentage || 0) + '%'"></strong></div>
-            <div class="d-flex justify-content-between small"><span class="text-muted">Available Shares</span><strong class="text-dark" x-text="selectedProperty?.available_shares"></strong></div>
+            <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">Category</span><strong class="text-dark" x-text="selectedProperty?.category"></strong></div>
+            <div class="d-flex justify-content-between small"><span class="text-muted">Status</span><strong class="text-success" x-text="selectedProperty?.status === 'sold_out' ? 'Sold' : 'For Sale'"></strong></div>
         </div>
-        <form action="{{ route('buy-shares.store') }}" method="POST">
+        <form :action="'/property/' + (selectedProperty?.id || '') + '/purchase'" method="POST" @submit="if (!confirm('Confirm purchase of ' + (selectedProperty?.title || '') + ' for $' + parseFloat(selectedProperty?.price || 0).toFixed(2) + '? This amount will be deducted from your wallet.')) { $event.preventDefault(); }">
             @csrf
-            <input type="hidden" name="property_id" :value="selectedProperty?.id">
-            <div class="mb-3">
-                <label class="form-label fw-bold text-dark small">Number of Shares to Buy</label>
-                <input type="number" name="shares" min="1" class="form-control fw-bold" placeholder="1" x-model="buySharesQty" @input="buyTotal = buySharesQty * (selectedProperty?.price_per_share || 0)" required>
-            </div>
             <div class="p-3 rounded-3 mb-3" style="background:#eff6ff; border:1px solid #bfdbfe;">
                 <div class="d-flex justify-content-between small fw-bold">
-                    <span class="text-muted">Total Cost</span>
-                    <span class="text-primary fs-5" x-text="'$' + parseFloat(buyTotal || 0).toFixed(2)">$0.00</span>
+                    <span class="text-muted">Purchase Price</span>
+                    <span class="text-primary fs-5" x-text="'$' + parseFloat(selectedProperty?.price || 0).toFixed(2)">$0.00</span>
                 </div>
                 <div class="text-muted mt-1" style="font-size:0.78rem;">Your wallet: <strong class="text-success">${{ number_format($walletBalance, 2) }}</strong></div>
             </div>
             <button type="submit" class="btn btn-primary fw-bold w-100 py-2 rounded-3" style="background:#2563eb;">
-                <i class="bi bi-lightning-charge me-1"></i> Confirm Purchase
+                <i class="bi bi-house-check me-1"></i> Confirm Purchase
             </button>
         </form>
     </div>
@@ -1652,7 +2490,12 @@
             </div>
             <div class="d-flex justify-content-between small mb-0"><span class="text-muted">Date</span><strong class="text-dark" x-text="selectedTxn?.created_at ? new Date(selectedTxn.created_at).toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'}) : ''"></strong></div>
         </div>
-        <button class="btn btn-light fw-bold w-100 py-2 rounded-3 border" @click="selectedTxn = null">Close</button>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-primary fw-bold w-50 py-2 rounded-3" style="background:#2563eb;" @click="printTransactionReceipt()">
+                <i class="bi bi-printer me-1.5"></i> Print Receipt
+            </button>
+            <button type="button" class="btn btn-light fw-bold w-50 py-2 rounded-3 border" @click="selectedTxn = null">Close</button>
+        </div>
     </div>
 </div>
 
@@ -1672,13 +2515,103 @@
     </div>
 </div>
 
+<!-- Quick Finance Deposit Request Modal -->
+<div x-show="showFinanceModal" x-cloak class="custom-modal-backdrop">
+    <div class="custom-modal-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-wallet2 text-primary me-2"></i>New Deposit Request</h5>
+            <button type="button" class="btn-close" @click="showFinanceModal = false"></button>
+        </div>
+        <form action="{{ route('deposit.store') }}" method="POST" x-data="{ modalDepMethod: 'bank_transfer' }">
+            @csrf
+            <div class="mb-3">
+                <label class="form-label fw-bold small" style="color:#1e293b;">Payment Method <span style="color:#ef4444;">*</span></label>
+                <select class="form-select rounded-3 border-secondary-subtle" name="payment_method" x-model="modalDepMethod" required>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="credit_card">Credit / Debit Card</option>
+                    <option value="wire_transfer">Wire Transfer</option>
+                    <option value="crypto">Cryptocurrency (USDT / BTC)</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold small" style="color:#1e293b;">Deposit Amount ($ USD) <span style="color:#ef4444;">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted border-secondary-subtle fw-bold">$</span>
+                    <input type="number" step="0.01" min="10" name="amount" class="form-control rounded-end-3 border-secondary-subtle" placeholder="e.g. 500.00" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold small" style="color:#1e293b;">Sender Name / Account</label>
+                <input type="text" name="sender_account_name" class="form-control rounded-3 border-secondary-subtle" value="{{ $user->name ?? '' }}" placeholder="Your Name or Account ID">
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold small" style="color:#1e293b;">Notes (Optional)</label>
+                <textarea name="notes" class="form-control rounded-3 border-secondary-subtle" rows="2" placeholder="Add additional details for finance team..."></textarea>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary fw-bold w-50 py-2 rounded-3" @click="showFinanceModal = false">Cancel</button>
+                <button type="submit" class="btn btn-primary fw-bold w-50 py-2 rounded-3" style="background:#2563eb;">Submit Deposit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Create Credit Swap Offer Modal -->
+<div x-show="showCreateSwapModal" x-cloak class="custom-modal-backdrop">
+    <div class="custom-modal-card p-4" style="max-width:520px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-arrow-repeat text-warning me-2"></i>Post Credit Swap Offer</h5>
+            <button type="button" class="btn-close" @click="showCreateSwapModal = false"></button>
+        </div>
+        <p class="text-muted small mb-3">Post your platform wallet credits for sale. Once posted, credits will be held safely in escrow until you confirm cash payment receipt from buyer.</p>
+        
+        <form action="{{ route('credit-swap.create') }}" method="POST">
+            @csrf
+            <div class="mb-3">
+                <label class="form-label fw-bold small text-dark">Amount to Swap ($ USD) <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted fw-bold">$</span>
+                    <input type="number" step="0.01" min="10" max="{{ $walletBalance }}" name="amount" class="form-control fw-bold" placeholder="e.g. 500.00" required>
+                </div>
+                <div class="d-flex justify-content-between small text-muted mt-1">
+                    <span>Available: ${{ number_format($walletBalance, 2) }}</span>
+                    <span>Min: $10.00</span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold small text-dark">Accepted Payment Method <span class="text-danger">*</span></label>
+                <select name="payment_method" class="form-select rounded-3" required>
+                    <option value="bank_transfer">Bank Transfer (Wire / Online Bank)</option>
+                    <option value="GCash">GCash / Mobile Money</option>
+                    <option value="cash">Cash / In Person</option>
+                    <option value="crypto">Crypto (USDT / BTC)</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold small text-dark">Your Receiving Account Details <span class="text-danger">*</span></label>
+                <textarea name="payment_details" class="form-control rounded-3" rows="3" placeholder="e.g. Bank Name: BDO | Account No: 123456789 | Account Name: Your Name" required></textarea>
+                <div class="form-text small text-muted">Buyers will send cash payment directly to these details before you release credits.</div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary fw-bold w-50 py-2 rounded-3" @click="showCreateSwapModal = false">Cancel</button>
+                <button type="submit" class="btn btn-warning fw-bold w-50 py-2 rounded-3 text-dark shadow-sm">
+                    <i class="bi bi-upload me-1"></i> Post Swap Offer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Alpine JS Dashboard Engine -->
 <script>
     function userDashboardEngine() {
         return {
             activeTab: (function() {
                 var hash = window.location.hash.replace('#', '');
-                var valid = ['overview','invest','marketplace','my_investments','deposit','withdraw','transactions','notifications','referrals','profile_kyc'];
+                var valid = ['overview','invest','saved_projects','marketplace','my_investments','deposit','withdraw','credit_swap','transactions','notifications','referrals','profile_kyc'];
                 return valid.indexOf(hash) !== -1 ? hash : 'overview';
             })(),
 
@@ -1686,27 +2619,138 @@
                 var self = this;
                 window.addEventListener('hashchange', function() {
                     var hash = window.location.hash.replace('#', '');
-                    var valid = ['overview','invest','marketplace','my_investments','deposit','withdraw','transactions','notifications','referrals','profile_kyc'];
+                    var valid = ['overview','invest','saved_projects','marketplace','my_investments','deposit','withdraw','credit_swap','transactions','notifications','referrals','profile_kyc'];
                     if (valid.indexOf(hash) !== -1) {
                         self.activeTab = hash;
                     }
                 });
             },
             requestFilter: 'all',
+            propFilter: 'all',
             showFinanceModal: false,
+            showCreateSwapModal: false,
             financeMethod: 'GCash',
             selectedDepInstruction: null,
             evidenceFileName: '',
             openReceiveModal: false,
+            showEditProfile: false,
             selectedProperty: null,
-            buySharesQty: 1,
-            buyTotal: 0,
             propertiesList: @json($properties),
             transactionsList: @json($transactions->values()),
             selectedTxn: null,
 
             openTxnPreview(index) {
                 this.selectedTxn = this.transactionsList[index];
+            },
+
+            printTransactionReceipt() {
+                if (!this.selectedTxn) return;
+                const txn = this.selectedTxn;
+                const userName = @json($user->name ?? 'Valued Investor');
+                const userEmail = @json($user->email ?? '');
+                const userAccount = @json($user->account_id ?? '');
+                const logoUrl = @json(asset('frontend/images/logo/radiantblue.png'));
+
+                const isCredit = ['deposit','receive_funds','roi_payout','affiliate_earning'].includes(txn.type);
+                const formattedAmount = (isCredit ? '+' : '-') + '$' + parseFloat(txn.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+                const printWin = window.open('', '_blank', 'width=840,height=920');
+                if (!printWin) {
+                    alert('Please allow popups to print receipt.');
+                    return;
+                }
+                printWin.document.write(`
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Transaction Receipt - ${txn.reference}</title>
+                        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+                        <style>
+                            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+                            body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f1f5f9; color: #0f172a; padding: 40px 20px; }
+                            .receipt-card { max-width: 680px; margin: 0 auto; background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; padding: 40px; box-shadow: 0 25px 50px -12px rgba(15,23,42,0.12); position: relative; overflow: hidden; }
+                            .header-bar { border-bottom: 2px dashed #cbd5e1; padding-bottom: 24px; margin-bottom: 28px; }
+                            .meta-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; }
+                            .receipt-table td { padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.92rem; }
+                            .receipt-table tr:last-child td { border-bottom: none; }
+                            .watermark-seal { position: absolute; right: -20px; bottom: 60px; opacity: 0.04; font-size: 14rem; color: #1e3a8a; pointer-events: none; }
+                            @media print {
+                                body { background: #ffffff !important; padding: 0 !important; }
+                                .no-print { display: none !important; }
+                                .receipt-card { border: none !important; box-shadow: none !important; padding: 0 !important; border-radius: 0 !important; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="no-print mb-4 text-center">
+                            <button onclick="window.print()" class="btn btn-primary fw-bold px-4 py-2.5 rounded-3 me-2 shadow-sm" style="background:#2563eb; border:none;"><i class="bi bi-printer me-2"></i>Print / Save as PDF</button>
+                            <button onclick="window.close()" class="btn btn-outline-secondary fw-bold px-4 py-2.5 rounded-3">Close</button>
+                        </div>
+                        <div class="receipt-card">
+                            <div class="watermark-seal"><i class="bi bi-shield-check"></i></div>
+                            <div class="header-bar d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                <div>
+                                    <img src="${logoUrl}" alt="Radiant Dream Realty" height="48" style="object-fit:contain;" class="mb-2">
+                                    <div class="text-muted small fw-medium" style="font-size:0.8rem;">Official Financial Statement &amp; Transaction Receipt</div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge fw-bold px-3 py-2 rounded-pill fs-6 d-inline-flex align-items-center gap-1.5" style="background:#f0fdf4; color:#16a34a; border: 1px solid #bbf7d0;">
+                                        <i class="bi bi-patch-check-fill"></i> VERIFIED RECEIPT
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="meta-box mb-4">
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <span class="text-muted small d-block fw-semibold" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">ACCOUNT HOLDER</span>
+                                        <strong class="text-dark fs-6 d-block mt-0.5">${userName}</strong>
+                                        <div class="small text-secondary" style="font-size:0.78rem;">${userAccount} &middot; ${userEmail}</div>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <span class="text-muted small d-block fw-semibold" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">TRANSACTION REFERENCE</span>
+                                        <code class="fw-bold text-primary fs-6 d-block mt-0.5" style="font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;">${txn.reference}</code>
+                                        <div class="small text-secondary" style="font-size:0.78rem;">${txn.created_at ? new Date(txn.created_at).toLocaleDateString('en-US', {year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}) : 'Recent'}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <table class="w-100 receipt-table mb-4">
+                                <tbody>
+                                    <tr>
+                                        <td class="text-muted fw-semibold">Transaction Type</td>
+                                        <td class="text-end fw-bold text-dark">${txn.type ? txn.type.replace(/_/g, ' ').toUpperCase() : 'TRANSACTION'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted fw-semibold">Description / Note</td>
+                                        <td class="text-end fw-bold text-dark" style="max-width:320px;">${txn.description || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted fw-semibold">Payment Status</td>
+                                        <td class="text-end py-2.5">
+                                            <span class="badge fw-bold px-3 py-1 rounded-pill" style="font-size:0.78rem; ${txn.status === 'completed' ? 'background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;' : (txn.status === 'pending' ? 'background:#fffbeb; color:#d97706; border:1px solid #fef3c7;' : 'background:#fef2f2; color:#dc2626; border:1px solid #fecaca;')}">
+                                                ${(txn.status || 'completed').toUpperCase()}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr style="border-top: 2px solid #e2e8f0; border-bottom: 2px solid #e2e8f0;">
+                                        <td class="text-dark fw-bold fs-5 py-3">Total Amount</td>
+                                        <td class="text-end fw-bold fs-3 py-3 ${isCredit ? 'text-success' : 'text-danger'}" style="font-variant-numeric: tabular-nums;">${formattedAmount}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="pt-3 border-top text-center text-muted small" style="font-size:0.78rem;">
+                                <p class="mb-1 fw-bold text-dark"><i class="bi bi-shield-lock text-primary me-1"></i> Radiant Dream Realty Corp. &middot; Automated Financial System</p>
+                                <p class="mb-0 text-secondary" style="font-size:0.72rem;">This is an electronically generated official receipt. Digitally verified by Radiant Dream Realty platform. No signature required.</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                `);
+                printWin.document.close();
             },
 
             openFinanceForm(type) {
@@ -1717,8 +2761,6 @@
                 const prop = this.propertiesList.find(p => p.id == id);
                 if (prop) {
                     this.selectedProperty = prop;
-                    this.buySharesQty = 1;
-                    this.buyTotal = parseFloat(prop.price_per_share || 0);
                 }
             },
 
@@ -1745,6 +2787,20 @@
                     alert('Credentials copied to clipboard!');
                 }
             }
+        }
+    }
+
+    function shareProject(title, url) {
+        if (navigator.share) {
+            navigator.share({ title: title, url: url, text: 'Invest in this project on Radiant Dream Realty' }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(url).then(() => {
+                const toast = document.createElement('div');
+                toast.textContent = 'Project link copied to clipboard!';
+                toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1d4ed8;color:#fff;padding:10px 20px;border-radius:8px;font-weight:600;font-size:0.85rem;z-index:999999;box-shadow:0 4px 20px rgba(0,0,0,0.2);';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2500);
+            });
         }
     }
 

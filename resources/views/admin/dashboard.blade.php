@@ -101,6 +101,12 @@
                 <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'properties' }" @click.prevent="activeAdminTab = 'properties'">
                     <i class="bi bi-building"></i> Investments / Properties
                 </a>
+                <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'projects' }" @click.prevent="activeAdminTab = 'projects'">
+                    <i class="bi bi-rocket-takeoff"></i> Projects
+                    @if($totalProjectsCount > 0)
+                        <span class="badge bg-warning text-dark ms-auto rounded-pill">{{ $totalProjectsCount }}</span>
+                    @endif
+                </a>
                 <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'users' }" @click.prevent="activeAdminTab = 'users'">
                     <i class="bi bi-people-fill"></i> Users
                 </a>
@@ -288,15 +294,20 @@
                                 <label class="form-label fw-semibold text-dark small">Location</label>
                                 <input type="text" name="location" class="form-control" placeholder="e.g. Manhattan, New York" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold text-dark small">Full Purchase Price ($)</label>
+                                <input type="number" step="0.01" min="1" name="price" class="form-control" placeholder="150000.00">
+                                <small class="text-muted">One-time purchase price for direct buyers.</small>
+                            </div>
+                            <div class="col-md-3">
                                 <label class="form-label fw-semibold text-dark small">Price Per Share ($)</label>
                                 <input type="number" step="0.01" name="price_per_share" class="form-control" placeholder="500.00" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label fw-semibold text-dark small">Total Shares</label>
                                 <input type="number" name="total_shares" class="form-control" placeholder="1000" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label fw-semibold text-dark small">Target ROI (%)</label>
                                 <input type="number" step="0.1" name="roi_percentage" class="form-control" placeholder="24.5" required>
                             </div>
@@ -315,6 +326,7 @@
                             <thead>
                                 <tr style="background:#f8fafc;">
                                     <th class="px-4 py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">PROPERTY</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">PRICE</th>
                                     <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">SHARE PRICE</th>
                                     <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">ROI %</th>
                                     <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">DURATION</th>
@@ -330,6 +342,7 @@
                                             <small class="text-muted" style="font-size:0.7rem;">{{ $prop->location }}</small>
                                             <span class="badge fw-semibold rounded-pill ms-1" style="background:{{ $prop->status === 'active' ? '#f0fdf4' : '#f1f5f9' }}; color:{{ $prop->status === 'active' ? '#16a34a' : '#64748b' }}; font-size:0.62rem;">{{ $prop->status }}</span>
                                         </td>
+                                        <td class="py-3"><span class="small fw-semibold text-dark">${{ number_format($prop->purchasePrice(), 2) }}</span></td>
                                         <td class="py-3"><span class="small fw-semibold text-dark">${{ number_format($prop->price_per_share, 2) }}</span></td>
                                         <td class="py-3"><span class="fw-bold" style="color:#7c3aed;">{{ $prop->roi_percentage }}%</span></td>
                                         <td class="py-3"><span class="small text-muted">{{ $prop->investment_duration_months }} months</span></td>
@@ -347,6 +360,151 @@
                                     </tr>
                                 @empty
                                     <tr><td colspan="6" class="text-center py-5" style="color:#94a3b8;"><i class="bi bi-building fs-2 d-block mb-2 opacity-25"></i><span style="font-size:0.9rem;">No properties yet.</span></td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROJECTS TAB -->
+            <div x-show="activeAdminTab === 'projects'" x-transition>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <span class="text-uppercase fw-bold text-purple small" style="color: #7c3aed;">INVESTMENT PROJECTS</span>
+                        <h3 class="fw-bold text-dark mb-0">Projects</h3>
+                        <p class="mb-0" style="font-size:0.9rem; font-weight:500; color:#475569;">Create and manage flexible-amount investment projects with target funding and expected returns.</p>
+                    </div>
+                </div>
+
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-plus-circle-fill text-primary me-2"></i>Publish New Investment Project</h5>
+                    <form action="{{ route('admin.project.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">Project Title</label>
+                                <input type="text" name="title" class="form-control" placeholder="e.g. Horizon Towers Development" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">Location</label>
+                                <input type="text" name="location" class="form-control" placeholder="e.g. Makati City, Philippines" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-dark small">Category</label>
+                                <select name="category" class="form-select">
+                                    @foreach(['Residential', 'Commercial', 'Luxury', 'Vacation', 'Land', 'Multi-Family'] as $cat)
+                                        <option value="{{ $cat }}">{{ $cat }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-dark small">Target Amount ($)</label>
+                                <input type="number" step="0.01" min="1" name="target_amount" class="form-control" placeholder="100000.00" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-dark small">Minimum Investment ($)</label>
+                                <input type="number" step="0.01" min="1" name="minimum_investment" class="form-control" placeholder="100.00" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-dark small">Expected Return (%)</label>
+                                <input type="number" step="0.1" min="0" name="expected_return_percentage" class="form-control" placeholder="24.5" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-dark small">Rating (0 - 5)</label>
+                                <input type="number" step="0.1" min="0" max="5" name="rating" class="form-control" placeholder="4.5">
+                                <small class="text-muted">Shown as stars on project listings.</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-dark small">Duration (Months)</label>
+                                <input type="number" min="1" name="investment_duration_months" class="form-control" placeholder="12" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-dark small">Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="active">Active</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="closed">Closed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">Image URL</label>
+                                <input type="url" name="image_url" class="form-control" placeholder="https://...">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">Project Document (PDF/DOC)</label>
+                                <input type="file" name="document" class="form-control" accept=".pdf,.doc,.docx">
+                                <small class="text-muted">Uploaded documents are downloadable by investors from the project page.</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold text-dark small">Description</label>
+                                <textarea name="description" class="form-control" rows="3" placeholder="Describe the project, location benefits, and return expectations..."></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary fw-bold px-4 py-2 rounded-3" style="background:#2563eb;">
+                            <i class="bi bi-plus-circle me-1"></i> Publish Project
+                        </button>
+                    </form>
+                </div>
+
+                <div class="card border-0 rounded-4 shadow-sm bg-white overflow-hidden">
+                    <div class="px-4 pt-4 pb-0 d-flex align-items-center justify-content-between">
+                        <h6 class="fw-bold mb-0" style="color:#0f172a;"><i class="bi bi-rocket-takeoff me-2" style="color:#7c3aed;"></i>All Projects</h6>
+                        <span class="badge fw-semibold rounded-pill px-2 py-1" style="background:#f1f5f9; color:#475569; font-size:0.68rem;">{{ $projects->count() }} projects</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0" style="border-collapse:separate; border-spacing:0;">
+                            <thead>
+                                <tr style="background:#f8fafc;">
+                                    <th class="px-4 py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">PROJECT</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">TARGET</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">MIN INVEST</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">RETURN %</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">RATING</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">DURATION</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">INVESTORS</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">STATUS</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($projects as $proj)
+                                    <tr style="border-bottom:1px solid #f1f5f9;">
+                                        <td class="px-4 py-3">
+                                            <div class="fw-bold small text-dark">{{ $proj->title }}</div>
+                                            <small class="text-muted" style="font-size:0.7rem;">{{ $proj->location }} &middot; {{ $proj->category }}</small>
+                                        </td>
+                                        <td class="py-3"><span class="small fw-semibold text-dark">${{ number_format($proj->target_amount, 2) }}</span></td>
+                                        <td class="py-3"><span class="small text-muted">${{ number_format($proj->minimum_investment, 2) }}</span></td>
+                                        <td class="py-3"><span class="fw-bold" style="color:#7c3aed;">{{ $proj->expected_return_percentage }}%</span></td>
+                                        <td class="py-3">
+                                            @if($proj->rating > 0)
+                                                <span class="fw-bold" style="color:#f59e0b;"><i class="bi bi-star-fill me-1"></i>{{ number_format((float) $proj->rating, 1) }}</span>
+                                            @else
+                                                <span class="text-muted small">—</span>
+                                            @endif
+                                        </td>
+                                        <td class="py-3"><span class="small text-muted">{{ $proj->investment_duration_months }} mos</span></td>
+                                        <td class="py-3"><span class="small text-muted">{{ $proj->investments_count }} investor(s)</span></td>
+                                        <td class="py-3">
+                                            <span class="badge fw-semibold rounded-pill" style="background:{{ $proj->status === 'active' ? '#f0fdf4' : '#f1f5f9' }}; color:{{ $proj->status === 'active' ? '#16a34a' : '#64748b' }}; font-size:0.62rem;">{{ $proj->status }}</span>
+                                        </td>
+                                        <td class="py-3">
+                                            <div class="d-flex gap-1">
+                                                <a href="{{ route('admin.project.edit', $proj->id) }}" class="btn btn-sm fw-bold rounded-pill px-3 text-white" style="background:#7c3aed; border:none; font-size:0.7rem;">
+                                                    <i class="bi bi-pencil me-1"></i> Edit
+                                                </a>
+                                                <form action="{{ route('admin.project.delete', $proj->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm fw-bold rounded-pill px-3 text-danger" style="background:#fef2f2; border:1px solid #fecaca; font-size:0.7rem;" onclick="return confirm('Delete project &quot;{{ $proj->title }}&quot;? This also removes all investments and saved records.')">
+                                                        <i class="bi bi-trash me-1"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="8" class="text-center py-5" style="color:#94a3b8;"><i class="bi bi-rocket-takeoff fs-2 d-block mb-2 opacity-25"></i><span style="font-size:0.9rem;">No projects yet. Publish your first investment project above.</span></td></tr>
                                 @endforelse
                             </tbody>
                         </table>

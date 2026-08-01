@@ -10,6 +10,7 @@ use App\Mail\WithdrawalApprovedMail;
 use App\Mail\WithdrawalRejectedMail;
 use App\Models\User;
 use App\Models\Property;
+use App\Models\Project;
 use App\Models\Investment;
 use App\Models\Deposit;
 use App\Models\Withdrawal;
@@ -17,6 +18,8 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AdminDashboardController extends Controller
 {
@@ -33,11 +36,13 @@ class AdminDashboardController extends Controller
         $totalUsersCount = User::where('role', 'user')->count();
         $totalInvestmentsAmount = Investment::sum('total_amount');
         $totalPropertiesCount = Property::count();
+        $totalProjectsCount = Project::count();
         $pendingDeposits = Deposit::with('user')->where('status', 'pending')->orderBy('created_at', 'desc')->get();
         $pendingWithdrawals = Withdrawal::with('user')->where('status', 'pending')->orderBy('created_at', 'desc')->get();
         $allDeposits = Deposit::with('user')->orderBy('created_at', 'desc')->take(20)->get();
         $allWithdrawals = Withdrawal::with('user')->orderBy('created_at', 'desc')->take(20)->get();
         $properties = Property::orderBy('created_at', 'desc')->get();
+        $projects = Project::withCount('investments')->orderBy('created_at', 'desc')->get();
         $users = User::with(['investments.property', 'deposits', 'withdrawals', 'transactions', 'referrals'])
             ->where('role', 'user')
             ->orderBy('created_at', 'desc')
@@ -50,11 +55,13 @@ class AdminDashboardController extends Controller
             'totalUsersCount',
             'totalInvestmentsAmount',
             'totalPropertiesCount',
+            'totalProjectsCount',
             'pendingDeposits',
             'pendingWithdrawals',
             'allDeposits',
             'allWithdrawals',
             'properties',
+            'projects',
             'users',
             'kycPendingUsers',
             'referrers',
@@ -188,6 +195,7 @@ class AdminDashboardController extends Controller
             'title' => 'required|string|max:255',
             'location' => 'required|string|max:255',
             'category' => 'required|string',
+            'price' => 'nullable|numeric|min:1',
             'price_per_share' => 'required|numeric|min:1',
             'total_shares' => 'required|integer|min:1',
             'roi_percentage' => 'required|numeric|min:0',
@@ -200,6 +208,7 @@ class AdminDashboardController extends Controller
             'title' => $request->title,
             'location' => $request->location,
             'category' => $request->category,
+            'price' => $request->price,
             'price_per_share' => $request->price_per_share,
             'total_shares' => $request->total_shares,
             'available_shares' => $request->total_shares,
@@ -219,6 +228,7 @@ class AdminDashboardController extends Controller
             'title' => 'required|string|max:255',
             'location' => 'required|string|max:255',
             'category' => 'required|string',
+            'price' => 'nullable|numeric|min:1',
             'price_per_share' => 'required|numeric|min:1',
             'total_shares' => 'required|integer|min:1',
             'roi_percentage' => 'required|numeric|min:0|max:1000',
@@ -232,6 +242,7 @@ class AdminDashboardController extends Controller
         $property->title = $request->title;
         $property->location = $request->location;
         $property->category = $request->category;
+        $property->price = $request->price;
         $property->price_per_share = $request->price_per_share;
         $property->total_shares = $request->total_shares;
         $property->available_shares = min($request->total_shares, $property->available_shares);
@@ -260,6 +271,108 @@ class AdminDashboardController extends Controller
         $property->delete();
 
         return redirect()->back()->with('success', 'Property "' . $property->title . '" deleted' . ($investmentsCount > 0 ? " (along with $investmentsCount linked investment record(s))" : '') . '.');
+    }
+
+    public function storeProject(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'category' => 'required|string',
+            'target_amount' => 'required|numeric|min:1',
+            'minimum_investment' => 'required|numeric|min:1',
+            'expected_return_percentage' => 'required|numeric|min:0|max:1000',
+            'investment_duration_months' => 'required|integer|min:1',
+            'rating' => 'nullable|numeric|min:0|max:5',
+            'image_url' => 'nullable|string',
+            'description' => 'nullable|string',
+            'document' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+            'status' => 'nullable|string|in:active,completed,closed',
+        ]);
+
+        $documentPath = null;
+        if ($request->hasFile('document')) {
+            $documentPath = $request->file('document')->store('project-documents', 'public');
+        }
+
+        Project::create([
+            'title' => $request->title,
+            'location' => $request->location,
+            'category' => $request->category,
+            'image_url' => $request->image_url ?: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1000&auto=format&fit=crop',
+            'target_amount' => $request->target_amount,
+            'minimum_investment' => $request->minimum_investment,
+            'expected_return_percentage' => $request->expected_return_percentage,
+            'investment_duration_months' => $request->investment_duration_months,
+            'rating' => $request->rating ?? 0.00,
+            'description' => $request->description,
+            'document_path' => $documentPath,
+            'status' => $request->status ?: 'active',
+        ]);
+
+        return redirect()->route('admin.dashboard', ['tab' => 'projects'])->with('success', 'New investment project created successfully!');
+    }
+
+    public function editProject($id)
+    {
+        $project = Project::findOrFail($id);
+
+        return view('admin.project-edit', compact('project'));
+    }
+
+    public function updateProject(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'category' => 'required|string',
+            'target_amount' => 'required|numeric|min:1',
+            'minimum_investment' => 'required|numeric|min:1',
+            'expected_return_percentage' => 'required|numeric|min:0|max:1000',
+            'investment_duration_months' => 'required|integer|min:1',
+            'rating' => 'nullable|numeric|min:0|max:5',
+            'image_url' => 'nullable|string',
+            'description' => 'nullable|string',
+            'document' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+            'status' => 'nullable|string|in:active,completed,closed',
+        ]);
+
+        $project = Project::findOrFail($id);
+        $project->title = $request->title;
+        $project->location = $request->location;
+        $project->category = $request->category;
+        $project->image_url = $request->image_url;
+        $project->target_amount = $request->target_amount;
+        $project->minimum_investment = $request->minimum_investment;
+        $project->expected_return_percentage = $request->expected_return_percentage;
+        $project->investment_duration_months = $request->investment_duration_months;
+        $project->rating = $request->rating ?? 0.00;
+        $project->description = $request->description;
+        $project->status = $request->status ?: $project->status;
+
+        if ($request->hasFile('document')) {
+            if ($project->document_path) {
+                Storage::disk('public')->delete($project->document_path);
+            }
+            $project->document_path = $request->file('document')->store('project-documents', 'public');
+        }
+
+        $project->save();
+
+        return redirect()->route('admin.dashboard', ['tab' => 'projects'])->with('success', 'Project "' . $project->title . '" updated successfully.');
+    }
+
+    public function deleteProject($id)
+    {
+        $project = Project::findOrFail($id);
+
+        if ($project->document_path) {
+            Storage::disk('public')->delete($project->document_path);
+        }
+
+        $project->delete();
+
+        return redirect()->back()->with('success', 'Project "' . $project->title . '" deleted.');
     }
 
     public function awardReferralBonus(Request $request)

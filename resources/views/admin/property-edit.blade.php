@@ -90,6 +90,17 @@
                 </div>
 
                 <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-tag-fill me-2" style="color:#2563eb;"></i>Direct Purchase Price</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-dark small">Full Purchase Price ($)</label>
+                            <input type="number" step="0.01" min="1" name="price" class="form-control" x-model="form.price" value="{{ $property->price }}" placeholder="150000.00">
+                            <small class="text-muted">One-time price for direct property buyers. Leave blank to fall back to share valuation.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
                     <h6 class="fw-bold text-dark mb-3"><i class="bi bi-graph-up-arrow me-2" style="color:#7c3aed;"></i>Investment Settings</h6>
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -154,6 +165,7 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between border-top pt-3 text-muted small mb-3">
+                                <span>Full Price: <b class="text-dark" x-text="'$' + Number(preview.price || 0).toFixed(2)">$0.00</b></span>
                                 <span>Share Price: <b class="text-dark" x-text="'$' + Number(preview.price_per_share).toFixed(2)">$0.00</b></span>
                                 <span>Est. Yield: <b class="text-success" x-text="preview.roi_percentage + '% p.a.'">0% p.a.</b></span>
                             </div>
@@ -217,6 +229,7 @@
                 status: '',
                 image_url: '',
                 description: '',
+                price: null,
                 price_per_share: 0,
                 roi_percentage: 0,
                 total_shares: 0,
@@ -233,6 +246,7 @@
                     status: {{ json_encode($property->status) }},
                     image_url: {{ json_encode($property->image_url) }},
                     description: {{ json_encode($property->description) }},
+                    price: {{ $property->price !== null ? $property->price : 'null' }},
                     price_per_share: parseFloat({{ $property->price_per_share }}),
                     roi_percentage: parseFloat({{ $property->roi_percentage }}),
                     total_shares: parseInt({{ $property->total_shares }}),

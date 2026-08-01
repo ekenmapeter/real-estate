@@ -16,6 +16,7 @@ class Property extends Model
         'location',
         'category',
         'image_url',
+        'price',
         'price_per_share',
         'total_shares',
         'available_shares',
@@ -26,6 +27,7 @@ class Property extends Model
     ];
 
     protected $casts = [
+        'price' => 'decimal:2',
         'price_per_share' => 'decimal:2',
         'roi_percentage' => 'decimal:2',
     ];
@@ -48,5 +50,20 @@ class Property extends Model
     public function investments()
     {
         return $this->hasMany(Investment::class);
+    }
+
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class);
+    }
+
+    public function savedBy()
+    {
+        return $this->hasMany(SavedProperty::class);
+    }
+
+    public function purchasePrice(): float
+    {
+        return (float) ($this->price ?? ($this->price_per_share * $this->total_shares));
     }
 }

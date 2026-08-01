@@ -7,13 +7,21 @@ use App\Mail\FundReceivedMail;
 use App\Mail\FundSentMail;
 use App\Mail\InvestmentConfirmationMail;
 use App\Mail\KycSubmittedMail;
+use App\Mail\ProjectInvestmentConfirmationMail;
+use App\Mail\PropertyPurchaseMail;
 use App\Mail\WithdrawalCreatedMail;
 use App\Models\User;
 use App\Models\Property;
 use App\Models\Investment;
+use App\Models\ProjectInvestment;
+use App\Models\Project;
+use App\Models\Purchase;
+use App\Models\SavedProject;
+use App\Models\SavedProperty;
 use App\Models\Deposit;
 use App\Models\Withdrawal;
 use App\Models\Transaction;
+use App\Models\CreditSwap;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -53,15 +61,25 @@ class UserDashboardController extends Controller
         $affiliateEarnings = $user ? $user->affiliate_earnings : 0.00;
 
         $userInvestments = $user ? Investment::with('property')->where('user_id', $user->id)->orderBy('created_at', 'desc')->get() : collect([]);
-        $activeProjectsCount = $userInvestments->where('status', 'active')->count();
-        $totalInvested = $userInvestments->sum('total_amount');
-        $totalRoiEarned = $userInvestments->sum('roi_earned');
+        $projectInvestments = $user ? ProjectInvestment::with('project')->where('user_id', $user->id)->orderBy('created_at', 'desc')->get() : collect([]);
+        $purchases = $user ? Purchase::with('property')->where('user_id', $user->id)->orderBy('created_at', 'desc')->get() : collect([]);
+        $activeProjectsCount = $userInvestments->where('status', 'active')->count() + $projectInvestments->where('status', 'active')->count();
+        $totalInvested = $userInvestments->sum('total_amount') + $projectInvestments->sum('amount');
+        $totalRoiEarned = $userInvestments->sum('roi_earned') + $projectInvestments->sum('roi_earned');
 
         $properties = Property::where('status', 'active')->orderBy('id', 'desc')->get();
+        $projects = Project::where('status', 'active')->orderBy('id', 'desc')->get();
+        $savedProjectIds = $user ? SavedProject::where('user_id', $user->id)->pluck('project_id')->all() : [];
+        $savedProjects = $user ? Project::whereIn('id', $savedProjectIds)->orderBy('id', 'desc')->get() : collect([]);
+        $savedPropertyIds = $user ? SavedProperty::where('user_id', $user->id)->pluck('property_id')->all() : [];
+        $savedProperties = $user ? Property::whereIn('id', $savedPropertyIds)->orderBy('id', 'desc')->get() : collect([]);
         $deposits = $user ? Deposit::where('user_id', $user->id)->orderBy('created_at', 'desc')->get() : collect([]);
         $withdrawals = $user ? Withdrawal::where('user_id', $user->id)->orderBy('created_at', 'desc')->get() : collect([]);
         $transactions = $user ? Transaction::where('user_id', $user->id)->orderBy('created_at', 'desc')->get() : collect([]);
         $referrals = $user ? $user->referrals()->orderBy('created_at', 'desc')->get() : collect([]);
+        $totalDeposits = $deposits->where('status', 'completed')->sum('amount');
+        $totalWithdrawals = $withdrawals->where('status', 'completed')->sum('amount');
+        $creditSwaps = CreditSwap::with(['seller', 'buyer'])->orderBy('created_at', 'desc')->get();
 
         $notifications = collect();
 
@@ -137,6 +155,18 @@ class UserDashboardController extends Controller
             ]);
         }
 
+        foreach ($projectInvestments as $inv) {
+            $notifications->push((object)[
+                'date' => $inv->created_at,
+                'icon' => 'bi-rocket-takeoff',
+                'color' => '#f59e0b',
+                'bg' => '#fffbeb',
+                'title' => 'Project Investment Confirmed',
+                'description' => 'Invested $' . number_format($inv->amount, 2) . ' in project ' . ($inv->project->title ?? '') . ' — $' . number_format($inv->amount, 2),
+                'action' => null,
+            ]);
+        }
+
         foreach ($userInvestments as $inv) {
             $notifications->push((object)[
                 'date' => $inv->created_at,
@@ -145,6 +175,18 @@ class UserDashboardController extends Controller
                 'bg' => '#f5f3ff',
                 'title' => 'Investment Confirmed',
                 'description' => 'Purchased shares in ' . ($inv->property->title ?? 'a property') . ' — $' . number_format($inv->total_amount, 2),
+                'action' => null,
+            ]);
+        }
+
+        foreach ($purchases as $purchase) {
+            $notifications->push((object)[
+                'date' => $purchase->created_at,
+                'icon' => 'bi-house-check',
+                'color' => '#2563eb',
+                'bg' => '#eff6ff',
+                'title' => 'Property Purchased',
+                'description' => 'Purchased ' . ($purchase->property->title ?? 'a property') . ' for $' . number_format($purchase->amount, 2),
                 'action' => null,
             ]);
         }
@@ -174,16 +216,26 @@ class UserDashboardController extends Controller
             'walletBalance',
             'affiliateEarnings',
             'userInvestments',
+            'projectInvestments',
+            'purchases',
             'activeProjectsCount',
             'totalInvested',
             'totalRoiEarned',
             'properties',
+            'projects',
+            'savedProjectIds',
+            'savedProjects',
+            'savedPropertyIds',
+            'savedProperties',
             'deposits',
             'withdrawals',
             'transactions',
             'referrals',
             'notifications',
-            'showTour'
+            'showTour',
+            'totalDeposits',
+            'totalWithdrawals',
+            'creditSwaps'
         ));
     }
 
@@ -332,67 +384,52 @@ class UserDashboardController extends Controller
         return redirect()->route('dashboard')->with('success', 'Withdrawal request of $' . number_format($request->amount, 2) . ' submitted successfully!');
     }
 
-    public function buyShares(Request $request)
+    public function purchaseProperty(Request $request, Property $property)
     {
-        $request->validate([
-            'property_id' => 'required|exists:properties,id',
-            'shares' => 'required|integer|min:1',
-        ]);
-
         /** @var User $user */
         $user = Auth::user();
         if (!$user) {
-            return redirect()->back()->with('error', 'User authentication required.');
+            return redirect()->route('login');
         }
 
-        $property = Property::findOrFail($request->property_id);
-
-        if ($property->available_shares < $request->shares) {
-            return redirect()->back()->with('error', 'Only ' . $property->available_shares . ' shares are available for this property.');
+        if ($property->status === 'sold_out') {
+            return redirect()->back()->with('error', 'This property has already been sold.');
         }
 
-        $totalCost = $property->price_per_share * $request->shares;
+        $price = $property->purchasePrice();
 
-        if ($user->wallet_balance < $totalCost) {
-            return redirect()->back()->with('error', 'Insufficient wallet balance. You need $' . number_format($totalCost, 2) . ' to purchase ' . $request->shares . ' shares.');
+        if ($user->wallet_balance < $price) {
+            return redirect()->back()->with('error', 'Insufficient wallet balance. You need $' . number_format($price, 2) . ' to purchase this property.');
         }
 
         // Deduct user balance
-        $user->wallet_balance -= $totalCost;
+        $user->wallet_balance -= $price;
         $user->save();
 
-        // Update property available shares
-        $property->available_shares -= $request->shares;
-        if ($property->available_shares <= 0) {
-            $property->status = 'sold_out';
-        }
+        // Mark property as sold
+        $property->status = 'sold_out';
         $property->save();
 
-        // Calculate expected ROI
-        $expectedRoi = ($totalCost * $property->roi_percentage) / 100;
-
-        $investment = Investment::create([
+        $purchase = Purchase::create([
             'user_id' => $user->id,
             'property_id' => $property->id,
-            'shares_bought' => $request->shares,
-            'total_amount' => $totalCost,
-            'expected_roi_amount' => $expectedRoi,
-            'roi_earned' => 0.00,
-            'status' => 'active',
+            'amount' => $price,
+            'status' => 'completed',
         ]);
 
         Transaction::create([
             'user_id' => $user->id,
-            'type' => 'property_investment',
-            'amount' => $totalCost,
-            'reference' => 'INV-' . $investment->id,
-            'description' => 'Purchased ' . $request->shares . ' Share(s) in ' . $property->title,
+            'type' => 'property_purchase',
+            'amount' => $price,
+            'reference' => 'PUR-' . $purchase->id,
+            'description' => 'Purchased ' . $property->title . ' outright',
             'status' => 'completed',
         ]);
 
-        Mail::to($user->email)->send(new InvestmentConfirmationMail($investment));
+        Mail::to($user->email)->send(new PropertyPurchaseMail($purchase));
 
-        return redirect()->route('dashboard')->with('success', 'Successfully invested $' . number_format($totalCost, 2) . ' for ' . $request->shares . ' share(s) in ' . $property->title . '!');
+        return redirect()->to('/dashboard#my_investments')
+            ->with('success', 'Congratulations! You have purchased ' . $property->title . ' for $' . number_format($price, 2) . '!');
     }
 
     public function sendFunds(Request $request)
@@ -485,5 +522,174 @@ class UserDashboardController extends Controller
         Mail::to($adminEmail)->send(new \App\Mail\KycSubmittedMail($user));
 
         return redirect()->route('dashboard', '#profile_kyc')->with('success', 'KYC documents submitted successfully! We will review them shortly.');
+    }
+
+    public function updateProfile(Request $request)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->back()->with('error', 'User authentication required.');
+        }
+
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+
+        if ($request->filled('password')) {
+            $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+        }
+
+        $user->save();
+
+        return redirect()->to(route('dashboard') . '#profile_kyc')->with('success', 'Profile information updated successfully!');
+    }
+
+    public function createCreditSwap(Request $request)
+    {
+        $request->validate([
+            'amount'         => 'required|numeric|min:10',
+            'payment_method' => 'required|string',
+            'payment_details'=> 'required|string',
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->back()->with('error', 'User authentication required.');
+        }
+
+        if ($user->wallet_balance < $request->amount) {
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Insufficient wallet balance to post this Credit Swap offer.');
+        }
+
+        // Lock seller credits in escrow
+        $user->wallet_balance -= $request->amount;
+        $user->save();
+
+        $ref = 'CSWAP-' . strtoupper(Str::random(8));
+
+        CreditSwap::create([
+            'user_id'         => $user->id,
+            'amount'          => $request->amount,
+            'payment_method'  => $request->payment_method,
+            'payment_details' => $request->payment_details,
+            'status'          => 'active',
+            'reference'       => $ref,
+        ]);
+
+        return redirect()->to(route('dashboard') . '#credit_swap')->with('success', 'Credit Swap offer posted successfully! $' . number_format($request->amount, 2) . ' held in escrow.');
+    }
+
+    public function buyCreditSwap(Request $request, $id)
+    {
+        /** @var User $buyer */
+        $buyer = Auth::user();
+        if (!$buyer) {
+            return redirect()->back()->with('error', 'User authentication required.');
+        }
+
+        $swap = CreditSwap::findOrFail($id);
+
+        if ($swap->user_id === $buyer->id) {
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'You cannot buy your own Credit Swap offer.');
+        }
+
+        if ($swap->status !== 'active') {
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'This Credit Swap offer is no longer active.');
+        }
+
+        $swap->buyer_id = $buyer->id;
+        $swap->status = 'pending_payment';
+        $swap->save();
+
+        return redirect()->to(route('dashboard') . '#credit_swap')->with('success', 'Credit Swap requested! Please send payment to the seller\'s account and wait for them to release the credits.');
+    }
+
+    public function releaseCreditSwap(Request $request, $id)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->back()->with('error', 'User authentication required.');
+        }
+
+        $swap = CreditSwap::findOrFail($id);
+
+        if ($swap->user_id !== $user->id && $user->role !== 'admin') {
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Unauthorized to release this Credit Swap.');
+        }
+
+        if (!in_array($swap->status, ['active', 'pending_payment'])) {
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'This Credit Swap cannot be released.');
+        }
+
+        $buyer = $swap->buyer ?? User::find($request->buyer_id);
+
+        if (!$buyer) {
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Buyer account not found for credit release.');
+        }
+
+        $swap->buyer_id = $buyer->id;
+        $swap->status = 'completed';
+        $swap->save();
+
+        // Release escrowed funds to Buyer's wallet balance
+        $buyer->wallet_balance += $swap->amount;
+        $buyer->save();
+
+        // Record audit transactions for both parties
+        Transaction::create([
+            'user_id'     => $swap->user_id,
+            'type'        => 'withdrawal',
+            'amount'      => $swap->amount,
+            'reference'   => $swap->reference,
+            'description' => 'P2P Credit Swap released to ' . $buyer->name . ' (' . ($buyer->account_id ?? $buyer->email) . ')',
+            'status'      => 'completed',
+        ]);
+
+        Transaction::create([
+            'user_id'     => $buyer->id,
+            'type'        => 'deposit',
+            'amount'      => $swap->amount,
+            'reference'   => $swap->reference,
+            'description' => 'P2P Credit Swap received from ' . $swap->seller->name . ' (' . ($swap->seller->account_id ?? $swap->seller->email) . ')',
+            'status'      => 'completed',
+        ]);
+
+        return redirect()->to(route('dashboard') . '#credit_swap')->with('success', 'Credits released successfully! $' . number_format($swap->amount, 2) . ' credited to ' . $buyer->name . '\'s wallet balance.');
+    }
+
+    public function cancelCreditSwap(Request $request, $id)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->back()->with('error', 'User authentication required.');
+        }
+
+        $swap = CreditSwap::findOrFail($id);
+
+        if ($swap->user_id !== $user->id && $user->role !== 'admin') {
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Unauthorized to cancel this listing.');
+        }
+
+        if ($swap->status === 'completed') {
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Completed Credit Swaps cannot be cancelled.');
+        }
+
+        $swap->status = 'cancelled';
+        $swap->save();
+
+        // Return escrowed credits back to Seller's wallet balance
+        $user->wallet_balance += $swap->amount;
+        $user->save();
+
+        return redirect()->to(route('dashboard') . '#credit_swap')->with('success', 'Credit Swap offer cancelled. $' . number_format($swap->amount, 2) . ' returned to your wallet balance.');
     }
 }

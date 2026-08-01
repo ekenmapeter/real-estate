@@ -69,6 +69,26 @@ class User extends Authenticatable
         return $this->hasMany(Investment::class);
     }
 
+    public function projectInvestments()
+    {
+        return $this->hasMany(ProjectInvestment::class);
+    }
+
+    public function savedProjects()
+    {
+        return $this->hasMany(SavedProject::class);
+    }
+
+    public function savedProperties()
+    {
+        return $this->hasMany(SavedProperty::class);
+    }
+
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class);
+    }
+
     public function deposits()
     {
         return $this->hasMany(Deposit::class);
@@ -82,6 +102,16 @@ class User extends Authenticatable
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function creditSwaps()
+    {
+        return $this->hasMany(CreditSwap::class, 'user_id');
+    }
+
+    public function purchasedSwaps()
+    {
+        return $this->hasMany(CreditSwap::class, 'buyer_id');
     }
 
     public function referrer()

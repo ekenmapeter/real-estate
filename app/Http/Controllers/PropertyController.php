@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Property;
+use App\Models\SavedProperty;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PropertyController extends Controller
 {
@@ -26,18 +28,48 @@ class PropertyController extends Controller
 
         $properties = $query->orderBy('id', 'desc')->get();
 
-        return view('properties', compact('properties'));
+        $savedPropertyIds = Auth::check()
+            ? SavedProperty::where('user_id', Auth::id())->pluck('property_id')->all()
+            : [];
+
+        return view('properties', compact('properties', 'savedPropertyIds'));
     }
 
     public function show(Property $property)
     {
-        $fundedPercent = $property->total_shares > 0
-            ? round((($property->total_shares - $property->available_shares) / $property->total_shares) * 100)
-            : 0;
+        $price = $property->purchasePrice();
+        $isSaved = Auth::check() && SavedProperty::where('user_id', Auth::id())->where('property_id', $property->id)->exists();
 
-        $raisedAmount = ($property->total_shares - $property->available_shares) * $property->price_per_share;
-        $totalValuation = $property->total_shares * $property->price_per_share;
+        return view('property-detail', compact('property', 'price', 'isSaved'));
+    }
 
-        return view('property-detail', compact('property', 'fundedPercent', 'raisedAmount', 'totalValuation'));
+    public function toggleSave(Property $property)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $existing = SavedProperty::where('user_id', $user->id)->where('property_id', $property->id)->first();
+
+        if ($existing) {
+            $existing->delete();
+            $saved = false;
+        } else {
+            SavedProperty::create([
+                'user_id' => $user->id,
+                'property_id' => $property->id,
+            ]);
+            $saved = true;
+        }
+
+        if (request()->wantsJson()) {
+            return response()->json(['saved' => $saved]);
+        }
+
+        return redirect()->back()->with('success', $saved
+            ? 'Property "' . $property->title . '" saved to your list!'
+            : 'Property removed from your saved list.');
     }
 }

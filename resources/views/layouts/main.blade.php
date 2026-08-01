@@ -248,8 +248,8 @@
                         <nav class="d-none d-lg-flex align-items-center gap-1">
                             <a href="{{ url('/') }}" class="nav-link-item {{ request()->is('/') ? 'active' : '' }}">Home</a>
                             <a href="{{ url('/properties') }}" class="nav-link-item {{ request()->is('properties*') ? 'active' : '' }}">Properties</a>
+                            <a href="{{ url('/invest') }}" class="nav-link-item {{ request()->is('invest') ? 'active' : '' }}">Invest</a>
                             <a href="{{ url('/list-property') }}" class="nav-link-item {{ request()->is('list-property*') ? 'active' : '' }}">List Property</a>
-                            <a href="{{ url('/project-marketplace') }}" class="nav-link-item {{ request()->is('project-marketplace*') ? 'active' : '' }}">Marketplace</a>
 
                             <!-- Partners Dropdown -->
                             <div class="nav-dropdown-wrap" style="position:relative;">
@@ -499,7 +499,7 @@
                             <ul class="list-unstyled text-white-50 mb-0" style="line-height: 2;">
                                 <li><a href="{{ url('/properties') }}" class="text-white-50 text-decoration-none">Buy Properties</a></li>
                                 <li><a href="{{ url('/properties') }}" class="text-white-50 text-decoration-none">Rent Properties</a></li>
-                                <li><a href="{{ url('/project-marketplace') }}" class="text-white-50 text-decoration-none">Project Marketplace</a></li>
+                                <li><a href="{{ url('/invest') }}" class="text-white-50 text-decoration-none">Invest in Projects</a></li>
                                 <li><a href="{{ url('/list-property') }}" class="text-white-50 text-decoration-none">List Your Property</a></li>
                             </ul>
                         </div>
@@ -706,6 +706,57 @@
           document.querySelectorAll('.nav-dropdown-menu').forEach(el => el.style.display = 'none');
         }
       });
+    </script>
+
+    <!-- Project/Property Countdowns & Share Helpers -->
+    <script>
+      (function() {
+        function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+        function formatRemaining(sec) {
+          if (sec <= 0) return null;
+          var d = Math.floor(sec / 86400);
+          var h = Math.floor((sec % 86400) / 3600);
+          var m = Math.floor((sec % 3600) / 60);
+          var s = sec % 60;
+          if (d > 0) return d + 'd ' + h + 'h ' + pad(m) + 'm';
+          if (h > 0) return h + 'h ' + pad(m) + 'm ' + pad(s) + 's';
+          return m + 'm ' + pad(s) + 's';
+        }
+
+        function tick() {
+          document.querySelectorAll('[data-countdown-ends]').forEach(function(el) {
+            var endTs = parseInt(el.getAttribute('data-countdown-ends'), 10);
+            if (!endTs) return;
+            var label = formatRemaining(endTs - Math.floor(Date.now() / 1000));
+            if (label === null) {
+              el.textContent = 'Ended';
+              el.classList.add('text-danger');
+            } else {
+              el.textContent = label;
+            }
+          });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+          tick();
+          setInterval(tick, 1000);
+        });
+      })();
+
+      function shareContent(title, url, label) {
+        if (navigator.share) {
+          navigator.share({ title: title, url: url, text: label + ' on Radiant Dream Realty' }).catch(function() {});
+        } else {
+          navigator.clipboard.writeText(url).then(function() {
+            var toast = document.createElement('div');
+            toast.textContent = title + ' link copied to clipboard!';
+            toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1d4ed8;color:#fff;padding:10px 20px;border-radius:8px;font-weight:600;font-size:0.85rem;z-index:999999;box-shadow:0 4px 20px rgba(0,0,0,0.2);';
+            document.body.appendChild(toast);
+            setTimeout(function() { toast.remove(); }, 2500);
+          });
+        }
+      }
     </script>
 </body>
 </html>
