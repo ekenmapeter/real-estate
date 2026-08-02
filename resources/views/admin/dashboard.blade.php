@@ -119,6 +119,12 @@
                 <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'withdrawals' }" @click.prevent="activeAdminTab = 'withdrawals'">
                     <i class="bi bi-arrow-up-right-circle"></i> Withdrawals
                 </a>
+                <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'cards' }" @click.prevent="activeAdminTab = 'cards'">
+                    <i class="bi bi-credit-card-2-front"></i> Crypto Cards
+                    @if($cards->where('status', 'pending')->count() > 0)
+                        <span class="badge bg-warning text-dark ms-auto rounded-pill">{{ $cards->where('status', 'pending')->count() }}</span>
+                    @endif
+                </a>
                 <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'referrals' }" @click.prevent="activeAdminTab = 'referrals'">
                     <i class="bi bi-gift-fill"></i> Referral Bonuses
                 </a>
@@ -787,6 +793,130 @@
                     <div class="card border-0 rounded-4 shadow-sm bg-white p-5 text-center" style="color:#94a3b8;">
                         <i class="bi bi-shield-check fs-1 d-block mb-2 opacity-25"></i>
                         <span style="font-size:0.9rem;">No pending KYC reviews.</span>
+                    </div>
+                @endforelse
+            </div>
+
+            <!-- CRYPTO CARDS TAB -->
+            <div x-show="activeAdminTab === 'cards'" x-transition>
+                <div class="mb-4">
+                    <h2 class="fw-bold mb-1" style="font-size:1.6rem; color:#0f172a;">Crypto Cards</h2>
+                    <p class="mb-0" style="font-size:0.95rem; font-weight:500; color:#475569;">Review card applications. On approval, card details are generated and emailed to the user automatically.</p>
+                </div>
+
+                @php
+                    $pendingCards = $cards->where('status', 'pending');
+                    $approvedCards = $cards->where('status', 'approved');
+                    $rejectedCards = $cards->where('status', 'rejected');
+                @endphp
+
+                <!-- Pending Applications -->
+                <h6 class="fw-bold text-dark mb-3" style="font-size:0.95rem;"><i class="bi bi-clock-history me-2" style="color:#f59e0b;"></i>Pending Applications
+                    <span class="badge bg-warning bg-opacity-20 text-warning fw-bold rounded-pill ms-1" style="color:#b45309;">{{ $pendingCards->count() }}</span>
+                </h6>
+                @forelse($pendingCards as $card)
+                    <div class="card border-0 rounded-4 shadow-sm bg-white overflow-hidden mb-3">
+                        <div class="p-4">
+                            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style="width:42px; height:42px; background:linear-gradient(135deg,#2563eb,#1d4ed8); font-size:0.85rem;">
+                                        {{ strtoupper(substr($card->user->name ?? 'U', 0, 2)) }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ $card->user->name }}</div>
+                                        <div class="small text-muted">{{ $card->user->email }} &middot; {{ $card->user->account_id ?? 'N/A' }}</div>
+                                        <span class="badge fw-semibold rounded-pill mt-1" style="background:#fffbeb; color:#d97706; font-size:0.68rem;">Applied {{ $card->created_at?->diffForHumans() }}</span>
+                                    </div>
+                                </div>
+                                <span class="badge fw-bold rounded-pill px-3 py-1.5" style="background:#fffbeb; color:#b45309;">Pending</span>
+                            </div>
+                            <div class="d-flex gap-2 mt-3 flex-wrap">
+                                <form action="{{ route('admin.card.approve', $card->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm fw-bold rounded-pill px-3" style="background:#22c55e; color:#fff; border:none;" onclick="return confirm('Approve the Crypto Card for {{ $card->user->name }}? Card details will be generated and emailed instantly.')">
+                                        <i class="bi bi-check-lg me-1"></i> Approve &amp; Generate Card
+                                    </button>
+                                </form>
+                                <form action="{{ route('admin.card.reject', $card->id) }}" method="POST" class="d-flex align-items-center gap-2">
+                                    @csrf
+                                    <input type="text" name="reason" class="form-control form-control-sm" style="width:200px; font-size:0.8rem;" placeholder="Rejection reason" required>
+                                    <button type="submit" class="btn btn-sm fw-bold rounded-pill px-3" style="background:#ef4444; color:#fff; border:none;">
+                                        <i class="bi bi-x-lg me-1"></i> Reject
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="card border-0 rounded-4 shadow-sm bg-white p-5 text-center mb-4" style="color:#94a3b8;">
+                        <i class="bi bi-credit-card-2-front fs-1 d-block mb-2 opacity-25"></i>
+                        <span style="font-size:0.9rem;">No pending Crypto Card applications.</span>
+                    </div>
+                @endforelse
+
+                <!-- Issued Cards -->
+                <h6 class="fw-bold text-dark mb-3 mt-4" style="font-size:0.95rem;"><i class="bi bi-patch-check me-2" style="color:#16a34a;"></i>Issued Cards
+                    <span class="badge fw-bold rounded-pill ms-1" style="background:#f0fdf4; color:#16a34a;">{{ $approvedCards->count() }}</span>
+                </h6>
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0" style="font-size:0.85rem;">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th class="py-2.5">USER</th>
+                                    <th class="py-2.5">BRAND</th>
+                                    <th class="py-2.5">CARD NUMBER</th>
+                                    <th class="py-2.5">EXPIRY</th>
+                                    <th class="py-2.5">APPROVED</th>
+                                    <th class="py-2.5 text-end">CVV</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($approvedCards as $card)
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold text-dark">{{ $card->user->name }}</div>
+                                            <div class="small text-muted">{{ $card->user->email }}</div>
+                                        </td>
+                                        <td><span class="badge fw-bold rounded-pill" style="background:#eff6ff; color:#2563eb;">{{ $card->card_brand }}</span></td>
+                                        <td><code class="fw-bold text-dark">{{ $card->maskedNumber() }}</code></td>
+                                        <td>{{ $card->expiryLabel() }}</td>
+                                        <td class="text-muted small">{{ $card->approved_at?->format('M d, Y') }}</td>
+                                        <td class="text-end"><code>{{ $card->cvv }}</code></td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="6" class="text-center py-4 text-muted">No cards issued yet.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Rejected Applications -->
+                <h6 class="fw-bold text-dark mb-3" style="font-size:0.95rem;"><i class="bi bi-x-octagon me-2" style="color:#dc2626;"></i>Rejected
+                    <span class="badge fw-bold rounded-pill ms-1" style="background:#fef2f2; color:#dc2626;">{{ $rejectedCards->count() }}</span>
+                </h6>
+                @forelse($rejectedCards as $card)
+                    <div class="card border-0 rounded-4 shadow-sm bg-white p-3 mb-2">
+                        <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="fw-bold text-dark small">{{ $card->user->name }}</div>
+                                <span class="text-muted small">{{ $card->user->email }}</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="badge fw-semibold rounded-pill" style="background:#fef2f2; color:#dc2626; font-size:0.68rem;">{{ $card->rejection_reason }}</span>
+                                <form action="{{ route('admin.card.approve', $card->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-success fw-bold rounded-pill px-3" onclick="return confirm('Re-open and approve this application?')">
+                                        <i class="bi bi-check-lg me-1"></i> Approve Now
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="card border-0 rounded-4 shadow-sm bg-white p-5 text-center" style="color:#94a3b8;">
+                        <span style="font-size:0.9rem;">No rejected applications.</span>
                     </div>
                 @endforelse
             </div>

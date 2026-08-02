@@ -309,6 +309,7 @@
                                         <span class="sidebar-group-label px-3" style="font-size:0.65rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#94a3b8; display:block; margin-top:6px; margin-bottom:2px;">Wallet</span>
                                         <a href="{{ url('/dashboard') }}#deposit" class="nav-dropdown-item"><i class="bi bi-arrow-down-circle-fill me-2 text-primary" style="width:16px;"></i>Deposit</a>
                                         <a href="{{ url('/dashboard') }}#withdraw" class="nav-dropdown-item"><i class="bi bi-arrow-up-circle-fill me-2 text-primary" style="width:16px;"></i>Withdraw</a>
+                                        <a href="{{ url('/dashboard') }}#credit_swap" class="nav-dropdown-item"><i class="bi bi-arrow-repeat me-2 text-warning" style="width:16px;"></i>Credit Swap</a>
                                         <a href="{{ url('/dashboard') }}#transactions" class="nav-dropdown-item"><i class="bi bi-arrow-down-up me-2 text-primary" style="width:16px;"></i>Transactions</a>
 
                                         <span class="sidebar-group-label px-3" style="font-size:0.65rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#94a3b8; display:block; margin-top:6px; margin-bottom:2px;">Account</span>
@@ -396,6 +397,9 @@
                         </a>
                         <a href="{{ url('/dashboard') }}#withdraw" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
                             <i class="bi bi-arrow-up-circle-fill"></i> Withdraw
+                        </a>
+                        <a href="{{ url('/dashboard') }}#credit_swap" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
+                            <i class="bi bi-arrow-repeat text-warning"></i> Credit Swap
                         </a>
                         <a href="{{ url('/dashboard') }}#transactions" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
                             <i class="bi bi-arrow-down-up"></i> Transactions

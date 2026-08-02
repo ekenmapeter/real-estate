@@ -22,6 +22,7 @@ use App\Models\Deposit;
 use App\Models\Withdrawal;
 use App\Models\Transaction;
 use App\Models\CreditSwap;
+use App\Models\Card;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -80,6 +81,7 @@ class UserDashboardController extends Controller
         $totalDeposits = $deposits->where('status', 'completed')->sum('amount');
         $totalWithdrawals = $withdrawals->where('status', 'completed')->sum('amount');
         $creditSwaps = CreditSwap::with(['seller', 'buyer'])->orderBy('created_at', 'desc')->get();
+        $userCard = $user ? Card::where('user_id', $user->id)->latest()->first() : null;
 
         $notifications = collect();
 
@@ -235,7 +237,8 @@ class UserDashboardController extends Controller
             'showTour',
             'totalDeposits',
             'totalWithdrawals',
-            'creditSwaps'
+            'creditSwaps',
+            'userCard'
         ));
     }
 
@@ -302,7 +305,8 @@ class UserDashboardController extends Controller
 
         return redirect()->route('dashboard')
             ->with('success', 'Finance request ' . $depositCode . ' submitted successfully!')
-            ->with('submitted_request_id', $depositCode);
+            ->with('submitted_request_id', $depositCode)
+            ->with('submitted_request_type', 'deposit');
     }
 
     public function uploadEvidence(Request $request, $id)
@@ -381,7 +385,9 @@ class UserDashboardController extends Controller
 
         Mail::to($user->email)->send(new WithdrawalCreatedMail($withdrawal));
 
-        return redirect()->route('dashboard')->with('success', 'Withdrawal request of $' . number_format($request->amount, 2) . ' submitted successfully!');
+        return redirect()->route('dashboard')->with('success', 'Withdrawal request of $' . number_format($request->amount, 2) . ' submitted successfully!')
+            ->with('submitted_request_id', $withdrawalCode)
+            ->with('submitted_request_type', 'withdrawal');
     }
 
     public function purchaseProperty(Request $request, Property $property)
@@ -691,5 +697,33 @@ class UserDashboardController extends Controller
         $user->save();
 
         return redirect()->to(route('dashboard') . '#credit_swap')->with('success', 'Credit Swap offer cancelled. $' . number_format($swap->amount, 2) . ' returned to your wallet balance.');
+    }
+
+    public function applyCard(Request $request)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->back()->with('error', 'User authentication required.');
+        }
+
+        $existing = Card::where('user_id', $user->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->first();
+
+        if ($existing) {
+            return redirect()->route('dashboard')
+                ->with('error', $existing->status === 'pending'
+                    ? 'You already have a Crypto Card application pending review.'
+                    : 'You already have an active Crypto Card.');
+        }
+
+        Card::create([
+            'user_id'         => $user->id,
+            'cardholder_name' => $user->name,
+            'status'          => 'pending',
+        ]);
+
+        return redirect()->route('dashboard')->with('success', 'Crypto Card application submitted! Our team will review and generate your card shortly.');
     }
 }

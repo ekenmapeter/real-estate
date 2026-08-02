@@ -30,6 +30,7 @@ Route::post('/credit-swap/create', [UserDashboardController::class, 'createCredi
 Route::post('/credit-swap/{id}/buy', [UserDashboardController::class, 'buyCreditSwap'])->name('credit-swap.buy');
 Route::post('/credit-swap/{id}/release', [UserDashboardController::class, 'releaseCreditSwap'])->name('credit-swap.release');
 Route::post('/credit-swap/{id}/cancel', [UserDashboardController::class, 'cancelCreditSwap'])->name('credit-swap.cancel');
+Route::post('/card/apply', [UserDashboardController::class, 'applyCard'])->name('card.apply');
 
 // Admin Platform Management Dashboard
 Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
@@ -51,6 +52,8 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::post('/kyc/approve/{id}', [AdminDashboardController::class, 'approveKyc'])->name('kyc.approve');
     Route::post('/kyc/reject/{id}', [AdminDashboardController::class, 'rejectKyc'])->name('kyc.reject');
     Route::post('/users/{id}/impersonate', [AdminDashboardController::class, 'impersonate'])->name('users.impersonate');
+    Route::post('/card/approve/{id}', [AdminDashboardController::class, 'approveCard'])->name('card.approve');
+    Route::post('/card/reject/{id}', [AdminDashboardController::class, 'rejectCard'])->name('card.reject');
 });
 
 // Stop impersonation - must be outside the admin middleware group so the impersonated user can leave

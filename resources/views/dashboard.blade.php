@@ -189,6 +189,40 @@
         border: 1px solid #e2e8f0;
         overflow: hidden;
     }
+
+    /* ── 3D Flip Card (Crypto Card Widget) ── */
+    .card3d-scene {
+        perspective: 1200px;
+    }
+
+    .card3d-flip {
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+    }
+
+    .card3d-flip.flipped {
+        transform: rotateY(180deg);
+    }
+
+    .card3d-face {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .card3d-back {
+        transform: rotateY(180deg);
+    }
+
+    @media (max-width: 767.98px) {
+        .card3d-flip {
+            height: 210px !important;
+        }
+    }
 </style>
 
 <div class="container-fluid px-0" x-data="userDashboardEngine()">
@@ -251,7 +285,7 @@
                 <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'withdraw' }" @click.prevent="activeTab = 'withdraw'">
                     <i class="bi bi-arrow-up-circle-fill"></i> Withdraw
                 </a>
-                <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'credit_swap' }" @click.prevent="activeTab = 'credit_swap'">
+                <a href="#credit_swap" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'credit_swap' }" @click="activeTab = 'credit_swap'">
                     <i class="bi bi-arrow-repeat text-warning"></i> Credit Swap (P2P)
                 </a>
                 <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'transactions' }" @click.prevent="activeTab = 'transactions'">
@@ -377,6 +411,7 @@
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'my_investments' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'my_investments'">My Investments</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'deposit' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'deposit'">Deposit</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'withdraw' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'withdraw'">Withdraw</button>
+                    <a href="#credit_swap" class="btn btn-sm fw-semibold text-decoration-none" :class="activeTab === 'credit_swap' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'credit_swap'">Credit Swap</a>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'transactions' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'transactions'">Transactions</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'notifications' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'notifications'">Notifications</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'referrals' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'referrals'">Referrals</button>
@@ -464,6 +499,138 @@
                             <button class="btn btn-outline-secondary fw-bold px-4 py-2 rounded-3" @click="activeTab = 'withdraw'">
                                 <i class="bi bi-arrow-up-circle me-1.5"></i> Withdraw
                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CRYPTO CARD WIDGET -->
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                    <div class="row align-items-center g-4">
+                        <div class="col-lg-7">
+                            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                                <h6 class="fw-bold text-dark mb-0" style="font-size:0.95rem;"><i class="bi bi-credit-card-2-front text-primary me-2"></i>My Crypto Card</h6>
+                                @if($userCard && $userCard->status === 'approved')
+                                    <span class="badge fw-bold rounded-pill px-3 py-1" style="background:#f0fdf4; color:#16a34a;"><i class="bi bi-check-circle-fill me-1"></i>Active</span>
+                                @elseif($userCard && $userCard->status === 'pending')
+                                    <span class="badge fw-bold rounded-pill px-3 py-1" style="background:#fffbeb; color:#b45309;"><i class="bi bi-clock-fill me-1"></i>Pending Review</span>
+                                @elseif($userCard && $userCard->status === 'rejected')
+                                    <span class="badge fw-bold rounded-pill px-3 py-1" style="background:#fef2f2; color:#dc2626;"><i class="bi bi-x-circle-fill me-1"></i>Rejected</span>
+                                @else
+                                    <span class="badge fw-bold rounded-pill px-3 py-1" style="background:#f1f5f9; color:#64748b;">Not Issued</span>
+                                @endif
+                            </div>
+
+                            <div class="d-flex justify-content-center justify-content-lg-start">
+                                <div class="card3d-scene w-100" style="max-width:420px;">
+                                    <div :class="cardFlipped ? 'card3d-flip flipped' : 'card3d-flip'" style="width:100%; height:230px;">
+                                        @if($userCard && $userCard->status === 'approved')
+                                            <!-- FRONT FACE -->
+                                            <div class="card3d-face text-white p-4 d-flex flex-column justify-content-between" style="background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 55%,#2563eb 100%); box-shadow:0 18px 40px rgba(30,58,138,0.35); cursor:pointer;" @click="cardFlipped = !cardFlipped">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div>
+                                                        <div class="fw-bold" style="font-size:0.72rem; letter-spacing:0.12em; opacity:0.9;">{{ $userCard->card_brand ?? 'RADIANT' }} CRYPTO CARD</div>
+                                                        <div class="text-white-50" style="font-size:0.6rem; letter-spacing:0.14em;">PREMIUM &middot; DIGITAL</div>
+                                                    </div>
+                                                    <i class="bi bi-credit-card-2-front" style="font-size:1.5rem; opacity:0.9;"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="d-flex align-items-center gap-3 mb-3">
+                                                        <div class="rounded-2" style="width:40px; height:28px; background:linear-gradient(135deg,#f59e0b,#d97706);"></div>
+                                                        <i class="bi bi-wifi text-white-50" style="font-size:1.1rem; transform:rotate(90deg);"></i>
+                                                    </div>
+                                                    <div class="fw-bold mb-3" style="font-size:1.25rem; letter-spacing:0.14em; font-variant-numeric:tabular-nums;">{{ $userCard->maskedNumber() }}</div>
+                                                    <div class="d-flex justify-content-between align-items-end">
+                                                        <div class="overflow-hidden" style="max-width:190px;">
+                                                            <div class="text-white-50" style="font-size:0.58rem; letter-spacing:0.1em;">CARDHOLDER</div>
+                                                            <div class="fw-bold text-truncate" style="font-size:0.85rem;">{{ $userCard->cardholder_name }}</div>
+                                                        </div>
+                                                        <div class="text-end">
+                                                            <div class="text-white-50" style="font-size:0.58rem; letter-spacing:0.1em;">EXPIRES</div>
+                                                            <div class="fw-bold" style="font-size:0.85rem;">{{ $userCard->expiryLabel() }}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- BACK FACE -->
+                                            <div class="card3d-face card3d-back d-flex flex-column" style="background:linear-gradient(160deg,#1e293b,#0f172a); box-shadow:0 18px 40px rgba(15,23,42,0.35); cursor:pointer;" @click="cardFlipped = !cardFlipped">
+                                                <div style="height:44px; background:#0a0f1c; margin-top:28px;"></div>
+                                                <div class="p-4 d-flex flex-column" style="flex:1; gap:12px;">
+                                                    <div class="d-flex align-items-center justify-content-between rounded-3 px-3 py-2 bg-white">
+                                                        <span class="fw-bold" style="font-family:monospace; letter-spacing:0.22em; color:#0f172a; font-size:1rem;">{{ $userCard->cvv }}</span>
+                                                        <span class="text-muted small fw-bold" style="font-size:0.62rem; letter-spacing:0.08em;">CVV</span>
+                                                    </div>
+                                                    <div class="d-flex align-items-center justify-content-between rounded-3 px-3 py-2 bg-white">
+                                                        <span class="text-dark fw-bold" style="font-family:'Brush Script MT', cursive; font-size:1.2rem;">{{ $userCard->cardholder_name }}</span>
+                                                        <span class="text-muted small fw-bold" style="font-size:0.62rem; letter-spacing:0.08em;">SIGNATURE</span>
+                                                    </div>
+                                                    <div class="text-white-50 small mt-auto" style="font-size:0.62rem; line-height:1.5;">
+                                                        <i class="bi bi-shield-lock me-1"></i> Digital crypto card. Never share your CVV. Contact support immediately if your card is lost or stolen.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <!-- PLACEHOLDER FACE -->
+                                            <div class="card3d-face d-flex flex-column align-items-center justify-content-center text-center p-4" style="background:linear-gradient(135deg,#f8fafc,#eef2f7); border:2px dashed #cbd5e1;">
+                                                <div class="rounded-circle bg-white d-flex align-items-center justify-content-center mb-3 shadow-sm" style="width:64px; height:64px;">
+                                                    <i class="bi bi-credit-card-2-front text-muted" style="font-size:1.8rem;"></i>
+                                                </div>
+                                                <div class="fw-bold text-dark mb-1">{{ $userCard && $userCard->status === 'pending' ? 'Application Under Review' : 'No Crypto Card Yet' }}</div>
+                                                <p class="text-muted small mb-0" style="max-width:280px;">
+                                                    @if($userCard && $userCard->status === 'pending')
+                                                        Your application is being reviewed by our team. Card details will be generated and emailed to you once approved.
+                                                    @elseif($userCard && $userCard->status === 'rejected')
+                                                        Your last application was declined. You may apply again anytime.
+                                                    @else
+                                                        Apply for your branded crypto card. Once approved, your card is generated instantly and delivered by email.
+                                                    @endif
+                                                </p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    @if($userCard && $userCard->status === 'approved')
+                                        <div class="text-center text-muted small mt-2" style="font-size:0.72rem;">
+                                            <i class="bi bi-mouse me-1"></i><span x-text="cardFlipped ? 'Click to flip back' : 'Click the card to flip it'"></span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-5">
+                            <div class="h-100 d-flex flex-column justify-content-center">
+                                @if($userCard && $userCard->status === 'approved')
+                                    <h5 class="fw-bold text-dark mb-2" style="font-size:1.15rem;">Your card is ready!</h5>
+                                    <p class="text-muted small mb-3" style="line-height:1.6;">Your Crypto Card details have been generated and sent to <strong class="text-dark">{{ $user->email }}</strong>. Tap the card to flip it and reveal your CVV whenever needed.</p>
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <button class="btn btn-outline-primary fw-bold px-4 py-2 rounded-3" style="font-size:0.85rem;" @click="cardFlipped = !cardFlipped">
+                                            <i class="bi bi-arrow-repeat me-1"></i> Flip Card
+                                        </button>
+                                    </div>
+                                @elseif($userCard && $userCard->status === 'pending')
+                                    <h5 class="fw-bold text-dark mb-2" style="font-size:1.15rem;">Application under review</h5>
+                                    <p class="text-muted small mb-0" style="line-height:1.6;">Our team is verifying your application. Once approved, your card details will be generated and emailed to you automatically. This usually takes 1&ndash;2 business days.</p>
+                                @elseif($userCard && $userCard->status === 'rejected')
+                                    <h5 class="fw-bold text-dark mb-2" style="font-size:1.15rem;">Application declined</h5>
+                                    <p class="text-muted small mb-3" style="line-height:1.6;">
+                                        Reason: <strong class="text-danger">{{ $userCard->rejection_reason ?? 'Not provided' }}</strong>. You can submit a new application whenever you are ready.
+                                    </p>
+                                    <form action="{{ route('card.apply') }}" method="POST" onsubmit="return confirm('Apply for your Radiant Crypto Card?')">
+                                        @csrf
+                                        <button type="submit" class="btn btn-primary fw-bold px-4 py-2 rounded-3" style="background:#2563eb; font-size:0.85rem;">
+                                            <i class="bi bi-credit-card me-1"></i> Apply Again
+                                        </button>
+                                    </form>
+                                @else
+                                    <h5 class="fw-bold text-dark mb-2" style="font-size:1.15rem;">Get your Crypto Card</h5>
+                                    <p class="text-muted small mb-3" style="line-height:1.6;">Apply for a branded digital crypto card. Our team reviews your application, then your card is generated with a unique number, expiry and CVV &mdash; delivered straight to your email.</p>
+                                    <form action="{{ route('card.apply') }}" method="POST" onsubmit="return confirm('Apply for your Radiant Crypto Card?')">
+                                        @csrf
+                                        <button type="submit" class="btn btn-primary fw-bold px-4 py-2 rounded-3 shadow-sm" style="background:#2563eb; font-size:0.85rem;">
+                                            <i class="bi bi-credit-card me-1"></i> Apply for Crypto Card
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -727,9 +894,9 @@
                                     <button class="btn btn-sm btn-light fw-bold rounded-3 text-primary" @click="openReceiveModal = true">
                                         <i class="bi bi-box-arrow-in-down me-1"></i> Receive Funds
                                     </button>
-                                    <button class="btn btn-sm btn-warning fw-bold rounded-3 text-dark" @click="activeTab = 'credit_swap'">
+                                    <a href="#credit_swap" class="btn btn-sm btn-warning fw-bold rounded-3 text-dark" @click="activeTab = 'credit_swap'">
                                         <i class="bi bi-arrow-repeat me-1"></i> Credit Swap (P2P)
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -2048,55 +2215,51 @@
             <div x-show="activeTab === 'credit_swap'" x-transition>
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                     <div>
-                        <h2 class="fw-bold mb-1" style="font-size:1.7rem; color:#0f172a;"><i class="bi bi-arrow-repeat text-warning me-2"></i>Credit Swap Marketplace</h2>
-                        <p class="mb-0 text-muted" style="font-size:0.95rem;">Peer-to-peer credit exchange. Sell your wallet credits for cash/bank transfer or deposit by buying credits directly from peers.</p>
+                        <h2 class="fw-bold mb-1" style="font-size:1.6rem; color:#0f172a;"><i class="bi bi-arrow-repeat text-warning me-2"></i>Credit Swap Marketplace</h2>
+                        <p class="mb-0 text-muted" style="font-size:0.9rem;">Sell your wallet credits for cash or buy credits directly from other investors.</p>
                     </div>
-                    <button class="btn btn-warning fw-bold px-4 py-2 rounded-3 shadow-sm text-dark d-flex align-items-center gap-1.5" @click="showCreateSwapModal = true">
-                        <i class="bi bi-plus-circle-fill"></i> Post Credit Swap Offer
+                    <button class="btn btn-warning fw-bold px-4 py-2 rounded-3 shadow-sm text-dark" @click="showCreateSwapModal = true">
+                        <i class="bi bi-plus-circle-fill me-1"></i> Post Credit Swap Offer
                     </button>
                 </div>
 
-                <!-- Info Box -->
-                <div class="p-3.5 rounded-4 mb-4 text-white position-relative overflow-hidden" style="background:linear-gradient(135deg, #0b1329 0%, #1e3a8a 100%); border:1px solid rgba(255,255,255,0.1);">
-                    <div class="row align-items-center g-3">
-                        <div class="col-lg-8">
-                            <h6 class="fw-bold text-warning mb-1"><i class="bi bi-shield-check me-1"></i> How Credit Swap Escrow Works</h6>
-                            <p class="small mb-0 text-white-50" style="line-height:1.5;">
-                                <strong>1. Seller Posts Offer:</strong> Credits are held securely in escrow from your wallet balance.<br>
-                                <strong>2. Buyer Pays Offline:</strong> Buyer transfers cash/bank transfer directly to seller's payment account.<br>
-                                <strong>3. Credits Released:</strong> Seller verifies payment receipt and clicks <em>Release Credits</em> to instantly transfer wallet funds to Buyer.
-                            </p>
-                        </div>
-                        <div class="col-lg-4 text-lg-end">
-                            <div class="p-3 rounded-3 bg-white bg-opacity-10 text-white text-center">
-                                <span class="small text-white-50 d-block mb-1">Your Spendable Wallet</span>
-                                <h4 class="fw-bold text-warning mb-0">${{ number_format($walletBalance, 2) }}</h4>
-                            </div>
-                        </div>
+                <!-- Info Notice Card (matches Withdrawal Info style) -->
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <h6 class="fw-bold mb-0" style="color:#0f172a; font-size:0.85rem;"><i class="bi bi-info-circle me-2" style="color:#2563eb;"></i>How Credit Swap Works</h6>
+                        <span class="badge fw-semibold rounded-pill px-3 py-1.5" style="background:#eff6ff; color:#2563eb;">Wallet Balance: ${{ number_format($walletBalance, 2) }}</span>
                     </div>
+                    <ul class="list-unstyled mb-0 small" style="color:#475569;">
+                        <li class="d-flex gap-2 mb-2"><i class="bi bi-1-circle text-primary flex-shrink-0 mt-0.5"></i><span><strong class="text-dark">Seller posts an offer</strong> &mdash; credits are locked safely in escrow from their wallet balance.</span></li>
+                        <li class="d-flex gap-2 mb-2"><i class="bi bi-2-circle text-primary flex-shrink-0 mt-0.5"></i><span><strong class="text-dark">Buyer pays offline</strong> &mdash; cash or bank transfer sent directly to the seller&rsquo;s account.</span></li>
+                        <li class="d-flex gap-2"><i class="bi bi-3-circle text-primary flex-shrink-0 mt-0.5"></i><span><strong class="text-dark">Credits are released</strong> &mdash; seller confirms payment and wallet funds transfer instantly to the buyer.</span></li>
+                    </ul>
                 </div>
 
                 <!-- Active Swap Offers Grid -->
                 <div class="mb-4">
-                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-shop text-primary me-2"></i>Available Credit Swap Offers</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-shop text-primary me-2"></i>Available Offers</h5>
+                        <span class="badge bg-light text-muted fw-bold rounded-pill px-3 py-1.5">{{ $creditSwaps->where('status', 'active')->count() }} open</span>
+                    </div>
                     <div class="row g-3">
                         @forelse($creditSwaps->where('status', 'active') as $swap)
-                            <div class="col-md-6 col-lg-4">
-                                <div class="card border-0 rounded-4 shadow-sm bg-white p-3.5 h-100 position-relative">
+                            <div class="col-md-6 col-xl-4">
+                                <div class="card border-0 rounded-4 shadow-sm bg-white h-100 d-flex flex-column" style="padding:1.25rem;">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <span class="badge fw-bold px-2.5 py-1 rounded-pill" style="background:#eff6ff; color:#2563eb; font-size:0.7rem;">
                                             <i class="bi bi-tag-fill me-1"></i> {{ $swap->reference }}
                                         </span>
-                                        <span class="badge bg-success bg-opacity-15 text-success fw-bold px-2 py-1 rounded-pill" style="font-size:0.68rem;">Active Offer</span>
+                                        <span class="badge bg-success bg-opacity-15 text-success fw-bold px-2 py-1 rounded-pill" style="font-size:0.65rem;">Active</span>
                                     </div>
                                     <h3 class="fw-bold text-dark mb-1">${{ number_format($swap->amount, 2) }} <small class="fs-6 text-muted fw-normal">Credit</small></h3>
-                                    <div class="small text-muted mb-2">
+                                    <div class="small text-muted mb-3">
                                         <i class="bi bi-person-circle text-primary me-1"></i> Seller: <strong class="text-dark">{{ $swap->seller->name ?? 'Investor' }}</strong>
                                     </div>
-                                    <div class="p-2 rounded-3 bg-light border small mb-3">
-                                        <div class="text-muted" style="font-size:0.72rem;">Accepts Payment via:</div>
+                                    <div class="p-2.5 rounded-3 bg-light border small mb-3">
+                                        <div class="text-muted" style="font-size:0.7rem;">Accepts payment via</div>
                                         <div class="fw-bold text-primary" style="font-size:0.8rem;"><i class="bi bi-credit-card me-1"></i> {{ ucwords(str_replace('_', ' ', $swap->payment_method)) }}</div>
-                                        <div class="text-secondary text-truncate" style="font-size:0.75rem;">Account: {{ $swap->payment_details }}</div>
+                                        <div class="text-secondary text-truncate" style="font-size:0.72rem;">Account: {{ $swap->payment_details }}</div>
                                     </div>
                                     <div class="mt-auto">
                                         @if($user && $swap->user_id === $user->id)
@@ -2131,18 +2294,21 @@
 
                 <!-- My Credit Swaps & Requests Section -->
                 <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
-                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-journal-text me-2 text-primary"></i>My Credit Swap Activity</h6>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 class="fw-bold text-dark mb-0"><i class="bi bi-journal-text me-2 text-primary"></i>My Credit Swap Activity</h6>
+                        <span class="badge bg-light text-muted fw-bold rounded-pill px-3 py-1.5">{{ $creditSwaps->filter(fn($s) => $s->user_id === $user->id || $s->buyer_id === $user->id)->count() }} records</span>
+                    </div>
                     <div class="table-responsive">
-                        <table class="table align-middle mb-0" style="font-size:0.85rem;">
+                        <table class="table align-middle mb-0" style="font-size:0.85rem; border-collapse:separate; border-spacing:0;">
                             <thead>
-                                <tr class="bg-light">
-                                    <th class="py-2.5">REF</th>
-                                    <th class="py-2.5">ROLE</th>
-                                    <th class="py-2.5">AMOUNT</th>
-                                    <th class="py-2.5">PAYMENT METHOD</th>
-                                    <th class="py-2.5">COUNTERPARTY</th>
-                                    <th class="py-2.5">STATUS</th>
-                                    <th class="py-2.5 text-end">ACTION</th>
+                                <tr style="background:#f8fafc;">
+                                    <th class="px-3 py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">REF</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">ROLE</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">AMOUNT</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">PAYMENT METHOD</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">COUNTERPARTY</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">STATUS</th>
+                                    <th class="px-3 py-2.5 small fw-bold text-muted text-end" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">ACTION</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2150,28 +2316,28 @@
                                     @php
                                         $isSeller = $mySwap->user_id === $user->id;
                                     @endphp
-                                    <tr>
-                                        <td><code class="fw-bold text-primary">{{ $mySwap->reference }}</code></td>
-                                        <td>
+                                    <tr style="border-bottom:1px solid #f1f5f9;">
+                                        <td class="px-3 py-3"><code class="fw-bold text-primary">{{ $mySwap->reference }}</code></td>
+                                        <td class="py-3">
                                             <span class="badge fw-bold px-2 py-1 rounded-pill" style="{{ $isSeller ? 'background:#eff6ff; color:#2563eb;' : 'background:#f0fdf4; color:#16a34a;' }}">
                                                 {{ $isSeller ? 'Seller' : 'Buyer' }}
                                             </span>
                                         </td>
-                                        <td class="fw-bold">${{ number_format($mySwap->amount, 2) }}</td>
-                                        <td>{{ ucwords(str_replace('_', ' ', $mySwap->payment_method)) }}</td>
-                                        <td>
+                                        <td class="py-3 fw-bold">${{ number_format($mySwap->amount, 2) }}</td>
+                                        <td class="py-3">{{ ucwords(str_replace('_', ' ', $mySwap->payment_method)) }}</td>
+                                        <td class="py-3">
                                             @if($isSeller)
                                                 {{ $mySwap->buyer ? $mySwap->buyer->name : 'Waiting for Buyer' }}
                                             @else
                                                 {{ $mySwap->seller ? $mySwap->seller->name : 'Seller' }}
                                             @endif
                                         </td>
-                                        <td>
+                                        <td class="py-3">
                                             <span class="badge fw-bold px-2 py-1 rounded-pill" style="{{ $mySwap->status === 'completed' ? 'background:#f0fdf4; color:#16a34a;' : ($mySwap->status === 'pending_payment' ? 'background:#fffbeb; color:#d97706;' : ($mySwap->status === 'active' ? 'background:#eff6ff; color:#2563eb;' : 'background:#fef2f2; color:#dc2626;')) }}">
                                                 {{ ucfirst(str_replace('_', ' ', $mySwap->status)) }}
                                             </span>
                                         </td>
-                                        <td class="text-end">
+                                        <td class="px-3 py-3 text-end">
                                             @if($isSeller && in_array($mySwap->status, ['active', 'pending_payment']))
                                                 <form action="{{ route('credit-swap.release', $mySwap->id) }}" method="POST" class="d-inline">
                                                     @csrf
@@ -2205,7 +2371,10 @@
 
         </div>
     </div>
-</div>
+
+<!-- ========================================== -->
+<!-- MODALS (inside root x-data scope so x-show state binds) -->
+<!-- ========================================== -->
 
 <!-- ========================================== -->
 <!-- STEP 2 MODAL: FINANCE REQUEST FORM -->
@@ -2306,26 +2475,32 @@
 <!-- ========================================== -->
 <!-- STEP 3 MODAL: REQUEST SUBMITTED (From Image) -->
 <!-- ========================================== -->
-@if(session('submitted_request_id'))
-<div class="custom-modal-backdrop">
-    <div class="custom-modal-card p-4 text-center">
+<div x-show="showSubmittedModal" x-cloak class="custom-modal-backdrop" @click.self="showSubmittedModal = false">
+    <div class="custom-modal-card p-4 text-center position-relative">
+        <button type="button" class="btn-close position-absolute top-0 end-0 m-3" @click="showSubmittedModal = false" aria-label="Close"></button>
         <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
             <i class="bi bi-check-circle-fill fs-1 text-success"></i>
         </div>
         <h4 class="fw-bold text-dark mb-2">Request Submitted!</h4>
-        <p class="text-muted small mb-3">Your finance request has been sent successfully. You will be notified once our finance team provides the payment details.</p>
-        
+        <p class="text-muted small mb-3" x-text="submittedRequestType === 'withdrawal'
+            ? 'Your withdrawal request has been sent successfully and is now pending review by our finance team.'
+            : 'Your finance request has been sent successfully. You will be notified once our finance team provides the payment details.'"></p>
+
         <div class="p-3 bg-light rounded-3 mb-4 border">
             <span class="text-muted small d-block mb-1">Request ID</span>
-            <h5 class="fw-bold text-primary mb-0">{{ session('submitted_request_id') }}</h5>
+            <h5 class="fw-bold text-primary mb-0" x-text="submittedRequestId"></h5>
         </div>
 
-        <button type="button" class="btn btn-primary w-100 fw-bold py-2 rounded-3" style="background:#2563eb;" onclick="window.location.href='{{ route('dashboard') }}'">
-            View My Requests
-        </button>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary fw-bold w-50 py-2 rounded-3" @click="showSubmittedModal = false">
+                Close
+            </button>
+            <button type="button" class="btn btn-primary fw-bold w-50 py-2 rounded-3" style="background:#2563eb;" @click="showSubmittedModal = false; activeTab = submittedRequestType === 'withdrawal' ? 'withdraw' : 'transactions'">
+                <i class="bi bi-list-ul me-1"></i> View My Requests
+            </button>
+        </div>
     </div>
 </div>
-@endif
 
 <!-- ========================================== -->
 <!-- STEP 5 & 7 MODAL: PAYMENT INSTRUCTIONS & EVIDENCE UPLOAD -->
@@ -2605,6 +2780,8 @@
     </div>
 </div>
 
+</div>
+
 <!-- Alpine JS Dashboard Engine -->
 <script>
     function userDashboardEngine() {
@@ -2629,6 +2806,10 @@
             propFilter: 'all',
             showFinanceModal: false,
             showCreateSwapModal: false,
+            showSubmittedModal: {{ session('submitted_request_id') ? 'true' : 'false' }},
+            submittedRequestId: @json(session('submitted_request_id')),
+            submittedRequestType: @json(session('submitted_request_type', 'deposit')),
+            cardFlipped: false,
             financeMethod: 'GCash',
             selectedDepInstruction: null,
             evidenceFileName: '',

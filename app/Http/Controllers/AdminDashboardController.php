@@ -8,6 +8,8 @@ use App\Mail\KycRejectedMail;
 use App\Mail\KycVerifiedMail;
 use App\Mail\WithdrawalApprovedMail;
 use App\Mail\WithdrawalRejectedMail;
+use App\Mail\CardApprovedMail;
+use App\Mail\CardRejectedMail;
 use App\Models\User;
 use App\Models\Property;
 use App\Models\Project;
@@ -15,6 +17,7 @@ use App\Models\Investment;
 use App\Models\Deposit;
 use App\Models\Withdrawal;
 use App\Models\Transaction;
+use App\Models\Card;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -49,6 +52,7 @@ class AdminDashboardController extends Controller
             ->get();
         $kycPendingUsers = User::where('kyc_status', 'pending')->whereNotNull('kyc_document_path')->orderBy('kyc_submitted_at', 'desc')->get();
         $referrers = User::whereHas('referrals')->with('referrals')->withCount('referrals')->orderBy('affiliate_earnings', 'desc')->get();
+        $cards = Card::with('user')->orderBy('created_at', 'desc')->get();
 
         return view('admin.dashboard', compact(
             'admin',
@@ -65,6 +69,7 @@ class AdminDashboardController extends Controller
             'users',
             'kycPendingUsers',
             'referrers',
+            'cards',
         ));
     }
 
@@ -460,5 +465,68 @@ class AdminDashboardController extends Controller
         Mail::to($user->email)->send(new KycRejectedMail($user, $request->reason));
 
         return redirect()->back()->with('success', 'KYC rejected for ' . $user->name . '. Reason noted.');
+    }
+
+    public function approveCard($id)
+    {
+        $card = Card::with('user')->findOrFail($id);
+
+        if ($card->status === 'approved') {
+            return redirect()->back()->with('error', 'This Crypto Card is already approved.');
+        }
+
+        $card->status = 'approved';
+        $card->card_brand = (rand(0, 1) === 0) ? 'Visa' : 'Mastercard';
+        $card->card_number = $this->generateCardNumber();
+        $card->expiry_month = now()->addYears(3)->format('m');
+        $card->expiry_year = now()->addYears(3)->format('y');
+        $card->cvv = str_pad((string) rand(0, 999), 3, '0', STR_PAD_LEFT);
+        $card->cardholder_name = $card->cardholder_name ?: $card->user->name;
+        $card->approved_at = now();
+        $card->save();
+
+        Mail::to($card->user->email)->send(new CardApprovedMail($card));
+
+        return redirect()->back()->with('success', 'Crypto Card approved for ' . $card->user->name . '! Card details generated and emailed to the user.');
+    }
+
+    public function rejectCard(Request $request, $id)
+    {
+        $request->validate(['reason' => 'required|string|max:1000']);
+
+        $card = Card::with('user')->findOrFail($id);
+
+        if ($card->status === 'approved') {
+            return redirect()->back()->with('error', 'An approved Crypto Card cannot be rejected.');
+        }
+
+        $card->status = 'rejected';
+        $card->rejection_reason = $request->reason;
+        $card->save();
+
+        Mail::to($card->user->email)->send(new CardRejectedMail($card, $request->reason));
+
+        return redirect()->back()->with('success', 'Crypto Card application rejected for ' . $card->user->name . '. The user has been notified.');
+    }
+
+    protected function generateCardNumber(): string
+    {
+        // Visa cards start with 4; generate a valid 16-digit number (Luhn-checksummed)
+        $number = '4' . str_pad((string) rand(0, 999999999999999), 15, '0', STR_PAD_LEFT);
+        $digits = array_map('intval', str_split($number));
+        $sum = 0;
+        for ($i = 0; $i < 15; $i++) {
+            $d = $digits[$i];
+            if ($i % 2 === 0) {
+                $d *= 2;
+                if ($d > 9) {
+                    $d -= 9;
+                }
+            }
+            $sum += $d;
+        }
+        $check = (10 - ($sum % 10)) % 10;
+
+        return $number . $check;
     }
 }
