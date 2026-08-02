@@ -19,21 +19,21 @@ Route::get('/', function () {
 
 // User Investment Dashboard
 Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
-Route::post('/deposit', [UserDashboardController::class, 'deposit'])->name('deposit.store');
-Route::post('/deposit/evidence/{id}', [UserDashboardController::class, 'uploadEvidence'])->name('deposit.evidence');
-Route::post('/withdraw', [UserDashboardController::class, 'withdraw'])->name('withdraw.store');
-Route::post('/send-funds', [UserDashboardController::class, 'sendFunds'])->name('send-funds.store');
-Route::post('/property/{property}/purchase', [UserDashboardController::class, 'purchaseProperty'])->name('property.purchase');
-Route::post('/kyc/submit', [UserDashboardController::class, 'submitKyc'])->name('kyc.submit');
-Route::post('/profile/update-info', [UserDashboardController::class, 'updateProfile'])->name('profile.update_info');
-Route::post('/credit-swap/create', [UserDashboardController::class, 'createCreditSwap'])->name('credit-swap.create');
-Route::post('/credit-swap/{id}/buy', [UserDashboardController::class, 'buyCreditSwap'])->name('credit-swap.buy');
-Route::post('/credit-swap/{id}/release', [UserDashboardController::class, 'releaseCreditSwap'])->name('credit-swap.release');
-Route::post('/credit-swap/{id}/cancel', [UserDashboardController::class, 'cancelCreditSwap'])->name('credit-swap.cancel');
-Route::post('/card/apply', [UserDashboardController::class, 'applyCard'])->name('card.apply');
+Route::post('/deposit', [UserDashboardController::class, 'deposit'])->name('deposit.store')->middleware('throttle:forms');
+Route::post('/deposit/evidence/{id}', [UserDashboardController::class, 'uploadEvidence'])->name('deposit.evidence')->middleware('throttle:forms');
+Route::post('/withdraw', [UserDashboardController::class, 'withdraw'])->name('withdraw.store')->middleware('throttle:forms');
+Route::post('/send-funds', [UserDashboardController::class, 'sendFunds'])->name('send-funds.store')->middleware('throttle:forms');
+Route::post('/property/{property}/purchase', [UserDashboardController::class, 'purchaseProperty'])->name('property.purchase')->middleware('throttle:forms');
+Route::post('/kyc/submit', [UserDashboardController::class, 'submitKyc'])->name('kyc.submit')->middleware('throttle:forms');
+Route::post('/profile/update-info', [UserDashboardController::class, 'updateProfile'])->name('profile.update_info')->middleware('throttle:forms');
+Route::post('/credit-swap/create', [UserDashboardController::class, 'createCreditSwap'])->name('credit-swap.create')->middleware('throttle:forms');
+Route::post('/credit-swap/{id}/buy', [UserDashboardController::class, 'buyCreditSwap'])->name('credit-swap.buy')->middleware('throttle:forms');
+Route::post('/credit-swap/{id}/release', [UserDashboardController::class, 'releaseCreditSwap'])->name('credit-swap.release')->middleware('throttle:forms');
+Route::post('/credit-swap/{id}/cancel', [UserDashboardController::class, 'cancelCreditSwap'])->name('credit-swap.cancel')->middleware('throttle:forms');
+Route::post('/card/apply', [UserDashboardController::class, 'applyCard'])->name('card.apply')->middleware('throttle:forms');
 
 // Admin Platform Management Dashboard
-Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['admin', 'throttle:admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::post('/deposit/instructions/{id}', [AdminDashboardController::class, 'sendInstructions'])->name('deposit.instructions');
     Route::post('/deposit/approve/{id}', [AdminDashboardController::class, 'approveDeposit'])->name('deposit.approve');
@@ -58,18 +58,18 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
 });
 
 // Stop impersonation - must be outside the admin middleware group so the impersonated user can leave
-Route::post('/admin/impersonate/stop', [AdminDashboardController::class, 'stopImpersonation'])->name('admin.impersonate.stop');
+Route::post('/admin/impersonate/stop', [AdminDashboardController::class, 'stopImpersonation'])->name('admin.impersonate.stop')->middleware('throttle:forms');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update')->middleware('throttle:forms');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy')->middleware('throttle:forms');
 });
 
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
 Route::get('/property/{property}', [PropertyController::class, 'show'])->name('property.show');
 Route::middleware('auth')->group(function () {
-    Route::post('/property/{property}/save', [PropertyController::class, 'toggleSave'])->name('property.save');
+    Route::post('/property/{property}/save', [PropertyController::class, 'toggleSave'])->name('property.save')->middleware('throttle:forms');
 });
 
 // Invest in Projects
@@ -77,8 +77,8 @@ Route::get('/invest', [InvestController::class, 'index'])->name('invest.index');
 Route::get('/project/{project}', [InvestController::class, 'show'])->name('project.show');
 Route::get('/project/{project}/download', [InvestController::class, 'downloadDocument'])->name('project.download');
 Route::middleware('auth')->group(function () {
-    Route::post('/project/{project}/save', [InvestController::class, 'toggleSave'])->name('project.save');
-    Route::post('/project/{project}/invest', [InvestController::class, 'invest'])->name('project.invest');
+    Route::post('/project/{project}/save', [InvestController::class, 'toggleSave'])->name('project.save')->middleware('throttle:forms');
+    Route::post('/project/{project}/invest', [InvestController::class, 'invest'])->name('project.invest')->middleware('throttle:forms');
 });
 
 Route::get('/list-property', function () {

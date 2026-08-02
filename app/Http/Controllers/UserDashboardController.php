@@ -39,6 +39,10 @@ class UserDashboardController extends Controller
             return redirect()->route('login')->with('error', 'Please sign in to access your dashboard.');
         }
 
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
         if ($user->isExpired()) {
             Auth::logout();
             return redirect()->route('login')->with('error', 'Your account has expired. Please contact support.');
