@@ -241,7 +241,7 @@
 
                         <!-- Logo -->
                         <a href="{{ url('/') }}" class="flex-shrink-0 d-flex align-items-center">
-                            <img src="{{ logo_url() }}" alt="{{ site_name() }}" height="42" style="object-fit: contain;">
+                            <img src="{{ logo_url() }}" alt="{{ site_name() }}" style="height: 42px; max-width: 170px; width: auto; object-fit: contain;">
                         </a>
 
                         <!-- Desktop & Laptop Navigation (Visible on Large Screens >= 992px) -->
@@ -457,7 +457,7 @@
                     <div class="row align-items-center pb-4 mb-4 border-bottom border-secondary-subtle">
                         <div class="col-lg-3 col-md-4 mb-3 mb-md-0">
                             <a href="{{ url('/') }}">
-                                <img src="{{ logo_url() }}" alt="{{ site_name() }} Logo" width="170" class="bg-white p-2 rounded">
+                                <img src="{{ logo_url() }}" alt="{{ site_name() }} Logo" style="width: 170px; max-height: 64px; object-fit: contain;" class="bg-white p-2 rounded">
                             </a>
                         </div>
                         <div class="col-lg-6 col-md-8 mb-3 mb-lg-0">

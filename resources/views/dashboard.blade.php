@@ -2962,7 +2962,7 @@
                             <div class="watermark-seal"><i class="bi bi-shield-check"></i></div>
                             <div class="header-bar d-flex justify-content-between align-items-center flex-wrap gap-3">
                                 <div>
-                                    <img src="${logoUrl}" alt="{{ site_name() }}" height="48" style="object-fit:contain;" class="mb-2">
+                                    <img src="${logoUrl}" alt="{{ site_name() }}" style="height: 48px; max-width: 220px; width: auto; object-fit: contain;" class="mb-2">
                                     <div class="text-muted small fw-medium" style="font-size:0.8rem;">Official Financial Statement &amp; Transaction Receipt</div>
                                 </div>
                                 <div class="text-end">

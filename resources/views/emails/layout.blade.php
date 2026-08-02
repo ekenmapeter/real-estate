@@ -12,7 +12,7 @@
                 <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px; width:100%;">
                     <tr>
                         <td style="background:linear-gradient(135deg,#0f172a,#1e3a8a); border-radius:16px 16px 0 0; padding:32px 36px 24px; text-align:center;">
-                            <img src="{{ logo_url() }}" alt="{{ site_name() }}" height="40" style="background:#fff; padding:6px 14px; border-radius:12px; margin-bottom:14px;">
+                            <img src="{{ logo_url() }}" alt="{{ site_name() }}" style="height: 40px; max-width: 320px; width: auto; object-fit: contain; background:#fff; padding:6px 14px; border-radius:12px; margin-bottom:14px;">
                             <h1 style="color:#fff; font-size:22px; font-weight:700; margin:0; letter-spacing:-0.3px;">@yield('heading', site_name())</h1>
                         </td>
                     </tr>
