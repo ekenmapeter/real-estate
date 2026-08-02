@@ -44,11 +44,11 @@
                         $galleryImages = ['https://radiantdreamrealty.com/frontend/images/home/house-7.jpg'];
                     }
                 @endphp
-                <div class="rounded-4 overflow-hidden shadow-lg mb-4 position-relative" x-data="{ slide: 0, images: @json($galleryImages) }">
+                <div class="rounded-4 overflow-hidden shadow-lg mb-4 position-relative" x-data='{ slide: 0, images: @json($galleryImages) }'>
                     <div class="position-relative overflow-hidden" style="height:460px; background:#e2e8f0;">
                         <template x-for="(img, i) in images" :key="i">
                             <div x-show="slide === i" x-transition.opacity.duration.300ms class="position-absolute top-0 start-0 w-100 h-100">
-                                <img :src="img" :alt="@json($property->title)" class="w-100 h-100" style="object-fit:cover;">
+                                <img :src="img" :alt='@json($property->title)' class="w-100 h-100" style="object-fit:cover;">
                             </div>
                         </template>
                     </div>
