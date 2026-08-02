@@ -487,6 +487,28 @@ class AdminDashboardController extends Controller
         return redirect()->route('admin.dashboard', ['tab' => 'settings'])->with('success', 'Platform settings saved successfully!');
     }
 
+    public function saveBranding(Request $request)
+    {
+        $request->validate([
+            'site_name' => 'required|string|max:60',
+            'logo' => 'nullable|image|mimes:png,jpg,jpeg,webp|max:2048',
+        ]);
+
+        Setting::set('site_name', trim($request->site_name));
+
+        if ($request->hasFile('logo')) {
+            $old = Setting::get('logo_path', '');
+            if ($old) {
+                Storage::disk('public')->delete($old);
+            }
+
+            $path = $request->file('logo')->storeAs('branding', 'logo.' . $request->file('logo')->extension(), 'public');
+            Setting::set('logo_path', $path);
+        }
+
+        return redirect()->route('admin.dashboard', ['tab' => 'settings'])->with('success', 'Site branding updated successfully!');
+    }
+
     public function updateAdminAccount(Request $request)
     {
         $request->validate([

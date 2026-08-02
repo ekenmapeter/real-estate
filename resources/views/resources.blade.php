@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Resources & Market Insights | radiantdreamrealty')
+@section('title', 'Resources & Market Insights | ' . site_name())
 
 @section('content')
 <!-- Resources Hero Section -->

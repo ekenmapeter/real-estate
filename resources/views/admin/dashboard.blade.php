@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Admin Panel - Finance Requests | radiantdreamrealty')
+@section('title', 'Admin Panel - Finance Requests | ' . site_name())
 
 @section('content')
 <style>
@@ -977,6 +977,35 @@
                 <h3 class="fw-bold text-dark mb-0">Settings</h3>
                 <p class="mb-0" style="font-size:0.9rem; font-weight:500; color:#475569;">Platform defaults, payment beneficiary details, and admin account management.</p>
             </div>
+        </div>
+
+        <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+            <h6 class="fw-bold text-dark mb-1"><i class="bi bi-brush me-2" style="color:#7c3aed;"></i>Site Branding</h6>
+            <p class="text-muted small mb-4">Set the site name and logo shown across the website, emails, and official receipts.</p>
+            <form action="{{ route('admin.settings.branding') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold text-dark small">Site Name</label>
+                        <input type="text" name="site_name" class="form-control" value="{{ $settings['site_name'] ?? 'radiantdreamrealty' }}" maxlength="60" required>
+                        <small class="text-muted d-block mt-1">Used in page titles, footer, emails, and receipts.</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold text-dark small">Logo</label>
+                        <input type="file" name="logo" class="form-control" accept="image/png,image/jpeg,image/webp">
+                        <small class="text-muted d-block mt-1">PNG / JPG / WEBP up to 2MB. Leave empty to keep the current logo.</small>
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <label class="form-label fw-semibold text-dark small d-block">Preview</label>
+                        <img src="{{ logo_url() }}" alt="{{ site_name() }}" class="border rounded-3 p-1 bg-white" style="max-height: 48px; max-width: 160px; object-fit: contain;">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn fw-bold px-4 py-2 rounded-3 text-white w-100" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">
+                            <i class="bi bi-save me-1"></i> Save Branding
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
 
         <div class="row g-4">

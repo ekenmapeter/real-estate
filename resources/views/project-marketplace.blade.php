@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Project Marketplace | radiantdreamrealty')
+@section('title', 'Project Marketplace | ' . site_name())
 
 @section('content')
 <!-- Marketplace Hero Section -->

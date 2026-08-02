@@ -19,5 +19,5 @@
     </table>
 
     <p style="margin:20px 0 0; font-size:14px; color:#64748b; line-height:1.5;">You will receive another notification once your deposit has been reviewed.</p>
-    <p style="margin:12px 0 0; font-size:14px; color:#64748b; line-height:1.5;">Thank you for choosing radiantdreamrealty.</p>
+    <p style="margin:12px 0 0; font-size:14px; color:#64748b; line-height:1.5;">Thank you for choosing {{ site_name() }}.</p>
 @endsection

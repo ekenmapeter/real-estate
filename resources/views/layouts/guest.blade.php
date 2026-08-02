@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ site_name() }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -18,7 +18,7 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
             <div>
                 <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
-                    <img src="{{ asset('frontend/images/logo/radiantblue.png') }}" alt="radiantdreamrealty" class="w-20 h-20" style="object-fit: contain;">
+                    <img src="{{ logo_url() }}" alt="{{ site_name() }}" class="w-20 h-20" style="object-fit: contain;">
                 </a>
             </div>
 

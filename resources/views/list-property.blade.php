@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'List Your Property | radiantdreamrealty')
+@section('title', 'List Your Property | ' . site_name())
 
 @section('content')
 <!-- List Property Hero Section -->
@@ -14,7 +14,7 @@
         </h1>
         <h5 class="text-white-50 fw-bold mb-3" style="font-weight: 700;">Market Your Real Estate to Global Investors Worldwide.</h5>
         <p class="subtitle text-white-50 body-2 mb-4" style="font-size: 1.15rem; line-height: 1.65; font-weight: 500;">
-          List luxury homes, villas, or commercial properties with radiantdreamrealty. Connect directly to verified buyers and co-ownership syndicates.
+          List luxury homes, villas, or commercial properties with {{ site_name() }}. Connect directly to verified buyers and co-ownership syndicates.
         </p>
         <div class="mt-4 d-flex flex-wrap gap-3 align-items-center">
           <a href="#submitForm" class="tf-btn primary shadow-lg fw-bold" style="min-width: 175px; padding: 15px 30px; font-size: 1.05rem; border-radius: 8px; font-weight: 800;">Submit Listing</a>

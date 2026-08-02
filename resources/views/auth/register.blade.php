@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Create Account | radiantdreamrealty')
+@section('title', 'Create Account | ' . site_name())
 
 @section('content')
 <section class="min-vh-100 d-flex align-items-center position-relative py-5" style="background: linear-gradient(135deg, rgba(13, 33, 55, 0.92) 0%, rgba(26, 60, 94, 0.88) 100%), url('{{ asset('frontend/images/hero_bg.png') }}') center/cover no-repeat;">

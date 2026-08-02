@@ -56,6 +56,7 @@ Route::prefix('admin')->name('admin.')->middleware(['admin', 'throttle:admin'])-
     Route::post('/card/reject/{id}', [AdminDashboardController::class, 'rejectCard'])->name('card.reject');
     Route::post('/gallery-image/delete/{id}', [AdminDashboardController::class, 'deleteGalleryImage'])->name('gallery.delete');
     Route::post('/settings/save', [AdminDashboardController::class, 'saveSettings'])->name('settings.save');
+    Route::post('/settings/branding', [AdminDashboardController::class, 'saveBranding'])->name('settings.branding');
     Route::post('/settings/account', [AdminDashboardController::class, 'updateAdminAccount'])->name('settings.account');
 });
 

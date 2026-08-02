@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Home | radiantdreamrealty - Global Real Estate Co-Ownership')
+@section('title', 'Home | ' . site_name() . ' - Global Real Estate Co-Ownership')
 
 @section('content')
 <!-- 1. Hero Slider Section -->
@@ -39,7 +39,7 @@
             </h1>
             <h5 class="text-white-50 fw-bold mb-3" style="font-weight: 700;">Work Remotely as an Affiliate or Agent.</h5>
             <p class="subtitle text-white-50 body-2 mb-4" style="font-size: 1.15rem; line-height: 1.65; font-weight: 500;">
-              Partner with radiantdreamrealty from anywhere. Broker international property deals, refer investors, and earn high-tier commissions paid directly to your balance.
+              Partner with {{ site_name() }} from anywhere. Broker international property deals, refer investors, and earn high-tier commissions paid directly to your balance.
             </p>
           </div>
 
@@ -908,12 +908,12 @@
   </div>
 </section>
 
-<!-- 13. Our Benefits / Why Choose radiantdreamrealty -->
+<!-- 13. Our Benefits / Why Choose {{ site_name() }} -->
 <section class="py-5" style="background: #ffffff;">
   <div class="container">
     <div class="text-center mb-5">
       <span class="text-primary fw-bold text-uppercase" style="font-size: 0.85rem;">Our Benefits</span>
-      <h2 class="fw-bold mt-1" style="color: #1a3c5e;">Why Choose radiantdreamrealty</h2>
+      <h2 class="fw-bold mt-1" style="color: #1a3c5e;">Why Choose {{ site_name() }}</h2>
       <p class="text-muted mx-auto" style="max-width: 650px;">Our seasoned team excels in real estate with years of successful market navigation, offering informed decisions and optimal results.</p>
     </div>
 

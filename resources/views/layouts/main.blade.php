@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-US" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <title>@yield('title', 'radiantdreamrealty | Global Property Investment & Co-Ownership Platform')</title>
+    <title>@yield('title', site_name() . ' | Global Property Investment & Co-Ownership Platform')</title>
     <meta name="description" content="Real Estate and property investment platform">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -241,7 +241,7 @@
 
                         <!-- Logo -->
                         <a href="{{ url('/') }}" class="flex-shrink-0 d-flex align-items-center">
-                            <img src="{{ asset('frontend/images/logo/radiantblue.png') }}" alt="radiantdreamrealty" height="42" style="object-fit: contain;">
+                            <img src="{{ logo_url() }}" alt="{{ site_name() }}" height="42" style="object-fit: contain;">
                         </a>
 
                         <!-- Desktop & Laptop Navigation (Visible on Large Screens >= 992px) -->
@@ -457,7 +457,7 @@
                     <div class="row align-items-center pb-4 mb-4 border-bottom border-secondary-subtle">
                         <div class="col-lg-3 col-md-4 mb-3 mb-md-0">
                             <a href="{{ url('/') }}">
-                                <img src="{{ asset('frontend/images/logo/radiantblue.png') }}" alt="radiantdreamrealty Logo" width="170" class="bg-white p-2 rounded">
+                                <img src="{{ logo_url() }}" alt="{{ site_name() }} Logo" width="170" class="bg-white p-2 rounded">
                             </a>
                         </div>
                         <div class="col-lg-6 col-md-8 mb-3 mb-lg-0">
@@ -537,7 +537,7 @@
 
                     <!-- Bottom Copyright & Legal Links -->
                     <div class="pt-4 mt-4 border-top border-secondary-subtle d-flex flex-wrap justify-content-between align-items-center gap-3 text-white-50 small">
-                        <div>© 2019 - {{ date('Y') }} radiantdreamrealty. All Rights Reserved.</div>
+                        <div>© 2019 - {{ date('Y') }} {{ site_name() }}. All Rights Reserved.</div>
                         <div class="d-flex gap-4">
                             <a href="{{ url('/privacy') }}" class="text-white-50 text-decoration-none">Privacy Policy</a>
                             <a href="{{ url('/terms') }}" class="text-white-50 text-decoration-none">Terms of Service</a>
@@ -754,7 +754,7 @@
 
       function shareContent(title, url, label) {
         if (navigator.share) {
-          navigator.share({ title: title, url: url, text: label + ' on radiantdreamrealty' }).catch(function() {});
+          navigator.share({ title: title, url: url, text: label + ' on {{ site_name() }}' }).catch(function() {});
         } else {
           navigator.clipboard.writeText(url).then(function() {
             showToast(title + ' link copied to clipboard!', 'info');

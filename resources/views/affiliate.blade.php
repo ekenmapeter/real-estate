@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Become an Affiliate | radiantdreamrealty')
+@section('title', 'Become an Affiliate | ' . site_name())
 
 @section('content')
 <!-- Affiliate Hero Section -->
@@ -14,7 +14,7 @@
         </h1>
         <h5 class="text-white-50 fw-bold mb-3" style="font-weight: 700;">Work From Home as a Global Real Estate Affiliate.</h5>
         <p class="subtitle text-white-50 body-2 mb-4" style="font-size: 1.15rem; line-height: 1.65; font-weight: 500;">
-          Refer investors, buyers, or co-owners to radiantdreamrealty and earn generous commission payouts directly to your balance with real-time dashboard analytics.
+          Refer investors, buyers, or co-owners to {{ site_name() }} and earn generous commission payouts directly to your balance with real-time dashboard analytics.
         </p>
         <div class="mt-4 d-flex flex-wrap gap-3 align-items-center">
           <a href="{{ route('register') }}" class="tf-btn primary shadow-lg fw-bold" style="min-width: 175px; padding: 15px 30px; font-size: 1.05rem; border-radius: 8px; font-weight: 800;">Get Started</a>

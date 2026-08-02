@@ -17,5 +17,5 @@
     </table>
 
     <p style="margin:20px 0 0; font-size:14px; color:#64748b; line-height:1.5;">This process usually takes 1-2 business days. You will receive an email once your identity has been verified.</p>
-    <p style="margin:12px 0 0; font-size:14px; color:#64748b; line-height:1.5;">Thank you for choosing radiantdreamrealty.</p>
+    <p style="margin:12px 0 0; font-size:14px; color:#64748b; line-height:1.5;">Thank you for choosing {{ site_name() }}.</p>
 @endsection
