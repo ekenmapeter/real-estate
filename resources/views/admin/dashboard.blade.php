@@ -967,13 +967,10 @@
                 @endforelse
             </div>
 
-        </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- SETTINGS TAB -->
-    <!-- ========================================== -->
-    <div x-show="activeAdminTab === 'settings'" x-transition>
+            <!-- ========================================== -->
+            <!-- SETTINGS TAB -->
+            <!-- ========================================== -->
+            <div x-show="activeAdminTab === 'settings'" x-transition>
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <span class="text-uppercase fw-bold small" style="color:#7c3aed;">SYSTEM CONFIGURATION</span>
@@ -1069,6 +1066,8 @@
         </div>
     </div>
 
+        </div>
+    </div>
 </div>
 </div>
 
