@@ -267,7 +267,7 @@
                 <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'saved_projects' }" @click.prevent="activeTab = 'saved_projects'">
                     <i class="bi bi-bookmark-star-fill"></i> Saved Projects
                     @if($savedProjects->count() > 0)
-                        <span class="badge ms-auto rounded-pill" style="background:#f59e0b; color:#1a1a1a; font-size:0.7rem;">{{ $savedProjects->count() }}</span>
+                        <span id="savedProjectsBadge" class="badge ms-auto rounded-pill" style="background:#f59e0b; color:#1a1a1a; font-size:0.7rem;">{{ $savedProjects->count() }}</span>
                     @endif
                 </a>
                 <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'marketplace' }" @click.prevent="activeTab = 'marketplace'">
@@ -614,21 +614,15 @@
                                     <p class="text-muted small mb-3" style="line-height:1.6;">
                                         Reason: <strong class="text-danger">{{ $userCard->rejection_reason ?? 'Not provided' }}</strong>. You can submit a new application whenever you are ready.
                                     </p>
-                                    <form action="{{ route('card.apply') }}" method="POST" onsubmit="return confirm('Apply for your Radiant Crypto Card?')">
-                                        @csrf
-                                        <button type="submit" class="btn btn-primary fw-bold px-4 py-2 rounded-3" style="background:#2563eb; font-size:0.85rem;">
-                                            <i class="bi bi-credit-card me-1"></i> Apply Again
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn btn-primary fw-bold px-4 py-2 rounded-3" style="background:#2563eb; font-size:0.85rem;" @click="openCardApplyModal = true">
+                                        <i class="bi bi-credit-card me-1"></i> Apply Again
+                                    </button>
                                 @else
                                     <h5 class="fw-bold text-dark mb-2" style="font-size:1.15rem;">Get your Crypto Card</h5>
                                     <p class="text-muted small mb-3" style="line-height:1.6;">Apply for a branded digital crypto card. Our team reviews your application, then your card is generated with a unique number, expiry and CVV &mdash; delivered straight to your email.</p>
-                                    <form action="{{ route('card.apply') }}" method="POST" onsubmit="return confirm('Apply for your Radiant Crypto Card?')">
-                                        @csrf
-                                        <button type="submit" class="btn btn-primary fw-bold px-4 py-2 rounded-3 shadow-sm" style="background:#2563eb; font-size:0.85rem;">
-                                            <i class="bi bi-credit-card me-1"></i> Apply for Crypto Card
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn btn-primary fw-bold px-4 py-2 rounded-3 shadow-sm" style="background:#2563eb; font-size:0.85rem;" @click="openCardApplyModal = true">
+                                        <i class="bi bi-credit-card me-1"></i> Apply for Crypto Card
+                                    </button>
                                 @endif
                             </div>
                         </div>
@@ -924,7 +918,7 @@
                                     <span class="badge position-absolute top-0 start-0 m-2 rounded-pill fw-bold {{ $projStatusCls[0] }}" style="font-size:0.75rem;">{{ $projStatusCls[1] }}</span>
                                     <span class="badge position-absolute top-0 start-0 m-2 mt-4 rounded-pill fw-bold" style="background:#f59e0b; font-size:0.75rem; color:#1a1a1a;">{{ $proj->expected_return_percentage }}% Return</span>
                                     @auth
-                                        <form action="{{ route('project.save', $proj) }}" method="POST" class="position-absolute top-0 end-0 m-2">
+                                        <form action="{{ route('project.save', $proj) }}" method="POST" class="js-save-project position-absolute top-0 end-0 m-2">
                                             @csrf
                                             <button type="submit" class="btn btn-sm rounded-circle border-0 shadow-sm {{ $projSaved ? 'text-danger' : 'bg-white' }}" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center;" title="{{ $projSaved ? 'Remove from saved' : 'Save project' }}">
                                                 <i class="bi {{ $projSaved ? 'bi-bookmark-fill' : 'bi-bookmark' }}"></i>
@@ -1009,10 +1003,10 @@
                         <p class="text-muted mb-0 small">Projects you have saved to invest in later.</p>
                     </div>
                     @if($savedProjects->count() > 0)
-                        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2 rounded-pill">{{ $savedProjects->count() }} Saved</span>
+                        <span id="savedCountPill" class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2 rounded-pill">{{ $savedProjects->count() }} Saved</span>
                     @endif
                 </div>
-                <div class="row g-4">
+                <div id="savedProjectsGrid" class="row g-4">
                     @forelse($savedProjects as $proj)
                         @php
                             $projRaised = $proj->raisedAmount();
@@ -1026,13 +1020,13 @@
                             ];
                             $projStatusCls = $projStatus[$proj->status] ?? ['bg-secondary', ucfirst($proj->status)];
                         @endphp
-                        <div class="col-md-6 col-lg-4">
+                        <div class="col-md-6 col-lg-4" data-saved-card>
                             <div class="card h-100 border-0 rounded-4 shadow-sm overflow-hidden bg-white">
                                 <div style="height:180px; overflow:hidden; position:relative;">
                                     <img src="{{ $proj->image_url ?? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop' }}" alt="{{ $proj->title }}" style="width:100%; height:100%; object-fit:cover;">
                                     <span class="badge position-absolute top-0 start-0 m-2 rounded-pill fw-bold {{ $projStatusCls[0] }}" style="font-size:0.75rem;">{{ $projStatusCls[1] }}</span>
                                     <span class="badge position-absolute top-0 start-0 m-2 mt-4 rounded-pill fw-bold" style="background:#f59e0b; font-size:0.75rem; color:#1a1a1a;">{{ $proj->expected_return_percentage }}% Return</span>
-                                    <form action="{{ route('project.save', $proj) }}" method="POST" class="position-absolute top-0 end-0 m-2">
+                                    <form action="{{ route('project.save', $proj) }}" method="POST" class="js-save-project position-absolute top-0 end-0 m-2" data-remove-card>
                                         @csrf
                                         <button type="submit" class="btn btn-sm rounded-circle border-0 shadow-sm bg-white" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center;" title="Remove from saved">
                                             <i class="bi bi-bookmark-fill text-danger"></i>
@@ -2507,12 +2501,12 @@
 <!-- ========================================== -->
 <div x-show="selectedDepInstruction" x-cloak class="custom-modal-backdrop">
     <div class="custom-modal-card p-4" style="max-width: 580px;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <span class="badge bg-success bg-opacity-15 text-success fw-bold me-2">Approved</span>
                 <span class="fw-bold text-dark">Deposit Request</span>
             </div>
-            <button type="button" class="btn-close" @click="selectedDepInstruction = null"></button>
+            <button type="button" class="btn-close" @click="selectedDepInstruction = null; stopInstructionTimer()"></button>
         </div>
 
         <div class="mb-3">
@@ -2521,9 +2515,16 @@
         </div>
 
         <!-- Timer Box (From Image Step 5) -->
-        <div class="p-3 rounded-3 mb-3 bg-primary bg-opacity-10 border border-primary border-opacity-25 d-flex justify-content-between align-items-center">
-            <span class="small fw-bold text-primary">Complete payment within:</span>
-            <span class="fs-5 fw-bold text-primary"><i class="bi bi-clock me-1"></i> 19:57</span>
+        <div class="p-3 rounded-3 mb-3 d-flex justify-content-between align-items-center"
+             :class="instructionExpired ? 'bg-danger bg-opacity-10 border border-danger border-opacity-25' : 'bg-primary bg-opacity-10 border border-primary border-opacity-25'">
+            <span class="small fw-bold" :class="instructionExpired ? 'text-danger' : 'text-primary'">Complete payment within:</span>
+            <span class="fs-5 fw-bold" :class="instructionExpired ? 'text-danger' : 'text-primary'">
+                <i class="bi bi-clock me-1"></i>
+                <span x-text="instructionLeft">19:57</span>
+                <template x-if="instructionExpired">
+                    <span class="badge bg-danger bg-opacity-15 text-danger ms-2 align-middle">Expired</span>
+                </template>
+            </span>
         </div>
 
         <!-- Beneficiary Payment Details Box (From Image Step 5) -->
@@ -2560,9 +2561,16 @@
         <div class="mb-4 text-secondary small">
             <h6 class="fw-bold text-dark mb-1" style="font-size:0.85rem;">Instructions</h6>
             <ul class="ps-3 mb-0">
-                <li>Please send the exact amount.</li>
-                <li>Do not include any remarks.</li>
-                <li>Upload your payment receipt before the timer expires.</li>
+                <template x-if="selectedDepInstruction?.admin_instructions?.instructions">
+                    <template x-for="line in selectedDepInstruction.admin_instructions.instructions.split('\n')" :key="line">
+                        <li x-text="line"></li>
+                    </template>
+                </template>
+                <template x-if="!selectedDepInstruction?.admin_instructions?.instructions">
+                    <li>Please send the exact amount.</li>
+                    <li>Do not include any remarks.</li>
+                    <li>Upload your payment receipt before the timer expires.</li>
+                </template>
             </ul>
         </div>
 
@@ -2588,10 +2596,10 @@
                 <textarea name="notes" class="form-control form-control-sm" rows="2" placeholder="Payment sent. Please confirm."></textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 fw-bold py-2.5 rounded-3 mb-2" style="background:#2563eb;">
+            <button type="submit" class="btn btn-primary w-100 fw-bold py-2.5 rounded-3 mb-2" style="background:#2563eb;" :disabled="instructionExpired">
                 Submit Evidence
             </button>
-            <button type="button" class="btn btn-link w-100 text-muted small text-decoration-none" @click="selectedDepInstruction = null">
+            <button type="button" class="btn btn-link w-100 text-muted small text-decoration-none" @click="selectedDepInstruction = null; stopInstructionTimer()">
                 Cancel Request
             </button>
         </form>
@@ -2687,6 +2695,83 @@
         </div>
         <button class="btn btn-primary w-100 fw-bold py-2 mb-2" style="background:#2563eb;" @click="shareAccountDetails()">Share Credentials</button>
         <button class="btn btn-outline-secondary w-100 fw-bold py-2" @click="openReceiveModal = false">Close</button>
+    </div>
+</div>
+
+<!-- Crypto Card Application Form Modal -->
+<div x-show="openCardApplyModal" x-cloak class="custom-modal-backdrop">
+    <div class="custom-modal-card p-4" style="max-width:540px;">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-credit-card-2-front text-primary me-2"></i>Apply for Crypto Card</h5>
+            <button type="button" class="btn-close" @click="openCardApplyModal = false"></button>
+        </div>
+        <p class="text-muted small mb-3">Complete the form below. Our team reviews your application, then your card is generated and emailed to you.</p>
+
+        <form action="{{ route('card.apply') }}" method="POST">
+            @csrf
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small" style="color:#1e293b;">Full Name (on card) <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="cardholder_name" class="form-control rounded-3 border-secondary-subtle" value="{{ old('cardholder_name', $user->name ?? '') }}" placeholder="e.g. John Doe" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small" style="color:#1e293b;">Phone Number <span style="color:#ef4444;">*</span></label>
+                    <input type="tel" name="phone" class="form-control rounded-3 border-secondary-subtle" value="{{ old('phone') }}" placeholder="e.g. +1 555 123 4567" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold small" style="color:#1e293b;">Street Address <span style="color:#ef4444;">*</span></label>
+                <input type="text" name="address" class="form-control rounded-3 border-secondary-subtle" value="{{ old('address') }}" placeholder="e.g. 123 Main Street, Apt 4B" required>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small" style="color:#1e293b;">City <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="city" class="form-control rounded-3 border-secondary-subtle" value="{{ old('city') }}" placeholder="e.g. New York" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small" style="color:#1e293b;">Country <span style="color:#ef4444;">*</span></label>
+                    <select name="country" class="form-select rounded-3 border-secondary-subtle" required>
+                        <option value="" disabled {{ old('country') ? '' : 'selected' }}>Select country...</option>
+                        <option value="United States" {{ old('country') === 'United States' ? 'selected' : '' }}>United States</option>
+                        <option value="United Kingdom" {{ old('country') === 'United Kingdom' ? 'selected' : '' }}>United Kingdom</option>
+                        <option value="Nigeria" {{ old('country') === 'Nigeria' ? 'selected' : '' }}>Nigeria</option>
+                        <option value="Philippines" {{ old('country') === 'Philippines' ? 'selected' : '' }}>Philippines</option>
+                        <option value="Singapore" {{ old('country') === 'Singapore' ? 'selected' : '' }}>Singapore</option>
+                        <option value="Canada" {{ old('country') === 'Canada' ? 'selected' : '' }}>Canada</option>
+                        <option value="Australia" {{ old('country') === 'Australia' ? 'selected' : '' }}>Australia</option>
+                        <option value="United Arab Emirates" {{ old('country') === 'United Arab Emirates' ? 'selected' : '' }}>United Arab Emirates</option>
+                        <option value="Germany" {{ old('country') === 'Germany' ? 'selected' : '' }}>Germany</option>
+                        <option value="Spain" {{ old('country') === 'Spain' ? 'selected' : '' }}>Spain</option>
+                        <option value="Other" {{ old('country') === 'Other' ? 'selected' : '' }}>Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small" style="color:#1e293b;">Card Type <span style="color:#ef4444;">*</span></label>
+                    <select name="card_type" class="form-select rounded-3 border-secondary-subtle" required>
+                        <option value="virtual" {{ old('card_type') === 'physical' ? '' : 'selected' }}>Virtual (instant digital)</option>
+                        <option value="physical" {{ old('card_type') === 'physical' ? 'selected' : '' }}>Physical (delivered)</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold small" style="color:#1e293b;">Preferred Brand <span style="color:#ef4444;">*</span></label>
+                    <select name="card_brand" class="form-select rounded-3 border-secondary-subtle" required>
+                        <option value="Visa" {{ old('card_brand') === 'Mastercard' ? '' : 'selected' }}>Visa</option>
+                        <option value="Mastercard" {{ old('card_brand') === 'Mastercard' ? 'selected' : '' }}>Mastercard</option>
+                    </select>
+                </div>
+            </div>
+            <div class="p-3 rounded-3 mb-3" style="background:#eff6ff; border:1px solid #bfdbfe;">
+                <small class="text-muted"><i class="bi bi-shield-lock me-1 text-primary"></i> Your information is kept confidential and used only for card verification and delivery.</small>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary fw-bold w-50 py-2 rounded-3" @click="openCardApplyModal = false">Cancel</button>
+                <button type="submit" class="btn btn-primary fw-bold w-50 py-2 rounded-3" style="background:#2563eb;">
+                    <i class="bi bi-send me-1"></i> Submit Application
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -2813,7 +2898,11 @@
             financeMethod: 'GCash',
             selectedDepInstruction: null,
             evidenceFileName: '',
+            instructionLeft: '--:--',
+            instructionExpired: false,
+            instructionTimer: null,
             openReceiveModal: false,
+            openCardApplyModal: false,
             showEditProfile: false,
             selectedProperty: null,
             propertiesList: @json($properties),
@@ -2947,6 +3036,28 @@
 
             showInstructionsModal(dep) {
                 this.selectedDepInstruction = dep;
+                if (this.instructionTimer) clearInterval(this.instructionTimer);
+                this.instructionExpired = false;
+                var self = this;
+                var end = dep && dep.expires_at ? new Date(dep.expires_at).getTime() : null;
+                var update = function() {
+                    if (!end) { self.instructionLeft = '--:--'; return; }
+                    var diff = Math.max(0, end - Date.now());
+                    var h = Math.floor(diff / 3600000);
+                    var m = Math.floor((diff % 3600000) / 60000);
+                    var s = Math.floor((diff % 60000) / 1000);
+                    self.instructionLeft = (h > 0 ? String(h).padStart(2, '0') + ':' : '') + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+                    if (diff <= 0) {
+                        self.instructionExpired = true;
+                        if (self.instructionTimer) { clearInterval(self.instructionTimer); self.instructionTimer = null; }
+                    }
+                };
+                update();
+                if (end) { this.instructionTimer = setInterval(update, 1000); }
+            },
+
+            stopInstructionTimer() {
+                if (this.instructionTimer) { clearInterval(this.instructionTimer); this.instructionTimer = null; }
             },
 
             copyText(text) {
@@ -2997,4 +3108,19 @@
         };
     }
 </script>
+
+@section('footer')
+<footer class="bg-white border-top">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-3 px-md-4 py-3">
+        <div class="small text-muted">© {{ date('Y') }} Radiant Dream Realty. All Rights Reserved.</div>
+        <div class="d-flex flex-wrap gap-3 small">
+            <a href="{{ url('/') }}" class="text-muted text-decoration-none hover-primary">Home</a>
+            <a href="{{ url('/invest') }}" class="text-muted text-decoration-none hover-primary">Invest</a>
+            <a href="{{ url('/properties') }}" class="text-muted text-decoration-none hover-primary">Properties</a>
+            <a href="{{ route('dashboard') }}" class="text-muted text-decoration-none hover-primary">Dashboard</a>
+            <a href="mailto:support@radiantdreamrealty.com" class="text-muted text-decoration-none hover-primary">Support</a>
+        </div>
+    </div>
+</footer>
+@endsection
 @endsection

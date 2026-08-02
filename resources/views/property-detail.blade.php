@@ -37,12 +37,35 @@
         <div class="row g-5">
             <!-- Left: Image & Details -->
             <div class="col-lg-7">
-                <!-- Hero Image -->
-                <div class="rounded-4 overflow-hidden shadow-lg mb-4 position-relative">
-                    <img src="{{ $property->image_url ?? 'https://radiantdreamrealty.com/frontend/images/home/house-7.jpg' }}"
-                         alt="{{ $property->title }}"
-                         class="w-100"
-                         style="height: 460px; object-fit: cover;">
+                <!-- Hero Image Carousel -->
+                @php
+                    $galleryImages = $property->galleryUrls();
+                    if (empty($galleryImages)) {
+                        $galleryImages = ['https://radiantdreamrealty.com/frontend/images/home/house-7.jpg'];
+                    }
+                @endphp
+                <div class="rounded-4 overflow-hidden shadow-lg mb-4 position-relative" x-data="{ slide: 0, images: @json($galleryImages) }">
+                    <div class="position-relative overflow-hidden" style="height:460px; background:#e2e8f0;">
+                        <template x-for="(img, i) in images" :key="i">
+                            <div x-show="slide === i" x-transition.opacity.duration.300ms class="position-absolute top-0 start-0 w-100 h-100">
+                                <img :src="img" :alt="@json($property->title)" class="w-100 h-100" style="object-fit:cover;">
+                            </div>
+                        </template>
+                    </div>
+
+                    <button x-show="images.length > 1" type="button" @click="slide = (slide - 1 + images.length) % images.length" class="btn btn-light rounded-circle position-absolute top-50 start-0 translate-middle-y ms-3 d-flex align-items-center justify-content-center shadow-sm" style="width:42px; height:42px; opacity:0.85; z-index:5;">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button x-show="images.length > 1" type="button" @click="slide = (slide + 1) % images.length" class="btn btn-light rounded-circle position-absolute top-50 end-0 translate-middle-y me-3 d-flex align-items-center justify-content-center shadow-sm" style="width:42px; height:42px; opacity:0.85; z-index:5;">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+
+                    <div x-show="images.length > 1" class="position-absolute bottom-0 end-0 m-3 d-flex gap-1" style="z-index:5;">
+                        <template x-for="(img, i) in images" :key="i">
+                            <button type="button" @click="slide = i" class="rounded-circle border-0" :class="slide === i ? 'bg-white' : 'bg-white bg-opacity-50'" style="width:8px; height:8px; padding:0;"></button>
+                        </template>
+                    </div>
+
                     <div class="position-absolute bottom-0 start-0 w-100 p-3" style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
                         <div class="d-flex gap-2 flex-wrap">
                             <span class="badge bg-primary fs-6 px-3 py-2">{{ $property->category }}</span>

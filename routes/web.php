@@ -54,6 +54,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::post('/users/{id}/impersonate', [AdminDashboardController::class, 'impersonate'])->name('users.impersonate');
     Route::post('/card/approve/{id}', [AdminDashboardController::class, 'approveCard'])->name('card.approve');
     Route::post('/card/reject/{id}', [AdminDashboardController::class, 'rejectCard'])->name('card.reject');
+    Route::post('/gallery-image/delete/{id}', [AdminDashboardController::class, 'deleteGalleryImage'])->name('gallery.delete');
 });
 
 // Stop impersonation - must be outside the admin middleware group so the impersonated user can leave

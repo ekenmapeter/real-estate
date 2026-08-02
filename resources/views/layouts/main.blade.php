@@ -448,6 +448,9 @@
             <!-- End Main Content -->
 
             <!-- Main Footer -->
+            @hasSection('footer')
+                @yield('footer')
+            @else
             <footer class="footer bg-dark text-white pt-5 pb-4" style="background-color: #0d1b2a !important;">
                 <div class="container">
                     <!-- Top Footer Header / Social & Contact -->
@@ -543,6 +546,7 @@
                     </div>
                 </div>
             </footer>
+            @endif
         </div>
     </div>
 
@@ -753,14 +757,118 @@
           navigator.share({ title: title, url: url, text: label + ' on Radiant Dream Realty' }).catch(function() {});
         } else {
           navigator.clipboard.writeText(url).then(function() {
-            var toast = document.createElement('div');
-            toast.textContent = title + ' link copied to clipboard!';
-            toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1d4ed8;color:#fff;padding:10px 20px;border-radius:8px;font-weight:600;font-size:0.85rem;z-index:999999;box-shadow:0 4px 20px rgba(0,0,0,0.2);';
-            document.body.appendChild(toast);
-            setTimeout(function() { toast.remove(); }, 2500);
+            showToast(title + ' link copied to clipboard!', 'info');
           });
         }
       }
+
+      function showToast(message, type) {
+        var bg = '#16a34a';
+        if (type === 'error') bg = '#dc2626';
+        else if (type === 'info') bg = '#1d4ed8';
+        var toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:' + bg + ';color:#fff;padding:12px 22px;border-radius:10px;font-weight:600;font-size:0.88rem;z-index:999999;box-shadow:0 8px 28px rgba(0,0,0,0.25);opacity:0;transform:translateY(12px);transition:all .25s ease;';
+        document.body.appendChild(toast);
+        requestAnimationFrame(function() {
+          toast.style.opacity = '1';
+          toast.style.transform = 'translateY(0)';
+        });
+        setTimeout(function() {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(12px)';
+          setTimeout(function() { toast.remove(); }, 300);
+        }, 2600);
+      }
+
+      // AJAX project save/unsave (no page reload)
+      document.addEventListener('submit', function(e) {
+        var form = e.target;
+        if (!form.classList.contains('js-save-project')) return;
+        e.preventDefault();
+
+        var btn = form.querySelector('button[type="submit"]');
+        if (btn) btn.disabled = true;
+
+        fetch(form.getAttribute('action'), {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+          credentials: 'same-origin'
+        }).then(function(res) {
+          if (res.redirected && res.url.indexOf('/login') !== -1) {
+            window.location.href = '/login';
+            throw new Error('redirect');
+          }
+          if (res.status === 419) {
+            window.location.reload();
+            throw new Error('reload');
+          }
+          return res.json().then(function(data) {
+            if (!res.ok) throw new Error(data.message || 'error');
+            return data;
+          });
+        }).then(function(data) {
+          var saved = !!data.saved;
+          if (btn) {
+            btn.disabled = false;
+            var icon = btn.querySelector('i');
+            if (icon) {
+              icon.classList.toggle('bi-bookmark-fill', saved);
+              icon.classList.toggle('bi-bookmark', !saved);
+            }
+            if (saved) {
+              btn.classList.add('saved');
+              btn.classList.remove('bg-white');
+              btn.classList.add('text-danger');
+            } else {
+              btn.classList.remove('saved');
+              btn.classList.add('bg-white');
+              btn.classList.remove('text-danger');
+            }
+            btn.title = saved ? 'Remove from saved' : 'Save project';
+          }
+
+          showToast(saved ? 'Project saved to your list!' : 'Project removed from your saved list.', saved ? 'success' : 'info');
+
+          if (form.hasAttribute('data-remove-card') && !saved) {
+            var card = form.closest('[data-saved-card]');
+            if (card) {
+              card.style.transition = 'opacity .3s ease, transform .3s ease';
+              card.style.opacity = '0';
+              card.style.transform = 'scale(0.96)';
+              setTimeout(function() {
+                card.remove();
+                var grid = document.getElementById('savedProjectsGrid');
+                if (grid && !grid.querySelector('[data-saved-card]')) {
+                  grid.innerHTML = '<div class="col-12"><div class="card border-0 rounded-4 shadow-sm bg-white p-5 text-center">' +
+                    '<div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width:64px; height:64px; background:#f1f5f9;">' +
+                    '<i class="bi bi-bookmark-star fs-2 text-muted"></i></div>' +
+                    '<h5 class="fw-bold text-dark mb-2">No Saved Projects</h5>' +
+                    '<p class="text-muted small mb-0">Save projects you are interested in and they will appear here for quick access.</p>' +
+                    '</div></div>';
+                }
+              }, 300);
+            }
+            var pill = document.getElementById('savedCountPill');
+            if (pill) {
+              var n = parseInt(pill.textContent, 10) || 0;
+              pill.textContent = Math.max(0, n - 1);
+              if (n - 1 <= 0) pill.classList.add('d-none');
+            }
+            var badge = document.getElementById('savedProjectsBadge');
+            if (badge) {
+              var m = parseInt(badge.textContent, 10) || 0;
+              badge.textContent = Math.max(0, m - 1);
+              if (m - 1 <= 0) badge.classList.add('d-none');
+            }
+          }
+        }).catch(function(err) {
+          if (btn) btn.disabled = false;
+          if (err && (err.message === 'redirect' || err.message === 'reload')) return;
+          showToast('Something went wrong. Please try again.', 'error');
+        });
+      });
     </script>
 </body>
 </html>

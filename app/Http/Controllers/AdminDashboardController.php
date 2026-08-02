@@ -18,6 +18,8 @@ use App\Models\Deposit;
 use App\Models\Withdrawal;
 use App\Models\Transaction;
 use App\Models\Card;
+use App\Models\ProjectImage;
+use App\Models\PropertyImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -207,9 +209,12 @@ class AdminDashboardController extends Controller
             'image_url' => 'nullable|string',
             'description' => 'nullable|string',
             'status' => 'nullable|string|in:active,sold_out,upcoming',
+            'gallery_urls' => 'nullable|string',
+            'gallery' => 'nullable|array',
+            'gallery.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
         ]);
 
-        Property::create([
+        $property = Property::create([
             'title' => $request->title,
             'location' => $request->location,
             'category' => $request->category,
@@ -223,6 +228,8 @@ class AdminDashboardController extends Controller
             'description' => $request->description,
             'status' => $request->status ?: 'active',
         ]);
+
+        $this->syncGallery($property, 'properties', $request);
 
         return redirect()->route('admin.dashboard', ['tab' => 'properties'])->with('success', 'New housing property listing created successfully!');
     }
@@ -241,6 +248,9 @@ class AdminDashboardController extends Controller
             'image_url' => 'nullable|string',
             'description' => 'nullable|string',
             'status' => 'nullable|string|in:active,sold_out,upcoming',
+            'gallery_urls' => 'nullable|string',
+            'gallery' => 'nullable|array',
+            'gallery.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
         ]);
 
         $property = Property::findOrFail($id);
@@ -258,6 +268,8 @@ class AdminDashboardController extends Controller
         $property->status = $request->status ?: $property->status;
         $property->save();
 
+        $this->syncGallery($property, 'properties', $request);
+
         return redirect()->route('admin.dashboard', ['tab' => 'properties'])->with('success', 'Property "' . $property->title . '" updated successfully.');
     }
 
@@ -272,6 +284,12 @@ class AdminDashboardController extends Controller
     {
         $property = Property::findOrFail($id);
         $investmentsCount = $property->investments()->count();
+
+        foreach ($property->images as $image) {
+            if (!Str::startsWith($image->image_path, ['http://', 'https://'])) {
+                Storage::disk('public')->delete($image->image_path);
+            }
+        }
 
         $property->delete();
 
@@ -293,6 +311,9 @@ class AdminDashboardController extends Controller
             'description' => 'nullable|string',
             'document' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
             'status' => 'nullable|string|in:active,completed,closed',
+            'gallery_urls' => 'nullable|string',
+            'gallery' => 'nullable|array',
+            'gallery.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
         ]);
 
         $documentPath = null;
@@ -300,7 +321,7 @@ class AdminDashboardController extends Controller
             $documentPath = $request->file('document')->store('project-documents', 'public');
         }
 
-        Project::create([
+        $project = Project::create([
             'title' => $request->title,
             'location' => $request->location,
             'category' => $request->category,
@@ -314,6 +335,8 @@ class AdminDashboardController extends Controller
             'document_path' => $documentPath,
             'status' => $request->status ?: 'active',
         ]);
+
+        $this->syncGallery($project, 'projects', $request);
 
         return redirect()->route('admin.dashboard', ['tab' => 'projects'])->with('success', 'New investment project created successfully!');
     }
@@ -340,6 +363,9 @@ class AdminDashboardController extends Controller
             'description' => 'nullable|string',
             'document' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
             'status' => 'nullable|string|in:active,completed,closed',
+            'gallery_urls' => 'nullable|string',
+            'gallery' => 'nullable|array',
+            'gallery.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
         ]);
 
         $project = Project::findOrFail($id);
@@ -364,6 +390,8 @@ class AdminDashboardController extends Controller
 
         $project->save();
 
+        $this->syncGallery($project, 'projects', $request);
+
         return redirect()->route('admin.dashboard', ['tab' => 'projects'])->with('success', 'Project "' . $project->title . '" updated successfully.');
     }
 
@@ -375,9 +403,61 @@ class AdminDashboardController extends Controller
             Storage::disk('public')->delete($project->document_path);
         }
 
+        foreach ($project->images as $image) {
+            if (!Str::startsWith($image->image_path, ['http://', 'https://'])) {
+                Storage::disk('public')->delete($image->image_path);
+            }
+        }
+
         $project->delete();
 
         return redirect()->back()->with('success', 'Project "' . $project->title . '" deleted.');
+    }
+
+    protected function syncGallery($owner, string $kind, Request $request): void
+    {
+        foreach ($owner->images as $image) {
+            if (!Str::startsWith($image->image_path, ['http://', 'https://'])) {
+                Storage::disk('public')->delete($image->image_path);
+            }
+        }
+
+        $owner->images()->delete();
+
+        $order = 0;
+
+        $urls = collect(preg_split('/\r\n|\r|\n/', (string) $request->input('gallery_urls', '')))
+            ->map(fn ($url) => trim($url))
+            ->filter()
+            ->values();
+
+        foreach ($urls as $url) {
+            $owner->images()->create(['image_path' => $url, 'sort_order' => $order++]);
+        }
+
+        if ($request->hasFile('gallery')) {
+            foreach ($request->file('gallery') as $file) {
+                $path = $file->store('uploads/galleries/' . $kind, 'public');
+                $owner->images()->create(['image_path' => $path, 'sort_order' => $order++]);
+            }
+        }
+    }
+
+    public function deleteGalleryImage($id)
+    {
+        $image = ProjectImage::where('id', $id)->first() ?? PropertyImage::where('id', $id)->first();
+
+        if (!$image) {
+            abort(404);
+        }
+
+        if (!Str::startsWith($image->image_path, ['http://', 'https://'])) {
+            Storage::disk('public')->delete($image->image_path);
+        }
+
+        $image->delete();
+
+        return redirect()->back()->with('success', 'Gallery image removed.');
     }
 
     public function awardReferralBonus(Request $request)
@@ -476,7 +556,7 @@ class AdminDashboardController extends Controller
         }
 
         $card->status = 'approved';
-        $card->card_brand = (rand(0, 1) === 0) ? 'Visa' : 'Mastercard';
+        $card->card_brand = $card->card_brand ?: ((rand(0, 1) === 0) ? 'Visa' : 'Mastercard');
         $card->card_number = $this->generateCardNumber();
         $card->expiry_month = now()->addYears(3)->format('m');
         $card->expiry_year = now()->addYears(3)->format('y');

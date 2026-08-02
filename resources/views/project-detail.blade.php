@@ -20,14 +20,7 @@
 
 <section class="py-5" style="background: #f8fafc; min-height: 80vh;">
     <div class="container">
-        <!-- Breadcrumb -->
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb bg-white rounded-3 p-3 shadow-sm mb-0">
-                <li class="breadcrumb-item"><a href="{{ url('/') }}" class="text-decoration-none fw-semibold text-primary">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('invest.index') }}" class="text-decoration-none fw-semibold text-primary">Invest</a></li>
-                <li class="breadcrumb-item active fw-bold text-dark text-truncate" style="max-width:280px;" aria-current="page">{{ $project->title }}</li>
-            </ol>
-        </nav>
+ 
 
         <div class="row g-5">
             <!-- Left: Image & Details -->
@@ -43,11 +36,34 @@
                     ];
                     $statusCls = $statusBadge[$project->status] ?? ['bg-secondary', ucfirst($project->status)];
                 @endphp
-                <div class="rounded-4 overflow-hidden shadow-lg mb-4 position-relative">
-                    <img src="{{ $project->image_url ?? 'https://radiantdreamrealty.com/frontend/images/home/house-1.jpg' }}"
-                         alt="{{ $project->title }}"
-                         class="w-100"
-                         style="height: 460px; object-fit: cover;">
+                @php
+                    $galleryImages = $project->galleryUrls();
+                    if (empty($galleryImages)) {
+                        $galleryImages = ['https://radiantdreamrealty.com/frontend/images/home/house-1.jpg'];
+                    }
+                @endphp
+                <div class="rounded-4 overflow-hidden shadow-lg mb-4 position-relative" x-data="{ slide: 0, images: @json($galleryImages) }">
+                    <div class="position-relative overflow-hidden" style="height:460px; background:#e2e8f0;">
+                        <template x-for="(img, i) in images" :key="i">
+                            <div x-show="slide === i" x-transition.opacity.duration.300ms class="position-absolute top-0 start-0 w-100 h-100">
+                                <img :src="img" :alt="@json($project->title)" class="w-100 h-100" style="object-fit:cover;">
+                            </div>
+                        </template>
+                    </div>
+
+                    <button x-show="images.length > 1" type="button" @click="slide = (slide - 1 + images.length) % images.length" class="btn btn-light rounded-circle position-absolute top-50 start-0 translate-middle-y ms-3 d-flex align-items-center justify-content-center shadow-sm" style="width:42px; height:42px; opacity:0.85; z-index:5;">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button x-show="images.length > 1" type="button" @click="slide = (slide + 1) % images.length" class="btn btn-light rounded-circle position-absolute top-50 end-0 translate-middle-y me-3 d-flex align-items-center justify-content-center shadow-sm" style="width:42px; height:42px; opacity:0.85; z-index:5;">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+
+                    <div x-show="images.length > 1" class="position-absolute bottom-0 end-0 m-3 d-flex gap-1" style="z-index:5;">
+                        <template x-for="(img, i) in images" :key="i">
+                            <button type="button" @click="slide = i" class="rounded-circle border-0" :class="slide === i ? 'bg-white' : 'bg-white bg-opacity-50'" style="width:8px; height:8px; padding:0;"></button>
+                        </template>
+                    </div>
+
                     <div class="position-absolute bottom-0 start-0 w-100 p-3" style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
                         <div class="d-flex gap-2 flex-wrap">
                             <span class="badge {{ $statusCls[0] }} fs-6 px-3 py-2">{{ $statusCls[1] }}</span>

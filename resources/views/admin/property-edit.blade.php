@@ -49,7 +49,7 @@
     <div class="row g-4">
         <!-- Edit Form -->
         <div class="col-lg-7">
-            <form action="{{ route('admin.property.update', $property->id) }}" method="POST">
+            <form action="{{ route('admin.property.update', $property->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
                     <h6 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle-fill me-2" style="color:#2563eb;"></i>Listing Details</h6>
@@ -87,6 +87,41 @@
                             <textarea name="description" class="form-control" rows="4" x-model="form.description" placeholder="Describe the property, amenities, and investment opportunity...">{{ $property->description }}</textarea>
                         </div>
                     </div>
+                </div>
+
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                    <h6 class="fw-bold text-dark mb-3"><i class="bi bi-images me-2" style="color:#2563eb;"></i>Photo Gallery</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-dark small">Add Gallery Images (Upload)</label>
+                            <input type="file" name="gallery[]" class="form-control" accept="image/*" multiple>
+                            <small class="text-muted">Upload multiple images at once. They appear in a carousel on the property page.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-dark small">Gallery Image URLs (one per line)</label>
+                            <textarea name="gallery_urls" class="form-control" rows="3" placeholder="https://...&#10;https://...">{{ $property->images->filter(fn($img) => str_starts_with($img->image_path, 'http'))->pluck('image_path')->implode(PHP_EOL) }}</textarea>
+                            <small class="text-muted">Saving replaces the entire gallery. Existing URL images are pre-filled above.</small>
+                        </div>
+                    </div>
+
+                    @if($property->images->count() > 0)
+                        <div class="mt-3">
+                            <label class="form-label fw-semibold text-dark small">Current Gallery ({{ $property->images->count() }})</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach($property->images as $image)
+                                    <div class="position-relative" style="width:120px;">
+                                        <img src="{{ $image->url() }}" alt="Gallery image" style="width:120px; height:80px; object-fit:cover; border-radius:10px; border:1px solid #e2e8f0;">
+                                        <form action="{{ route('admin.gallery.delete', $image->id) }}" method="POST" class="position-absolute top-0 end-0 m-1">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-circle p-0 d-flex align-items-center justify-content-center" style="width:22px; height:22px;" title="Remove image" onclick="return confirm('Remove this gallery image?')">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">

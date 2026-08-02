@@ -35,18 +35,11 @@ class UserDashboardController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        // If no authenticated user, get or create default test user for smooth evaluation
         if (!$user) {
-            $user = User::where('email', 'investor@radiantrealty.com')->notExpired()->first();
-            if (!$user) {
-                $user = User::notExpired()->first();
-            }
-            if ($user) {
-                Auth::login($user);
-            }
+            return redirect()->route('login')->with('error', 'Please sign in to access your dashboard.');
         }
 
-        if ($user && $user->isExpired()) {
+        if ($user->isExpired()) {
             Auth::logout();
             return redirect()->route('login')->with('error', 'Your account has expired. Please contact support.');
         }
@@ -718,9 +711,25 @@ class UserDashboardController extends Controller
                     : 'You already have an active Crypto Card.');
         }
 
+        $request->validate([
+            'cardholder_name' => 'required|string|max:255',
+            'phone'           => 'required|string|max:30',
+            'address'         => 'required|string|max:255',
+            'city'            => 'required|string|max:255',
+            'country'         => 'required|string|max:255',
+            'card_type'       => 'required|in:virtual,physical',
+            'card_brand'      => 'required|in:Visa,Mastercard',
+        ]);
+
         Card::create([
             'user_id'         => $user->id,
-            'cardholder_name' => $user->name,
+            'cardholder_name' => $request->cardholder_name,
+            'phone'           => $request->phone,
+            'address'         => $request->address,
+            'city'            => $request->city,
+            'country'         => $request->country,
+            'card_type'       => $request->card_type,
+            'card_brand'      => $request->card_brand,
             'status'          => 'pending',
         ]);
 

@@ -289,7 +289,7 @@
             <div x-show="activeAdminTab === 'properties'" x-transition>
                 <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
                     <h5 class="fw-bold text-dark mb-3"><i class="bi bi-plus-circle-fill text-primary me-2"></i>Publish New Housing Property Listing</h5>
-                    <form action="{{ route('admin.property.store') }}" method="POST">
+                    <form action="{{ route('admin.property.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
@@ -316,6 +316,19 @@
                             <div class="col-md-3">
                                 <label class="form-label fw-semibold text-dark small">Target ROI (%)</label>
                                 <input type="number" step="0.1" name="roi_percentage" class="form-control" placeholder="24.5" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">Image URL</label>
+                                <input type="url" name="image_url" class="form-control" placeholder="https://...">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">Gallery Images (Upload)</label>
+                                <input type="file" name="gallery[]" class="form-control" accept="image/*" multiple>
+                                <small class="text-muted">You can upload multiple images — they will show in a carousel on the property page.</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold text-dark small">Gallery Image URLs (one per line)</label>
+                                <textarea name="gallery_urls" class="form-control" rows="2" placeholder="https://...&#10;https://..."></textarea>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary fw-bold px-4 py-2 rounded-3" style="background:#2563eb;">Publish Listing</button>
@@ -441,6 +454,15 @@
                                 <label class="form-label fw-semibold text-dark small">Project Document (PDF/DOC)</label>
                                 <input type="file" name="document" class="form-control" accept=".pdf,.doc,.docx">
                                 <small class="text-muted">Uploaded documents are downloadable by investors from the project page.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">Gallery Images (Upload)</label>
+                                <input type="file" name="gallery[]" class="form-control" accept="image/*" multiple>
+                                <small class="text-muted">You can upload multiple images — they will show in a carousel on the project page.</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold text-dark small">Gallery Image URLs (one per line)</label>
+                                <textarea name="gallery_urls" class="form-control" rows="2" placeholder="https://...&#10;https://..."></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-semibold text-dark small">Description</label>
@@ -829,6 +851,30 @@
                                     </div>
                                 </div>
                                 <span class="badge fw-bold rounded-pill px-3 py-1.5" style="background:#fffbeb; color:#b45309;">Pending</span>
+                            </div>
+                            <div class="row g-2 mt-2 mb-3">
+                                <div class="col-md-3">
+                                    <span class="text-muted small d-block" style="font-size:0.68rem;">PHONE</span>
+                                    <span class="small fw-semibold text-dark">{{ $card->phone ?? 'N/A' }}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="text-muted small d-block" style="font-size:0.68rem;">LOCATION</span>
+                                    <span class="small fw-semibold text-dark">{{ $card->city ? $card->city . ', ' . $card->country : ($card->country ?? 'N/A') }}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="text-muted small d-block" style="font-size:0.68rem;">CARD TYPE</span>
+                                    <span class="small fw-semibold text-dark">{{ ucfirst($card->card_type ?? 'virtual') }}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="text-muted small d-block" style="font-size:0.68rem;">PREFERRED BRAND</span>
+                                    <span class="small fw-semibold text-dark">{{ $card->card_brand ?? 'Any' }}</span>
+                                </div>
+                                @if($card->address)
+                                <div class="col-12">
+                                    <span class="text-muted small d-block" style="font-size:0.68rem;">ADDRESS</span>
+                                    <span class="small fw-semibold text-dark">{{ $card->address }}</span>
+                                </div>
+                                @endif
                             </div>
                             <div class="d-flex gap-2 mt-3 flex-wrap">
                                 <form action="{{ route('admin.card.approve', $card->id) }}" method="POST">

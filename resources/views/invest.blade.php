@@ -108,7 +108,7 @@
                 <span class="badge bg-dark text-warning fw-bold">{{ $project->expected_return_percentage }}% Return</span>
               </div>
               @auth
-                <form action="{{ route('project.save', $project) }}" method="POST" class="position-absolute top-0 end-0 m-2">
+                <form action="{{ route('project.save', $project) }}" method="POST" class="js-save-project position-absolute top-0 end-0 m-2">
                   @csrf
                   <button type="submit" class="btn btn-sm rounded-circle border-0 shadow-sm save-btn {{ $isSaved ? 'saved' : 'bg-white' }}" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;" title="{{ $isSaved ? 'Remove from saved' : 'Save project' }}">
                     <i class="bi {{ $isSaved ? 'bi-bookmark-fill' : 'bi-bookmark' }}" style="font-size:1rem;"></i>

@@ -62,6 +62,21 @@ class Property extends Model
         return $this->hasMany(SavedProperty::class);
     }
 
+    public function images()
+    {
+        return $this->hasMany(PropertyImage::class)->orderBy('sort_order');
+    }
+
+    public function galleryUrls(): array
+    {
+        $urls = collect($this->images->map(fn ($img) => $img->url()));
+        if ($this->image_url) {
+            $urls->prepend($this->image_url);
+        }
+
+        return $urls->values()->all();
+    }
+
     public function purchasePrice(): float
     {
         return (float) ($this->price ?? ($this->price_per_share * $this->total_shares));

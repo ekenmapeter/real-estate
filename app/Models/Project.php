@@ -58,6 +58,21 @@ class Project extends Model
         return $this->hasMany(SavedProject::class);
     }
 
+    public function images()
+    {
+        return $this->hasMany(ProjectImage::class)->orderBy('sort_order');
+    }
+
+    public function galleryUrls(): array
+    {
+        $urls = collect($this->images->map(fn ($img) => $img->url()));
+        if ($this->image_url) {
+            $urls->prepend($this->image_url);
+        }
+
+        return $urls->values()->all();
+    }
+
     public function raisedAmount(): float
     {
         return (float) $this->investments()

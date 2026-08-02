@@ -287,5 +287,34 @@ class DatabaseSeeder extends Seeder
             'description' => 'Affiliate Referral Reward Commission',
             'status' => 'completed',
         ]);
+
+        // 8. Seed gallery images for projects and properties (idempotent)
+        $projectGalleries = [
+            [$prj1, ['https://images.unsplash.com/photo-1515263487990-61b07816b324?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?q=80&w=1200&auto=format&fit=crop']],
+            [$prj2, ['https://images.unsplash.com/photo-1580587771525-78b9dba3b914?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop']],
+            [$prj3, ['https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop']],
+            [$prj4, ['https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1200&auto=format&fit=crop']],
+        ];
+        foreach ($projectGalleries as [$project, $urls]) {
+            foreach ($urls as $order => $url) {
+                if ($project && !$project->images()->where('image_path', $url)->exists()) {
+                    $project->images()->create(['image_path' => $url, 'sort_order' => $order]);
+                }
+            }
+        }
+
+        $propertyGalleries = [
+            [$p1, ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1200&auto=format&fit=crop']],
+            [$p2, ['https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1200&auto=format&fit=crop']],
+            [$p3, ['https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop']],
+            [$p4, ['https://images.unsplash.com/photo-1460317442991-0ec209397118?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=1200&auto=format&fit=crop']],
+        ];
+        foreach ($propertyGalleries as [$property, $urls]) {
+            foreach ($urls as $order => $url) {
+                if ($property && !$property->images()->where('image_path', $url)->exists()) {
+                    $property->images()->create(['image_path' => $url, 'sort_order' => $order]);
+                }
+            }
+        }
     }
 }
