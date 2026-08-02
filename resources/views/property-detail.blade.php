@@ -28,8 +28,6 @@
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb bg-white rounded-3 p-3 shadow-sm mb-0">
-                <li class="breadcrumb-item"><a href="{{ url('/') }}" class="text-decoration-none fw-semibold text-primary">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ url('/properties') }}" class="text-decoration-none fw-semibold text-primary">Properties</a></li>
                 <li class="breadcrumb-item active fw-bold text-dark text-truncate" style="max-width:280px;" aria-current="page">{{ $property->title }}</li>
             </ol>
         </nav>
