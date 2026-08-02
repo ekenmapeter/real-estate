@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Sign In | Radiant Dream Realty')
+@section('title', 'Sign In | radiantdreamrealty')
 
 @section('content')
 <section class="min-vh-100 d-flex align-items-center position-relative py-5" style="background: linear-gradient(135deg, rgba(13, 33, 55, 0.92) 0%, rgba(26, 60, 94, 0.88) 100%), url('{{ asset('frontend/images/hero_bg.png') }}') center/cover no-repeat;">

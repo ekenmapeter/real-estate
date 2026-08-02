@@ -20,8 +20,10 @@ use App\Models\Transaction;
 use App\Models\Card;
 use App\Models\ProjectImage;
 use App\Models\PropertyImage;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -72,7 +74,7 @@ class AdminDashboardController extends Controller
             'kycPendingUsers',
             'referrers',
             'cards',
-        ));
+        ))->with('settings', Setting::pluck('value', 'key')->all());
     }
 
     public function sendInstructions(Request $request, $id)
@@ -85,7 +87,7 @@ class AdminDashboardController extends Controller
             'beneficiary_account_name' => 'required|string',
         ]);
 
-        $expirationMinutes = (int) ($request->expiration_minutes ?? 20);
+        $expirationMinutes = (int) ($request->expiration_minutes ?? Setting::get('default_expiration_minutes', 20));
 
         $deposit->admin_instructions = [
             'method'         => $request->beneficiary_method,
@@ -458,6 +460,53 @@ class AdminDashboardController extends Controller
         $image->delete();
 
         return redirect()->back()->with('success', 'Gallery image removed.');
+    }
+
+    public function saveSettings(Request $request)
+    {
+        $request->validate([
+            'beneficiary_method' => 'required|string|max:50',
+            'beneficiary_account_number' => 'required|string|max:100',
+            'beneficiary_account_name' => 'required|string|max:100',
+            'reference_prefix' => 'nullable|string|max:20',
+            'default_expiration_minutes' => 'required|integer|min:5|max:1440',
+            'min_deposit_amount' => 'required|numeric|min:1',
+            'referral_bonus_amount' => 'required|numeric|min:0',
+            'support_email' => 'required|email',
+        ]);
+
+        Setting::set('beneficiary_method', $request->beneficiary_method);
+        Setting::set('beneficiary_account_number', $request->beneficiary_account_number);
+        Setting::set('beneficiary_account_name', $request->beneficiary_account_name);
+        Setting::set('reference_prefix', $request->reference_prefix ?: 'RDR');
+        Setting::set('default_expiration_minutes', $request->default_expiration_minutes);
+        Setting::set('min_deposit_amount', $request->min_deposit_amount);
+        Setting::set('referral_bonus_amount', $request->referral_bonus_amount);
+        Setting::set('support_email', $request->support_email);
+
+        return redirect()->route('admin.dashboard', ['tab' => 'settings'])->with('success', 'Platform settings saved successfully!');
+    }
+
+    public function updateAdminAccount(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . Auth::id(),
+            'current_password' => 'required|current_password',
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        $admin = Auth::user();
+        $admin->name = $request->name;
+        $admin->email = $request->email;
+
+        if ($request->filled('password')) {
+            $admin->password = Hash::make($request->password);
+        }
+
+        $admin->save();
+
+        return redirect()->route('admin.dashboard', ['tab' => 'settings'])->with('success', 'Admin account updated successfully!');
     }
 
     public function awardReferralBonus(Request $request)

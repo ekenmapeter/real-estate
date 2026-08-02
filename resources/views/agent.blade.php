@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Become a Verified Agent | Radiant Dream Realty')
+@section('title', 'Become a Verified Agent | radiantdreamrealty')
 
 @section('content')
 <!-- Agent Hero Section -->
@@ -14,7 +14,7 @@
         </h1>
         <h5 class="text-white-50 fw-bold mb-3" style="font-weight: 700;">Market & Sell Luxury International Real Estate.</h5>
         <p class="subtitle text-white-50 body-2 mb-4" style="font-size: 1.15rem; line-height: 1.65; font-weight: 500;">
-          Join Radiant Dream Realty as a verified broker or agent. Access thousands of active global buyers and list premium inventory worldwide.
+          Join radiantdreamrealty as a verified broker or agent. Access thousands of active global buyers and list premium inventory worldwide.
         </p>
         <div class="mt-4 d-flex flex-wrap gap-3 align-items-center">
           <a href="#agentApp" class="tf-btn primary shadow-lg fw-bold" style="min-width: 175px; padding: 15px 30px; font-size: 1.05rem; border-radius: 8px; font-weight: 800;">Apply as Agent</a>
@@ -78,7 +78,7 @@
         </div>
       </div>
       <div class="col-lg-6">
-        <h3 class="fw-bold mb-3" style="color: #1a3c5e;">Why Join Radiant Dream Realty?</h3>
+        <h3 class="fw-bold mb-3" style="color: #1a3c5e;">Why Join radiantdreamrealty?</h3>
         <ul class="list-unstyled space-y-3">
           <li class="d-flex align-items-start gap-3 mb-3">
             <i class="bi bi-check-circle-fill text-primary fs-4"></i>

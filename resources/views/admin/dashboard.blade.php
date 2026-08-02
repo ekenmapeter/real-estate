@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Admin Panel - Finance Requests | Radiant Dream Realty')
+@section('title', 'Admin Panel - Finance Requests | radiantdreamrealty')
 
 @section('content')
 <style>
@@ -132,7 +132,7 @@
                     <i class="bi bi-person-workspace"></i> User View Dashboard
                 </a>
                 <hr class="border-secondary opacity-25 my-3">
-                <a href="#" class="nav-link-admin">
+                <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'settings' }" @click.prevent="activeAdminTab = 'settings'">
                     <i class="bi bi-gear-fill"></i> Settings
                 </a>
                 <form method="POST" action="{{ route('logout') }}" class="mt-2">
@@ -969,6 +969,107 @@
 
         </div>
     </div>
+
+    <!-- ========================================== -->
+    <!-- SETTINGS TAB -->
+    <!-- ========================================== -->
+    <div x-show="activeAdminTab === 'settings'" x-transition>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <span class="text-uppercase fw-bold small" style="color:#7c3aed;">SYSTEM CONFIGURATION</span>
+                <h3 class="fw-bold text-dark mb-0">Settings</h3>
+                <p class="mb-0" style="font-size:0.9rem; font-weight:500; color:#475569;">Platform defaults, payment beneficiary details, and admin account management.</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                    <h6 class="fw-bold text-dark mb-1"><i class="bi bi-sliders me-2" style="color:#7c3aed;"></i>Platform Settings</h6>
+                    <p class="text-muted small mb-4">These values prefill deposit instructions, referral bonuses, and validation rules across the platform.</p>
+                    <form action="{{ route('admin.settings.save') }}" method="POST">
+                        @csrf
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">Payment Method</label>
+                                <select name="beneficiary_method" class="form-select">
+                                    @foreach(['GCash', 'Maya', 'Bank Transfer', 'Wire Transfer', 'USDT TRC20'] as $method)
+                                        <option value="{{ $method }}" @selected(($settings['beneficiary_method'] ?? 'GCash') === $method)>{{ $method }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">Reference Prefix</label>
+                                <input type="text" name="reference_prefix" class="form-control" value="{{ $settings['reference_prefix'] ?? 'RDR' }}" maxlength="20" placeholder="RDR">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">Beneficiary Account Number</label>
+                                <input type="text" name="beneficiary_account_number" class="form-control" value="{{ $settings['beneficiary_account_number'] ?? '09658726718' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">Beneficiary Account Name</label>
+                                <input type="text" name="beneficiary_account_name" class="form-control" value="{{ $settings['beneficiary_account_name'] ?? 'RINNY P.' }}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-dark small">Payment Window (Minutes)</label>
+                                <input type="number" name="default_expiration_minutes" min="5" max="1440" class="form-control" value="{{ $settings['default_expiration_minutes'] ?? 20 }}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-dark small">Min Deposit ($)</label>
+                                <input type="number" step="0.01" min="1" name="min_deposit_amount" class="form-control" value="{{ $settings['min_deposit_amount'] ?? 10 }}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold text-dark small">Referral Bonus ($)</label>
+                                <input type="number" step="0.01" min="0" name="referral_bonus_amount" class="form-control" value="{{ $settings['referral_bonus_amount'] ?? 10 }}" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold text-dark small">Support Email</label>
+                                <input type="email" name="support_email" class="form-control" value="{{ $settings['support_email'] ?? 'support@radiantdreamrealty.com' }}" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn fw-bold px-4 py-2 rounded-3 text-white mt-3" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">
+                            <i class="bi bi-check-lg me-1"></i> Save Platform Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                    <h6 class="fw-bold text-dark mb-1"><i class="bi bi-person-gear me-2" style="color:#2563eb;"></i>Admin Account</h6>
+                    <p class="text-muted small mb-4">Update your admin profile details and password.</p>
+                    <form action="{{ route('admin.settings.account') }}" method="POST">
+                        @csrf
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">Full Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ $admin->name }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ $admin->email }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">Current Password <span class="text-danger">*</span></label>
+                            <input type="password" name="current_password" class="form-control" required autocomplete="current-password">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">New Password</label>
+                            <input type="password" name="password" class="form-control" autocomplete="new-password" placeholder="Leave blank to keep current password">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small">Confirm New Password</label>
+                            <input type="password" name="password_confirmation" class="form-control" autocomplete="new-password">
+                        </div>
+                        <button type="submit" class="btn fw-bold px-4 py-2 rounded-3 text-white" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);">
+                            <i class="bi bi-check-lg me-1"></i> Update Account
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 </div>
 
 <!-- ========================================== -->
@@ -989,37 +1090,35 @@
             <div class="mb-3">
                 <label class="form-label fw-semibold text-dark small">Payment Method</label>
                 <select name="beneficiary_method" class="form-select" required>
-                    <option value="GCash">GCash</option>
-                    <option value="Maya">Maya</option>
-                    <option value="Bank Transfer">Bank Transfer</option>
-                    <option value="Wire Transfer">Wire Transfer</option>
-                    <option value="USDT TRC20">USDT (TRC20)</option>
+                    @foreach(['GCash', 'Maya', 'Bank Transfer', 'Wire Transfer', 'USDT TRC20'] as $method)
+                        <option value="{{ $method }}" @selected(($settings['beneficiary_method'] ?? 'GCash') === $method)>{{ $method }}</option>
+                    @endforeach
                 </select>
             </div>
 
             <div class="row g-2 mb-3">
                 <div class="col-6">
                     <label class="form-label fw-semibold text-dark small">Account Number</label>
-                    <input type="text" name="beneficiary_account_number" class="form-control" value="09658726718" required>
+                    <input type="text" name="beneficiary_account_number" class="form-control" value="{{ $settings['beneficiary_account_number'] ?? '09658726718' }}" required>
                 </div>
                 <div class="col-6">
                     <label class="form-label fw-semibold text-dark small">Account Name</label>
-                    <input type="text" name="beneficiary_account_name" class="form-control" value="RINNY P." required>
+                    <input type="text" name="beneficiary_account_name" class="form-control" value="{{ $settings['beneficiary_account_name'] ?? 'RINNY P.' }}" required>
                 </div>
             </div>
 
             <div class="row g-2 mb-3">
                 <div class="col-6">
                     <label class="form-label fw-semibold text-dark small">Reference Number (Optional)</label>
-                    <input type="text" name="reference_number" class="form-control" value="RDR250520001">
+                    <input type="text" name="reference_number" class="form-control" value="{{ $settings['reference_prefix'] ?? 'RDR' }}250520001">
                 </div>
                 <div class="col-6">
                     <label class="form-label fw-semibold text-dark small">Expiration Time</label>
                     <select name="expiration_minutes" class="form-select">
-                        <option value="20">20 Minutes</option>
-                        <option value="30">30 Minutes</option>
-                        <option value="60">1 Hour</option>
-                        <option value="1440">24 Hours</option>
+                        <option value="20" @selected(($settings['default_expiration_minutes'] ?? 20) == 20)>20 Minutes</option>
+                        <option value="30" @selected(($settings['default_expiration_minutes'] ?? 20) == 30)>30 Minutes</option>
+                        <option value="60" @selected(($settings['default_expiration_minutes'] ?? 20) == 60)>1 Hour</option>
+                        <option value="1440" @selected(($settings['default_expiration_minutes'] ?? 20) == 1440)>24 Hours</option>
                     </select>
                 </div>
             </div>
@@ -1266,7 +1365,11 @@
 <script>
     function adminDashboardEngine() {
         return {
-            activeAdminTab: 'finance_requests',
+            activeAdminTab: (function() {
+                var tab = new URLSearchParams(window.location.search).get('tab');
+                var valid = ['finance_requests','properties','projects','users','kyc_reviews','withdrawals','cards','referrals','settings'];
+                return valid.indexOf(tab) !== -1 ? tab : 'finance_requests';
+            })(),
             filterType: 'all',
             filterStatus: 'all',
             searchQuery: '',

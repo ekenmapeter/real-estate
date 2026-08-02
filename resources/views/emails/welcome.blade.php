@@ -1,9 +1,9 @@
 @extends('emails.layout')
-@section('subject', 'Welcome to Radiant Dream Realty')
-@section('heading', 'Welcome to Radiant Dream Realty!')
+@section('subject', 'Welcome to radiantdreamrealty')
+@section('heading', 'Welcome to radiantdreamrealty!')
 @section('content')
     <p style="margin:0 0 16px; font-size:15px; color:#1e293b; line-height:1.6;">Hello <strong style="color:#0f172a;">{{ $user->name }}</strong>,</p>
-    <p style="margin:0 0 16px; font-size:15px; color:#475569; line-height:1.6;">Thank you for joining Radiant Dream Realty! Your account has been created successfully and you're now ready to start investing in premium real estate opportunities.</p>
+    <p style="margin:0 0 16px; font-size:15px; color:#475569; line-height:1.6;">Thank you for joining radiantdreamrealty! Your account has been created successfully and you're now ready to start investing in premium real estate opportunities.</p>
 
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc; border-radius:12px; padding:20px; margin:0 0 20px;">
         <tr>
@@ -23,5 +23,5 @@
         <tr><td align="center"><a href="{{ url('/dashboard') }}" style="display:inline-block; background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; font-size:15px; font-weight:700; padding:14px 36px; border-radius:10px; text-decoration:none;">Go to Dashboard</a></td></tr>
     </table>
 
-    <p style="margin:20px 0 0; font-size:14px; color:#64748b; line-height:1.5;">Happy investing!<br><strong style="color:#0f172a;">The Radiant Dream Realty Team</strong></p>
+    <p style="margin:20px 0 0; font-size:14px; color:#64748b; line-height:1.5;">Happy investing!<br><strong style="color:#0f172a;">The radiantdreamrealty Team</strong></p>
 @endsection

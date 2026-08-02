@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Meet The Team | Radiant Dream Realty')
+@section('title', 'Meet The Team | radiantdreamrealty')
 
 @section('content')
 <!-- Team Hero Section -->

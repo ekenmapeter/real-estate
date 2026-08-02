@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Careers | Radiant Dream Realty')
+@section('title', 'Careers | radiantdreamrealty')
 
 @section('content')
 <!-- Career Hero Section -->

@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', $project->title . ' | Radiant Dream Realty')
+@section('title', $project->title . ' | radiantdreamrealty')
 
 @section('content')
 <style>

@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Edit Property | Radiant Dream Realty')
+@section('title', 'Edit Property | radiantdreamrealty')
 
 @section('content')
 <style>

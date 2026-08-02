@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', $property->title . ' | Radiant Dream Realty')
+@section('title', $property->title . ' | radiantdreamrealty')
 
 @section('content')
 <style>

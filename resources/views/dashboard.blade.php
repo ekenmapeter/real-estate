@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'User Dashboard | Radiant Dream Realty Investment Platform')
+@section('title', 'User Dashboard | radiantdreamrealty Investment Platform')
 
 @section('content')
 
@@ -1390,7 +1390,7 @@
                                         <span class="fw-bold text-dark small"><i class="bi bi-globe2 text-primary me-1"></i> International Wire Transfer</span>
                                         <span class="badge bg-primary bg-opacity-10 text-primary fw-bold" style="font-size:0.65rem;">SWIFT</span>
                                     </div>
-                                    <div class="small text-muted mb-1">Account Name: <strong class="text-dark">Radiant Dream Realty Corp.</strong></div>
+                                    <div class="small text-muted mb-1">Account Name: <strong class="text-dark">radiantdreamrealty Corp.</strong></div>
                                     <div class="d-flex align-items-center justify-content-between bg-white p-1.5 rounded border">
                                         <span class="small text-muted">SWIFT: <code class="fw-bold text-dark">RDRPHMM1XXXX</code></span>
                                         <button class="btn btn-sm btn-link p-0 text-primary fw-bold small text-decoration-none" @click="copyText('RDRPHMM1XXXX')">
@@ -1461,7 +1461,7 @@
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center mb-1.5 small">
                                             <span class="text-muted">Account Name:</span>
-                                            <strong class="text-dark">Radiant Dream Realty Corp.</strong>
+                                            <strong class="text-dark">radiantdreamrealty Corp.</strong>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center mb-1.5 small">
                                             <span class="text-muted">SWIFT Code:</span>
@@ -2962,7 +2962,7 @@
                             <div class="watermark-seal"><i class="bi bi-shield-check"></i></div>
                             <div class="header-bar d-flex justify-content-between align-items-center flex-wrap gap-3">
                                 <div>
-                                    <img src="${logoUrl}" alt="Radiant Dream Realty" height="48" style="object-fit:contain;" class="mb-2">
+                                    <img src="${logoUrl}" alt="radiantdreamrealty" height="48" style="object-fit:contain;" class="mb-2">
                                     <div class="text-muted small fw-medium" style="font-size:0.8rem;">Official Financial Statement &amp; Transaction Receipt</div>
                                 </div>
                                 <div class="text-end">
@@ -3013,8 +3013,8 @@
                             </table>
 
                             <div class="pt-3 border-top text-center text-muted small" style="font-size:0.78rem;">
-                                <p class="mb-1 fw-bold text-dark"><i class="bi bi-shield-lock text-primary me-1"></i> Radiant Dream Realty Corp. &middot; Automated Financial System</p>
-                                <p class="mb-0 text-secondary" style="font-size:0.72rem;">This is an electronically generated official receipt. Digitally verified by Radiant Dream Realty platform. No signature required.</p>
+                                <p class="mb-1 fw-bold text-dark"><i class="bi bi-shield-lock text-primary me-1"></i> radiantdreamrealty Corp. &middot; Automated Financial System</p>
+                                <p class="mb-0 text-secondary" style="font-size:0.72rem;">This is an electronically generated official receipt. Digitally verified by radiantdreamrealty platform. No signature required.</p>
                             </div>
                         </div>
                     </body>
@@ -3071,7 +3071,7 @@
             },
 
             shareAccountDetails() {
-                const text = `Radiant Dream Realty Credentials:\nAccount ID: {{ $user->account_id ?? "RDR-884920" }}\nEmail: {{ $user->email ?? "investor@radiantrealty.com" }}`;
+                const text = `radiantdreamrealty Credentials:\nAccount ID: {{ $user->account_id ?? "RDR-884920" }}\nEmail: {{ $user->email ?? "investor@radiantrealty.com" }}`;
                 if (navigator.share) {
                     navigator.share({ title: 'Receive Funds', text: text }).catch(() => {});
                 } else {
@@ -3084,7 +3084,7 @@
 
     function shareProject(title, url) {
         if (navigator.share) {
-            navigator.share({ title: title, url: url, text: 'Invest in this project on Radiant Dream Realty' }).catch(() => {});
+            navigator.share({ title: title, url: url, text: 'Invest in this project on radiantdreamrealty' }).catch(() => {});
         } else {
             navigator.clipboard.writeText(url).then(() => {
                 const toast = document.createElement('div');
@@ -3112,7 +3112,7 @@
 @section('footer')
 <footer class="bg-white border-top">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 px-3 px-md-4 py-3">
-        <div class="small text-muted">© {{ date('Y') }} Radiant Dream Realty. All Rights Reserved.</div>
+        <div class="small text-muted">© {{ date('Y') }} radiantdreamrealty. All Rights Reserved.</div>
         <div class="d-flex flex-wrap gap-3 small">
             <a href="{{ url('/') }}" class="text-muted text-decoration-none hover-primary">Home</a>
             <a href="{{ url('/invest') }}" class="text-muted text-decoration-none hover-primary">Invest</a>

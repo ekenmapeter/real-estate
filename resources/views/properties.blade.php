@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Properties for Sale | Radiant Dream Realty')
+@section('title', 'Properties for Sale | radiantdreamrealty')
 
 @section('content')
 <!-- Properties Hero Section -->

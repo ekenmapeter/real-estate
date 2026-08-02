@@ -59,7 +59,7 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         if ($referrerId) {
-            $bonusAmount = 10.00;
+            $bonusAmount = (float) \App\Models\Setting::get('referral_bonus_amount', 10.00);
             $referrer = User::find($referrerId);
 
             if ($referrer) {
