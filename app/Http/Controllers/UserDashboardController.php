@@ -57,6 +57,7 @@ class UserDashboardController extends Controller
 
         $walletBalance = $user ? $user->wallet_balance : 0.00;
         $affiliateEarnings = $user ? $user->affiliate_earnings : 0.00;
+        $preferredCurrency = $user && $user->preferred_currency ? strtoupper($user->preferred_currency) : 'USD';
 
         $userInvestments = $user ? Investment::with('property')->where('user_id', $user->id)->orderBy('created_at', 'desc')->get() : collect([]);
         $projectInvestments = $user ? ProjectInvestment::with('project')->where('user_id', $user->id)->orderBy('created_at', 'desc')->get() : collect([]);
@@ -115,7 +116,7 @@ class UserDashboardController extends Controller
                 'title' => $label . ' — ' . $dep->deposit_code,
                 'description' => ($dep->status === 'awaiting_payment' ? 'Payment of ' : 'Amount ') .
                     ($dep->currency ?? '$') . ' ' . number_format($dep->amount, 2) .
-                    ($dep->status === 'completed' ? ' credited to your wallet.' : '.') .
+                    ($dep->status === 'completed' ? ' credited to your AVC balance.' : '.') .
                     ($dep->status === 'rejected' ? ' Reason: ' . ($dep->admin_note ?? 'No reason provided.') : ''),
                 'action' => $dep->status === 'awaiting_payment' ? $dep : null,
             ]);
@@ -148,7 +149,7 @@ class UserDashboardController extends Controller
                 'color' => $color,
                 'bg' => $bg,
                 'title' => $label . ' — ' . ($wd->withdrawal_code ?? 'WD-' . $wd->id),
-                'description' => 'Amount: $' . number_format($wd->amount, 2) .
+                'description' => 'Amount: ' . format_avc($wd->amount) .
                     ($wd->status === 'rejected' && $wd->admin_note ? '. Reason: ' . $wd->admin_note : ''),
                 'action' => null,
             ]);
@@ -161,7 +162,7 @@ class UserDashboardController extends Controller
                 'color' => '#f59e0b',
                 'bg' => '#fffbeb',
                 'title' => 'Project Investment Confirmed',
-                'description' => 'Invested $' . number_format($inv->amount, 2) . ' in project ' . ($inv->project->title ?? '') . ' — $' . number_format($inv->amount, 2),
+                'description' => 'Invested ' . format_avc($inv->amount) . ' in project ' . ($inv->project->title ?? '') . ' — ' . format_avc($inv->amount),
                 'action' => null,
             ]);
         }
@@ -173,7 +174,7 @@ class UserDashboardController extends Controller
                 'color' => '#8b5cf6',
                 'bg' => '#f5f3ff',
                 'title' => 'Investment Confirmed',
-                'description' => 'Purchased shares in ' . ($inv->property->title ?? 'a property') . ' — $' . number_format($inv->total_amount, 2),
+                'description' => 'Purchased shares in ' . ($inv->property->title ?? 'a property') . ' — ' . format_avc($inv->total_amount),
                 'action' => null,
             ]);
         }
@@ -185,7 +186,7 @@ class UserDashboardController extends Controller
                 'color' => '#2563eb',
                 'bg' => '#eff6ff',
                 'title' => 'Property Purchased',
-                'description' => 'Purchased ' . ($purchase->property->title ?? 'a property') . ' for $' . number_format($purchase->amount, 2),
+                'description' => 'Purchased ' . ($purchase->property->title ?? 'a property') . ' for ' . format_avc($purchase->amount),
                 'action' => null,
             ]);
         }
@@ -197,7 +198,7 @@ class UserDashboardController extends Controller
                 'color' => '#10b981',
                 'bg' => '#f0fdf4',
                 'title' => 'Referral Bonus Earned',
-                'description' => $txn->description . ' — +$' . number_format($txn->amount, 2),
+                'description' => $txn->description . ' — +' . format_avc($txn->amount),
                 'action' => null,
             ]);
         }
@@ -235,7 +236,8 @@ class UserDashboardController extends Controller
             'totalDeposits',
             'totalWithdrawals',
             'creditSwaps',
-            'userCard'
+            'userCard',
+            'preferredCurrency'
         ));
     }
 
@@ -352,7 +354,7 @@ class UserDashboardController extends Controller
         }
 
         if ($user->wallet_balance < $request->amount) {
-            return redirect()->back()->with('error', 'Insufficient wallet balance for this withdrawal.');
+            return redirect()->back()->with('error', 'Insufficient AVC balance for this withdrawal.');
         }
 
         $withdrawalCode = 'WTH-' . rand(10000, 99999);
@@ -382,7 +384,7 @@ class UserDashboardController extends Controller
 
         Mail::to($user->email)->send(new WithdrawalCreatedMail($withdrawal));
 
-        return redirect()->route('dashboard')->with('success', 'Withdrawal request of $' . number_format($request->amount, 2) . ' submitted successfully!')
+        return redirect()->route('dashboard')->with('success', 'Withdrawal request of ' . format_avc($request->amount) . ' submitted successfully!')
             ->with('submitted_request_id', $withdrawalCode)
             ->with('submitted_request_type', 'withdrawal');
     }
@@ -402,7 +404,7 @@ class UserDashboardController extends Controller
         $price = $property->purchasePrice();
 
         if ($user->wallet_balance < $price) {
-            return redirect()->back()->with('error', 'Insufficient wallet balance. You need $' . number_format($price, 2) . ' to purchase this property.');
+            return redirect()->back()->with('error', 'Insufficient AVC balance. You need ' . format_avc($price) . ' to purchase this property.');
         }
 
         // Deduct user balance
@@ -432,7 +434,7 @@ class UserDashboardController extends Controller
         Mail::to($user->email)->send(new PropertyPurchaseMail($purchase));
 
         return redirect()->to('/dashboard#my_investments')
-            ->with('success', 'Congratulations! You have purchased ' . $property->title . ' for $' . number_format($price, 2) . '!');
+            ->with('success', 'Congratulations! You have purchased ' . $property->title . ' for ' . format_avc($price) . '!');
     }
 
     public function sendFunds(Request $request)
@@ -449,7 +451,7 @@ class UserDashboardController extends Controller
         }
 
         if ($sender->wallet_balance < $request->amount) {
-            return redirect()->back()->with('error', 'Insufficient wallet balance for transfer.');
+            return redirect()->back()->with('error', 'Insufficient AVC balance for transfer.');
         }
 
         $recipientQuery = trim($request->recipient);
@@ -473,7 +475,7 @@ class UserDashboardController extends Controller
                 'type' => 'receive_funds',
                 'amount' => $request->amount,
                 'reference' => 'TRF-' . strtoupper(Str::random(8)),
-                'description' => 'Received funds from ' . $sender->name . ' (' . ($sender->account_id ?? $sender->email) . ')',
+                'description' => 'Received AVC from ' . $sender->name . ' (' . ($sender->account_id ?? $sender->email) . ')',
                 'status' => 'completed',
             ]);
         }
@@ -484,7 +486,7 @@ class UserDashboardController extends Controller
             'type' => 'send_funds',
             'amount' => $request->amount,
             'reference' => $txnRef,
-            'description' => 'Sent $' . number_format($request->amount, 2) . ' to ' . ($recipient ? $recipient->name : $recipientQuery),
+            'description' => 'Sent ' . format_avc($request->amount) . ' to ' . ($recipient ? $recipient->name : $recipientQuery),
             'status' => 'completed',
         ]);
 
@@ -493,7 +495,7 @@ class UserDashboardController extends Controller
             Mail::to($recipient->email)->send(new FundReceivedMail($sender, $recipient, $request->amount, $txnRef));
         }
 
-        return redirect()->route('dashboard')->with('success', 'Successfully sent $' . number_format($request->amount, 2) . ' to ' . ($recipient ? $recipient->name : $recipientQuery) . '!');
+        return redirect()->to(route('dashboard') . '#transfer')->with('success', 'Successfully sent ' . format_avc($request->amount) . ' to ' . ($recipient ? $recipient->name : $recipientQuery) . '!');
     }
 
     public function submitKyc(Request $request)
@@ -536,13 +538,18 @@ class UserDashboardController extends Controller
         }
 
         $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8|confirmed',
+            'name'              => 'required|string|max:255',
+            'email'             => 'required|email|max:255|unique:users,email,' . $user->id,
+            'password'          => 'nullable|string|min:8|confirmed',
+            'preferred_currency'=> 'nullable|string|in:USD,EUR,GBP,PHP,NGN,AED,SGD,CAD,AUD',
         ]);
 
         $user->name = $request->name;
         $user->email = $request->email;
+
+        if ($request->filled('preferred_currency')) {
+            $user->preferred_currency = strtoupper($request->preferred_currency);
+        }
 
         if ($request->filled('password')) {
             $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
@@ -556,9 +563,11 @@ class UserDashboardController extends Controller
     public function createCreditSwap(Request $request)
     {
         $request->validate([
-            'amount'         => 'required|numeric|min:10',
-            'payment_method' => 'required|string',
-            'payment_details'=> 'required|string',
+            'amount'          => 'required|numeric|min:10',
+            'offer_type'      => 'required|in:buy,sell',
+            'country'         => 'required|string|max:255',
+            'payment_method'  => 'required|string',
+            'payment_details' => 'required|string',
         ]);
 
         /** @var User $user */
@@ -567,18 +576,24 @@ class UserDashboardController extends Controller
             return redirect()->back()->with('error', 'User authentication required.');
         }
 
-        if ($user->wallet_balance < $request->amount) {
-            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Insufficient wallet balance to post this Credit Swap offer.');
+        $isSell = $request->offer_type === 'sell';
+
+        if ($isSell && $user->wallet_balance < $request->amount) {
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Insufficient AVC balance to post this marketplace offer.');
         }
 
-        // Lock seller credits in escrow
-        $user->wallet_balance -= $request->amount;
-        $user->save();
+        if ($isSell) {
+            // Lock seller AVC in escrow
+            $user->wallet_balance -= $request->amount;
+            $user->save();
+        }
 
         $ref = 'CSWAP-' . strtoupper(Str::random(8));
 
         CreditSwap::create([
             'user_id'         => $user->id,
+            'offer_type'      => $request->offer_type,
+            'country'         => $request->country,
             'amount'          => $request->amount,
             'payment_method'  => $request->payment_method,
             'payment_details' => $request->payment_details,
@@ -586,32 +601,65 @@ class UserDashboardController extends Controller
             'reference'       => $ref,
         ]);
 
-        return redirect()->to(route('dashboard') . '#credit_swap')->with('success', 'Credit Swap offer posted successfully! $' . number_format($request->amount, 2) . ' held in escrow.');
+        $message = $isSell
+            ? 'Sell offer posted successfully! ' . format_avc($request->amount) . ' held in escrow.'
+            : 'Buy offer posted successfully! Sellers can now respond with their AVC.';
+
+        return redirect()->to(route('dashboard') . '#credit_swap')->with('success', $message);
     }
 
     public function buyCreditSwap(Request $request, $id)
     {
-        /** @var User $buyer */
-        $buyer = Auth::user();
-        if (!$buyer) {
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user) {
             return redirect()->back()->with('error', 'User authentication required.');
         }
 
         $swap = CreditSwap::findOrFail($id);
 
-        if ($swap->user_id === $buyer->id) {
-            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'You cannot buy your own Credit Swap offer.');
+        if ($swap->user_id === $user->id) {
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'You cannot respond to your own AVC Marketplace offer.');
         }
 
         if ($swap->status !== 'active') {
-            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'This Credit Swap offer is no longer active.');
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'This AVC Marketplace offer is no longer active.');
         }
 
-        $swap->buyer_id = $buyer->id;
-        $swap->status = 'pending_payment';
-        $swap->save();
+        if ($swap->offer_type === 'buy') {
+            // Buy offer: the responder holds AVC and becomes the seller (escrow their AVC)
+            $request->validate([
+                'payment_details' => 'required|string',
+            ]);
 
-        return redirect()->to(route('dashboard') . '#credit_swap')->with('success', 'Credit Swap requested! Please send payment to the seller\'s account and wait for them to release the credits.');
+            if ($swap->seller_id) {
+                return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'A seller has already responded to this buy offer.');
+            }
+
+            if ($user->wallet_balance < $swap->amount) {
+                return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Insufficient AVC balance to sell on this buy offer.');
+            }
+
+            $user->wallet_balance -= $swap->amount;
+            $user->save();
+
+            $swap->seller_id = $user->id;
+            $swap->payment_details = $request->payment_details;
+            $swap->status = 'pending_payment';
+            $swap->save();
+
+            $message = 'You responded as the seller on the buy offer. ' . format_avc($swap->amount) .
+                ' are held in escrow. Once the buyer pays you, release the AVC.';
+        } else {
+            // Sell offer: responder is the buyer
+            $swap->buyer_id = $user->id;
+            $swap->status = 'pending_payment';
+            $swap->save();
+
+            $message = 'Purchase requested! Please send payment to the seller\'s account and wait for them to release the AVC.';
+        }
+
+        return redirect()->to(route('dashboard') . '#credit_swap')->with('success', $message);
     }
 
     public function releaseCreditSwap(Request $request, $id)
@@ -624,19 +672,29 @@ class UserDashboardController extends Controller
 
         $swap = CreditSwap::findOrFail($id);
 
-        if ($swap->user_id !== $user->id && $user->role !== 'admin') {
-            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Unauthorized to release this Credit Swap.');
+        $isSeller = $swap->offer_type === 'buy'
+            ? $swap->seller_id === $user->id
+            : $swap->user_id === $user->id;
+
+        if (!$isSeller && $user->role !== 'admin') {
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Unauthorized to release this AVC Marketplace trade.');
         }
 
         if (!in_array($swap->status, ['active', 'pending_payment'])) {
-            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'This Credit Swap cannot be released.');
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'This AVC Marketplace trade cannot be released.');
         }
 
-        $buyer = $swap->buyer ?? User::find($request->buyer_id);
+        $buyer = $swap->offer_type === 'buy' ? User::find($swap->user_id) : ($swap->buyer ?? User::find($request->buyer_id));
 
         if (!$buyer) {
-            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Buyer account not found for credit release.');
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Buyer account not found for AVC release.');
         }
+
+        $sellerName = $swap->offer_type === 'buy'
+            ? ($swap->responder->name ?? 'Investor')
+            : ($swap->seller?->name ?? 'Investor');
+
+        $escrowUserId = $swap->offer_type === 'buy' ? $swap->seller_id : $swap->user_id;
 
         $swap->buyer_id = $buyer->id;
         $swap->status = 'completed';
@@ -648,11 +706,11 @@ class UserDashboardController extends Controller
 
         // Record audit transactions for both parties
         Transaction::create([
-            'user_id'     => $swap->user_id,
+            'user_id'     => $escrowUserId,
             'type'        => 'withdrawal',
             'amount'      => $swap->amount,
             'reference'   => $swap->reference,
-            'description' => 'P2P Credit Swap released to ' . $buyer->name . ' (' . ($buyer->account_id ?? $buyer->email) . ')',
+            'description' => 'AVC Marketplace — released to ' . $buyer->name . ' (' . ($buyer->account_id ?? $buyer->email) . ')',
             'status'      => 'completed',
         ]);
 
@@ -661,11 +719,11 @@ class UserDashboardController extends Controller
             'type'        => 'deposit',
             'amount'      => $swap->amount,
             'reference'   => $swap->reference,
-            'description' => 'P2P Credit Swap received from ' . $swap->seller->name . ' (' . ($swap->seller->account_id ?? $swap->seller->email) . ')',
+            'description' => 'AVC Marketplace — received from ' . $sellerName . ' (' . ($swap->country ? $swap->country . ' · ' : '') . ')',
             'status'      => 'completed',
         ]);
 
-        return redirect()->to(route('dashboard') . '#credit_swap')->with('success', 'Credits released successfully! $' . number_format($swap->amount, 2) . ' credited to ' . $buyer->name . '\'s wallet balance.');
+        return redirect()->to(route('dashboard') . '#credit_swap')->with('success', 'AVC released successfully! ' . format_avc($swap->amount) . ' credited to ' . $buyer->name . '\'s AVC balance.');
     }
 
     public function cancelCreditSwap(Request $request, $id)
@@ -678,22 +736,36 @@ class UserDashboardController extends Controller
 
         $swap = CreditSwap::findOrFail($id);
 
-        if ($swap->user_id !== $user->id && $user->role !== 'admin') {
+        $isSeller = $swap->offer_type === 'buy'
+            ? $swap->seller_id === $user->id
+            : $swap->user_id === $user->id;
+
+        $isBuyPoster = $swap->offer_type === 'buy' && $swap->user_id === $user->id && $swap->status === 'active';
+
+        if (!$isSeller && !$isBuyPoster && $user->role !== 'admin') {
             return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Unauthorized to cancel this listing.');
         }
 
         if ($swap->status === 'completed') {
-            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Completed Credit Swaps cannot be cancelled.');
+            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Completed AVC Marketplace trades cannot be cancelled.');
         }
 
         $swap->status = 'cancelled';
         $swap->save();
 
-        // Return escrowed credits back to Seller's wallet balance
-        $user->wallet_balance += $swap->amount;
-        $user->save();
+        // Return escrowed AVC back to the escrow holder's wallet balance
+        $holder = $swap->offer_type === 'buy'
+            ? ($swap->seller_id ? User::find($swap->seller_id) : null)
+            : User::find($swap->user_id);
 
-        return redirect()->to(route('dashboard') . '#credit_swap')->with('success', 'Credit Swap offer cancelled. $' . number_format($swap->amount, 2) . ' returned to your wallet balance.');
+        if ($holder) {
+            $holder->wallet_balance += $swap->amount;
+            $holder->save();
+        }
+
+        return redirect()->to(route('dashboard') . '#credit_swap')->with('success', $holder
+            ? 'Offer cancelled. ' . format_avc($swap->amount) . ' returned to the seller\'s balance.'
+            : 'Offer cancelled.');
     }
 
     public function applyCard(Request $request)

@@ -10,7 +10,7 @@
             <td>
                 <table width="100%" cellpadding="0" cellspacing="0">
                     <tr><td style="padding-bottom:10px;"><span style="font-size:13px; color:#64748b;">Recipient</span></td><td style="padding-bottom:10px; text-align:right;"><span style="font-size:14px; font-weight:700; color:#0f172a;">{{ $recipient->name }} ({{ $recipient->email }})</span></td></tr>
-                    <tr><td style="padding-bottom:10px;"><span style="font-size:13px; color:#64748b;">Amount Sent</span></td><td style="padding-bottom:10px; text-align:right;"><span style="font-size:16px; font-weight:700; color:#dc2626;">-${{ number_format($amount, 2) }}</span></td></tr>
+                    <tr><td style="padding-bottom:10px;"><span style="font-size:13px; color:#64748b;">Amount Sent</span></td><td style="padding-bottom:10px; text-align:right;"><span style="font-size:16px; font-weight:700; color:#dc2626;">-{{ format_avc($amount) }}</span></td></tr>
                     <tr><td style="padding-bottom:0;"><span style="font-size:13px; color:#64748b;">Reference</span></td><td style="padding-bottom:0; text-align:right;"><span style="font-size:14px; font-weight:600; color:#0f172a;">{{ $reference }}</span></td></tr>
                 </table>
             </td>

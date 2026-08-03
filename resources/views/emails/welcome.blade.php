@@ -11,7 +11,7 @@
                 <table width="100%" cellpadding="0" cellspacing="0">
                     <tr><td style="padding-bottom:12px;"><span style="font-size:13px; color:#64748b;">Account ID</span></td><td style="padding-bottom:12px; text-align:right;"><span style="font-size:14px; font-weight:700; color:#0f172a;">{{ $user->account_id ?? 'RDR-'.str_pad($user->id,6,'0',STR_PAD_LEFT) }}</span></td></tr>
                     <tr><td style="padding-bottom:12px;"><span style="font-size:13px; color:#64748b;">Email</span></td><td style="padding-bottom:12px; text-align:right;"><span style="font-size:14px; font-weight:600; color:#0f172a;">{{ $user->email }}</span></td></tr>
-                    <tr><td style="padding-bottom:0;"><span style="font-size:13px; color:#64748b;">Wallet Balance</span></td><td style="padding-bottom:0; text-align:right;"><span style="font-size:14px; font-weight:700; color:#2563eb;">${{ number_format($user->wallet_balance ?? 0, 2) }}</span></td></tr>
+                    <tr><td style="padding-bottom:0;"><span style="font-size:13px; color:#64748b;">AVC Balance</span></td><td style="padding-bottom:0; text-align:right;"><span style="font-size:14px; font-weight:700; color:#2563eb;">{{ format_avc($user->wallet_balance ?? 0) }}</span></td></tr>
                 </table>
             </td>
         </tr>

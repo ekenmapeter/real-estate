@@ -68,16 +68,16 @@ class InvestController extends Controller
         $amount = round((float) $request->amount, 2);
 
         if ($amount < $project->minimum_investment) {
-            return redirect()->back()->with('error', 'Minimum investment for this project is $' . number_format($project->minimum_investment, 2) . '.');
+            return redirect()->back()->with('error', 'Minimum investment for this project is ' . format_avc($project->minimum_investment) . '.');
         }
 
         $remaining = max(0, (float) $project->target_amount - $project->raisedAmount());
         if ($amount > $remaining) {
-            return redirect()->back()->with('error', 'Only $' . number_format($remaining, 2) . ' remains to be raised for this project.');
+            return redirect()->back()->with('error', 'Only ' . format_avc($remaining) . ' remains to be raised for this project.');
         }
 
         if ($user->wallet_balance < $amount) {
-            return redirect()->back()->with('error', 'Insufficient wallet balance. You need $' . number_format($amount, 2) . ' to invest in this project.');
+            return redirect()->back()->with('error', 'Insufficient AVC balance. You need ' . format_avc($amount) . ' to invest in this project.');
         }
 
         $user->wallet_balance -= $amount;
@@ -99,14 +99,14 @@ class InvestController extends Controller
             'type' => 'project_investment',
             'amount' => $amount,
             'reference' => 'PINV-' . $investment->id,
-            'description' => 'Invested $' . number_format($amount, 2) . ' in ' . $project->title,
+            'description' => 'Invested ' . format_avc($amount) . ' in ' . $project->title,
             'status' => 'completed',
         ]);
 
         Mail::to($user->email)->send(new ProjectInvestmentConfirmationMail($investment));
 
         return redirect()->route('project.show', $project)
-            ->with('success', 'Successfully invested $' . number_format($amount, 2) . ' in ' . $project->title . '!');
+            ->with('success', 'Successfully invested ' . format_avc($amount) . ' in ' . $project->title . '!');
     }
 
     public function downloadDocument(Project $project)

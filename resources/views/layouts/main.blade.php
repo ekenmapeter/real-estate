@@ -183,6 +183,7 @@
       @media (max-width: 767.98px) {
         body {
           padding-top: 64px;
+          padding-bottom: 76px;
         }
 
         #header img {
@@ -248,7 +249,7 @@
                         <nav class="d-none d-lg-flex align-items-center gap-1">
                             <a href="{{ url('/') }}" class="nav-link-item {{ request()->is('/') ? 'active' : '' }}">Home</a>
                             <a href="{{ url('/properties') }}" class="nav-link-item {{ request()->is('properties*') ? 'active' : '' }}">Properties</a>
-                            <a href="{{ url('/invest') }}" class="nav-link-item {{ request()->is('invest') ? 'active' : '' }}">Invest</a>
+                            <a href="{{ url('/invest') }}" class="nav-link-item {{ request()->is('invest') ? 'active' : '' }}">Project Marketplace</a>
                             <a href="{{ url('/list-property') }}" class="nav-link-item {{ request()->is('list-property*') ? 'active' : '' }}">List Property</a>
 
                             <!-- Partners Dropdown -->
@@ -302,14 +303,14 @@
 
                                         <span class="sidebar-group-label px-3" style="font-size:0.65rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#94a3b8; display:block; margin-top:6px; margin-bottom:2px;">My Portfolio</span>
                                         <a href="{{ url('/dashboard') }}" class="nav-dropdown-item"><i class="bi bi-grid-fill me-2 text-primary" style="width:16px;"></i>Dashboard</a>
-                                        <a href="{{ url('/dashboard') }}#invest" class="nav-dropdown-item"><i class="bi bi-lightning-charge-fill me-2 text-primary" style="width:16px;"></i>Invest</a>
+                                        <a href="{{ url('/dashboard') }}#invest" class="nav-dropdown-item"><i class="bi bi-shop me-2 text-primary" style="width:16px;"></i>Project Marketplace</a>
                                         <a href="{{ url('/properties') }}" class="nav-dropdown-item"><i class="bi bi-building me-2 text-primary" style="width:16px;"></i>Browse Properties</a>
-                                        <a href="{{ url('/dashboard') }}#my_investments" class="nav-dropdown-item"><i class="bi bi-pie-chart-fill me-2 text-primary" style="width:16px;"></i>My Investments</a>
+                                        <a href="{{ url('/dashboard') }}#my_investments" class="nav-dropdown-item"><i class="bi bi-pie-chart-fill me-2 text-primary" style="width:16px;"></i>My Portfolio</a>
 
                                         <span class="sidebar-group-label px-3" style="font-size:0.65rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#94a3b8; display:block; margin-top:6px; margin-bottom:2px;">Wallet</span>
                                         <a href="{{ url('/dashboard') }}#deposit" class="nav-dropdown-item"><i class="bi bi-arrow-down-circle-fill me-2 text-primary" style="width:16px;"></i>Deposit</a>
                                         <a href="{{ url('/dashboard') }}#withdraw" class="nav-dropdown-item"><i class="bi bi-arrow-up-circle-fill me-2 text-primary" style="width:16px;"></i>Withdraw</a>
-                                        <a href="{{ url('/dashboard') }}#credit_swap" class="nav-dropdown-item"><i class="bi bi-arrow-repeat me-2 text-warning" style="width:16px;"></i>Credit Swap</a>
+                                        <a href="{{ url('/dashboard') }}#credit_swap" class="nav-dropdown-item"><i class="bi bi-arrow-repeat me-2 text-warning" style="width:16px;"></i>AVC Marketplace</a>
                                         <a href="{{ url('/dashboard') }}#transactions" class="nav-dropdown-item"><i class="bi bi-arrow-down-up me-2 text-primary" style="width:16px;"></i>Transactions</a>
 
                                         <span class="sidebar-group-label px-3" style="font-size:0.65rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#94a3b8; display:block; margin-top:6px; margin-bottom:2px;">Account</span>
@@ -381,13 +382,13 @@
                             <i class="bi bi-grid-fill"></i> Dashboard
                         </a>
                         <a href="{{ url('/dashboard') }}#invest" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
-                            <i class="bi bi-lightning-charge-fill"></i> Invest
+                            <i class="bi bi-shop"></i> Project Marketplace
                         </a>
                         <a href="{{ url('/properties') }}" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
                             <i class="bi bi-building"></i> Browse Properties
                         </a>
                         <a href="{{ url('/dashboard') }}#my_investments" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
-                            <i class="bi bi-pie-chart-fill"></i> My Investments
+                            <i class="bi bi-pie-chart-fill"></i> My Portfolio
                         </a>
 
                         <!-- GROUP: WALLET -->
@@ -399,7 +400,7 @@
                             <i class="bi bi-arrow-up-circle-fill"></i> Withdraw
                         </a>
                         <a href="{{ url('/dashboard') }}#credit_swap" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
-                            <i class="bi bi-arrow-repeat text-warning"></i> Credit Swap
+                            <i class="bi bi-arrow-repeat text-warning"></i> AVC Marketplace
                         </a>
                         <a href="{{ url('/dashboard') }}#transactions" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
                             <i class="bi bi-arrow-down-up"></i> Transactions
@@ -549,6 +550,32 @@
             @endif
         </div>
     </div>
+
+    <!-- Mobile Bottom Navigation (mobile only) -->
+    <nav id="mobileBottomNav" class="d-md-none" style="position:fixed; bottom:0; left:0; right:0; z-index:99998; background:#ffffff; border-top:1px solid #e2e8f0; box-shadow:0 -4px 20px rgba(0,0,0,0.06); padding-bottom: env(safe-area-inset-bottom);">
+        <div class="d-flex align-items-stretch justify-content-around" style="height:62px;">
+            <a href="{{ url('/dashboard') }}#overview" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="overview" onclick="setBottomNavActive(this)">
+                <i class="bi bi-house-fill" style="font-size:1.25rem; line-height:1;"></i>
+                <small class="fw-semibold mt-1" style="font-size:0.64rem;">Home</small>
+            </a>
+            <a href="{{ url('/dashboard') }}#my_investments" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="my_investments" onclick="setBottomNavActive(this)">
+                <i class="bi bi-pie-chart-fill" style="font-size:1.25rem; line-height:1;"></i>
+                <small class="fw-semibold mt-1" style="font-size:0.64rem;">Assets</small>
+            </a>
+            <a href="{{ url('/dashboard') }}#deposit" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="deposit" onclick="setBottomNavActive(this)">
+                <i class="bi bi-wallet2" style="font-size:1.25rem; line-height:1;"></i>
+                <small class="fw-semibold mt-1" style="font-size:0.64rem;">Deposit</small>
+            </a>
+            <a href="{{ url('/dashboard') }}#credit_swap" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="credit_swap" onclick="setBottomNavActive(this)">
+                <i class="bi bi-arrow-repeat" style="font-size:1.25rem; line-height:1;"></i>
+                <small class="fw-semibold mt-1" style="font-size:0.64rem;">Trade</small>
+            </a>
+            <a href="{{ url('/dashboard') }}#transactions" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="transactions" onclick="setBottomNavActive(this)">
+                <i class="bi bi-clock-history" style="font-size:1.25rem; line-height:1;"></i>
+                <small class="fw-semibold mt-1" style="font-size:0.64rem;">History</small>
+            </a>
+        </div>
+    </nav>
 
     <!-- Session Expiry Warning Modal -->
     <div id="sessionWarningModal" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="z-index: 999999; background: rgba(11,19,41,0.75); backdrop-filter: blur(10px);">
@@ -713,6 +740,23 @@
         if (!e.target.closest('.nav-dropdown-wrap')) {
           document.querySelectorAll('.nav-dropdown-menu').forEach(el => el.style.display = 'none');
         }
+      });
+    </script>
+
+    <script>
+      // Mobile bottom navigation active state
+      function setBottomNavActive(el) {
+        document.querySelectorAll('.mobile-bottom-link').forEach(function(a) {
+          a.style.color = '#94a3b8';
+        });
+        if (el) el.style.color = '#2563eb';
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        var current = window.location.hash.replace('#', '');
+        if (!current && window.location.pathname.indexOf('/dashboard') !== -1) current = 'overview';
+        var link = document.querySelector('.mobile-bottom-link[data-key="' + current + '"]');
+        if (link) setBottomNavActive(link);
       });
     </script>
 

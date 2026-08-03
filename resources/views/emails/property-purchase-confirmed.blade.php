@@ -11,7 +11,7 @@
                 <table width="100%" cellpadding="0" cellspacing="0">
                     <tr><td style="padding-bottom:10px;"><span style="font-size:13px; color:#64748b;">Property</span></td><td style="padding-bottom:10px; text-align:right;"><span style="font-size:14px; font-weight:700; color:#0f172a;">{{ $purchase->property->title }}</span></td></tr>
                     <tr><td style="padding-bottom:10px;"><span style="font-size:13px; color:#64748b;">Location</span></td><td style="padding-bottom:10px; text-align:right;"><span style="font-size:14px; font-weight:600; color:#0f172a;">{{ $purchase->property->location }}</span></td></tr>
-                    <tr><td style="padding-bottom:10px;"><span style="font-size:13px; color:#64748b;">Purchase Price</span></td><td style="padding-bottom:10px; text-align:right;"><span style="font-size:16px; font-weight:700; color:#2563eb;">${{ number_format($purchase->amount, 2) }}</span></td></tr>
+                    <tr><td style="padding-bottom:10px;"><span style="font-size:13px; color:#64748b;">Purchase Price</span></td><td style="padding-bottom:10px; text-align:right;"><span style="font-size:16px; font-weight:700; color:#2563eb;">{{ format_avc($purchase->amount) }}</span></td></tr>
                     <tr><td style="padding-bottom:0;"><span style="font-size:13px; color:#64748b;">Status</span></td><td style="padding-bottom:0; text-align:right;"><span style="font-size:14px; font-weight:700; color:#16a34a;">Completed</span></td></tr>
                 </table>
             </td>

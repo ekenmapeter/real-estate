@@ -167,7 +167,7 @@
                             <div class="d-flex align-items-center gap-1 mt-1 small">
                                 <i class="bi bi-wallet2" style="color:#1e40af;"></i>
                                 @auth
-                                    <span style="color:#1e40af;">Balance: <strong>${{ number_format(auth()->user()->wallet_balance, 2) }}</strong></span>
+                                    <span style="color:#1e40af;">Balance: <strong>{{ format_avc(auth()->user()->wallet_balance) }}</strong></span>
                                 @else
                                     <a href="{{ route('login') }}" class="text-primary fw-semibold">Sign in</a> to see your balance
                                 @endauth

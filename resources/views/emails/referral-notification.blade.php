@@ -12,7 +12,7 @@
                     <tr><td style="padding-bottom:10px;"><span style="font-size:13px; color:#64748b;">New Member</span></td><td style="padding-bottom:10px; text-align:right;"><span style="font-size:14px; font-weight:600; color:#0f172a;">{{ $referredUser->name }}</span></td></tr>
                     <tr><td style="padding-bottom:10px;"><span style="font-size:13px; color:#64748b;">Email</span></td><td style="padding-bottom:10px; text-align:right;"><span style="font-size:14px; font-weight:600; color:#0f172a;">{{ $referredUser->email }}</span></td></tr>
                     <tr><td style="padding-bottom:10px;"><span style="font-size:13px; color:#64748b;">Referred By</span></td><td style="padding-bottom:10px; text-align:right;"><span style="font-size:14px; font-weight:600; color:#0f172a;">{{ $referrer->name }} ({{ $referrer->email }})</span></td></tr>
-                    <tr><td style="padding-bottom:0;"><span style="font-size:13px; color:#64748b;">Bonus Awarded</span></td><td style="padding-bottom:0; text-align:right;"><span style="font-size:14px; font-weight:700; color:#10b981;">+${{ number_format($bonusAmount, 2) }}</span></td></tr>
+                    <tr><td style="padding-bottom:0;"><span style="font-size:13px; color:#64748b;">Bonus Awarded</span></td><td style="padding-bottom:0; text-align:right;"><span style="font-size:14px; font-weight:700; color:#10b981;">+{{ format_avc($bonusAmount) }}</span></td></tr>
                 </table>
             </td>
         </tr>

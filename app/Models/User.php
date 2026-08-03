@@ -26,6 +26,7 @@ class User extends Authenticatable
         'role',
         'affiliate_code',
         'affiliate_earnings',
+        'preferred_currency',
         'expires_at',
         'kyc_verified',
         'kyc_document_path',
