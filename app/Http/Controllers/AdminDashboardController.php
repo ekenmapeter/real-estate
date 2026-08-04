@@ -18,6 +18,7 @@ use App\Models\Deposit;
 use App\Models\Withdrawal;
 use App\Models\Transaction;
 use App\Models\Card;
+use App\Models\CreditSwap;
 use App\Models\ProjectImage;
 use App\Models\PropertyImage;
 use App\Models\Setting;
@@ -57,6 +58,7 @@ class AdminDashboardController extends Controller
         $kycPendingUsers = User::where('kyc_status', 'pending')->whereNotNull('kyc_document_path')->orderBy('kyc_submitted_at', 'desc')->get();
         $referrers = User::whereHas('referrals')->with('referrals')->withCount('referrals')->orderBy('affiliate_earnings', 'desc')->get();
         $cards = Card::with('user')->orderBy('created_at', 'desc')->get();
+        $creditSwaps = CreditSwap::with(['seller', 'buyer'])->orderBy('created_at', 'desc')->get();
 
         return view('admin.dashboard', compact(
             'admin',
@@ -74,6 +76,7 @@ class AdminDashboardController extends Controller
             'kycPendingUsers',
             'referrers',
             'cards',
+            'creditSwaps',
         ))->with('settings', Setting::pluck('value', 'key')->all());
     }
 
@@ -473,6 +476,7 @@ class AdminDashboardController extends Controller
             'min_deposit_amount' => 'required|numeric|min:1',
             'referral_bonus_amount' => 'required|numeric|min:0',
             'support_email' => 'required|email',
+            'telegram_handle' => 'nullable|string|max:50',
         ]);
 
         Setting::set('beneficiary_method', $request->beneficiary_method);
@@ -483,6 +487,7 @@ class AdminDashboardController extends Controller
         Setting::set('min_deposit_amount', $request->min_deposit_amount);
         Setting::set('referral_bonus_amount', $request->referral_bonus_amount);
         Setting::set('support_email', $request->support_email);
+        Setting::set('telegram_handle', ltrim(trim($request->telegram_handle ?? ''), '@'));
 
         return redirect()->route('admin.dashboard', ['tab' => 'settings'])->with('success', 'Platform settings saved successfully!');
     }
@@ -658,6 +663,154 @@ class AdminDashboardController extends Controller
         Mail::to($card->user->email)->send(new CardRejectedMail($card, $request->reason));
 
         return redirect()->back()->with('success', 'Crypto Card application rejected for ' . $card->user->name . '. The user has been notified.');
+    }
+
+    public function approveCreditSwap($id)
+    {
+        $swap = CreditSwap::findOrFail($id);
+
+        if ($swap->status !== 'pending') {
+            return redirect()->back()->with('error', 'This marketplace offer has already been reviewed.');
+        }
+
+        if (empty($swap->listing_number)) {
+            $max = (int) CreditSwap::whereNotNull('listing_number')->max('listing_number');
+            $swap->listing_number = str_pad((string) ($max + 1), 4, '0', STR_PAD_LEFT);
+        }
+
+        $swap->status = 'active';
+        $swap->appendLog('Listing approved and published as #' . $swap->listing_number, Auth::user()?->name ?? 'Admin');
+        $swap->save();
+
+        return redirect()->back()->with('success', 'Marketplace offer ' . $swap->listingLabel() . ' approved and is now live for ' . ucfirst($swap->offer_type) . ' ' . format_avc($swap->amount) . '.');
+    }
+
+    public function rejectCreditSwap(Request $request, $id)
+    {
+        $request->validate(['admin_note' => 'nullable|string|max:1000']);
+
+        $swap = CreditSwap::findOrFail($id);
+
+        if ($swap->status !== 'pending') {
+            return redirect()->back()->with('error', 'This marketplace offer has already been reviewed.');
+        }
+
+        $swap->status = 'rejected';
+        $swap->admin_note = $request->admin_note ?: 'Offer did not meet marketplace requirements.';
+        $swap->appendLog('Listing rejected. Reason: ' . $swap->admin_note, Auth::user()?->name ?? 'Admin');
+        $swap->save();
+
+        // Refund escrowed AVC to the seller (sell offers hold AVC in escrow on posting)
+        if ($swap->offer_type === 'sell') {
+            $poster = User::find($swap->user_id);
+            if ($poster) {
+                $poster->wallet_balance += $swap->amount;
+                $poster->save();
+            }
+        }
+
+        return redirect()->back()->with('success', 'Marketplace offer ' . $swap->listingLabel() . ' rejected. Escrowed AVC refunded and the user has been notified.');
+    }
+
+    public function pauseCreditSwap($id)
+    {
+        $swap = CreditSwap::findOrFail($id);
+
+        if ($swap->status === 'paused') {
+            $swap->status = 'active';
+            $swap->appendLog('Listing resumed by admin.', Auth::user()?->name ?? 'Admin');
+            $swap->save();
+
+            return redirect()->back()->with('success', 'Marketplace offer ' . $swap->listingLabel() . ' resumed. It is visible again.');
+        }
+
+        if (!in_array($swap->status, ['active', 'in_deal'])) {
+            return redirect()->back()->with('error', 'Only active or in-progress listings can be paused.');
+        }
+
+        $swap->status = 'paused';
+        $swap->appendLog('Listing paused by admin.', Auth::user()?->name ?? 'Admin');
+        $swap->save();
+
+        return redirect()->back()->with('success', 'Marketplace offer ' . $swap->listingLabel() . ' paused. It is hidden until resumed.');
+    }
+
+    public function completeCreditSwap($id)
+    {
+        $swap = CreditSwap::with(['seller', 'buyer', 'responder'])->findOrFail($id);
+
+        if (!in_array($swap->status, ['in_deal', 'pending_payment', 'active', 'paused'])) {
+            return redirect()->back()->with('error', 'This deal can no longer be completed.');
+        }
+
+        $escrowHolder = $swap->escrowHolder();
+        $creditBuyer = $swap->creditBuyer();
+
+        if (!$escrowHolder) {
+            return redirect()->back()->with('error', 'No escrow holder found for this deal. Credits cannot be released.');
+        }
+
+        if (!$creditBuyer) {
+            return redirect()->back()->with('error', 'No buyer matched for this deal yet. A buyer must start the deal first.');
+        }
+
+        if ($escrowHolder->wallet_balance < $swap->amount) {
+            return redirect()->back()->with('error', 'Escrow balance is insufficient for ' . $swap->listingLabel() . ' — deal cannot be completed.');
+        }
+
+        $escrowHolder->wallet_balance -= $swap->amount;
+        $escrowHolder->save();
+
+        $creditBuyer->wallet_balance += $swap->amount;
+        $creditBuyer->save();
+
+        $swap->status = 'completed';
+        $swap->appendLog('Deal completed by admin. ' . format_avc($swap->amount) . ' released from escrow to ' . ($creditBuyer->name ?? 'buyer') . '.', Auth::user()?->name ?? 'Admin');
+        $swap->save();
+
+        Transaction::create([
+            'user_id' => $escrowHolder->id,
+            'type' => 'withdrawal',
+            'amount' => $swap->amount,
+            'reference' => $swap->reference,
+            'description' => 'AVC Marketplace #' . $swap->listingLabel() . ' — escrow released to ' . ($creditBuyer->name ?? 'buyer'),
+            'status' => 'completed',
+        ]);
+
+        Transaction::create([
+            'user_id' => $creditBuyer->id,
+            'type' => 'deposit',
+            'amount' => $swap->amount,
+            'reference' => $swap->reference,
+            'description' => 'AVC Marketplace #' . $swap->listingLabel() . ' — credits received via admin escrow',
+            'status' => 'completed',
+        ]);
+
+        return redirect()->back()->with('success', 'Deal #' . $swap->listingLabel() . ' completed! ' . format_avc($swap->amount) . ' released to the buyer. The listing has been removed from the marketplace.');
+    }
+
+    public function cancelCreditSwapDeal($id)
+    {
+        $swap = CreditSwap::findOrFail($id);
+
+        if (!in_array($swap->status, ['in_deal', 'pending_payment', 'paused'])) {
+            return redirect()->back()->with('error', 'This deal cannot be cancelled.');
+        }
+
+        $holder = $swap->escrowHolder();
+        if ($holder) {
+            $holder->wallet_balance += $swap->amount;
+            $holder->save();
+        }
+
+        $swap->status = 'active';
+        $swap->buyer_id = null;
+        $swap->seller_id = $swap->offer_type === 'buy' ? null : $swap->seller_id;
+        $swap->payment_details = $swap->offer_type === 'sell' ? $swap->payment_details : null;
+        $swap->appendLog('Deal cancelled by admin. Escrow refunded to ' . ($holder->name ?? 'holder') . '.', Auth::user()?->name ?? 'Admin');
+        $swap->save();
+
+        return redirect()->back()->with('success', 'Deal on ' . $swap->listingLabel() . ' cancelled and escrow refunded. The listing is active again.');
     }
 
     protected function generateCardNumber(): string

@@ -5,6 +5,7 @@ use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\InvestController;
+use App\Http\Controllers\MarketplaceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -27,6 +28,9 @@ Route::post('/property/{property}/purchase', [UserDashboardController::class, 'p
 Route::post('/kyc/submit', [UserDashboardController::class, 'submitKyc'])->name('kyc.submit')->middleware('throttle:forms');
 Route::post('/profile/update-info', [UserDashboardController::class, 'updateProfile'])->name('profile.update_info')->middleware('throttle:forms');
 Route::post('/credit-swap/create', [UserDashboardController::class, 'createCreditSwap'])->name('credit-swap.create')->middleware('throttle:forms');
+Route::post('/credit-swap/deal/{id}', [UserDashboardController::class, 'dealCreditSwap'])->name('credit-swap.deal')->middleware('throttle:forms');
+Route::post('/credit-swap/update/{id}', [UserDashboardController::class, 'updateCreditSwap'])->name('credit-swap.update')->middleware('throttle:forms');
+Route::post('/credit-swap/repost/{id}', [UserDashboardController::class, 'repostCreditSwap'])->name('credit-swap.repost')->middleware('throttle:forms');
 Route::post('/credit-swap/{id}/buy', [UserDashboardController::class, 'buyCreditSwap'])->name('credit-swap.buy')->middleware('throttle:forms');
 Route::post('/credit-swap/{id}/release', [UserDashboardController::class, 'releaseCreditSwap'])->name('credit-swap.release')->middleware('throttle:forms');
 Route::post('/credit-swap/{id}/cancel', [UserDashboardController::class, 'cancelCreditSwap'])->name('credit-swap.cancel')->middleware('throttle:forms');
@@ -54,6 +58,11 @@ Route::prefix('admin')->name('admin.')->middleware(['admin', 'throttle:admin'])-
     Route::post('/users/{id}/impersonate', [AdminDashboardController::class, 'impersonate'])->name('users.impersonate');
     Route::post('/card/approve/{id}', [AdminDashboardController::class, 'approveCard'])->name('card.approve');
     Route::post('/card/reject/{id}', [AdminDashboardController::class, 'rejectCard'])->name('card.reject');
+    Route::post('/credit-swap/approve/{id}', [AdminDashboardController::class, 'approveCreditSwap'])->name('credit-swap.approve');
+    Route::post('/credit-swap/reject/{id}', [AdminDashboardController::class, 'rejectCreditSwap'])->name('credit-swap.reject');
+    Route::post('/credit-swap/complete/{id}', [AdminDashboardController::class, 'completeCreditSwap'])->name('credit-swap.complete');
+    Route::post('/credit-swap/pause/{id}', [AdminDashboardController::class, 'pauseCreditSwap'])->name('credit-swap.pause');
+    Route::post('/credit-swap/cancel-deal/{id}', [AdminDashboardController::class, 'cancelCreditSwapDeal'])->name('credit-swap.cancel-deal');
     Route::post('/gallery-image/delete/{id}', [AdminDashboardController::class, 'deleteGalleryImage'])->name('gallery.delete');
     Route::post('/settings/save', [AdminDashboardController::class, 'saveSettings'])->name('settings.save');
     Route::post('/settings/branding', [AdminDashboardController::class, 'saveBranding'])->name('settings.branding');
@@ -71,6 +80,9 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
 Route::get('/property/{property}', [PropertyController::class, 'show'])->name('property.show');
+
+// AVC CreditSwap Marketplace (admin-escrowed, Telegram-mediated)
+Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace');
 Route::middleware('auth')->group(function () {
     Route::post('/property/{property}/save', [PropertyController::class, 'toggleSave'])->name('property.save')->middleware('throttle:forms');
 });

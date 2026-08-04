@@ -18,13 +18,39 @@ class CreditSwap extends Model
         'payment_method',
         'country',
         'payment_details',
+        'admin_note',
+        'notes',
         'status',
         'reference',
+        'listing_number',
+        'logs',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'logs' => 'array',
     ];
+
+    public function appendLog(string $action, ?string $actor = null): void
+    {
+        $logs = $this->logs ?? [];
+        $logs[] = [
+            'at' => now()->toDateTimeString(),
+            'actor' => $actor ?? 'System',
+            'action' => $action,
+        ];
+        $this->logs = $logs;
+    }
+
+    public function listingLabel(): string
+    {
+        return $this->listing_number ?: ($this->reference ? '#' . substr($this->reference, 6) : '#' . $this->id);
+    }
+
+    public function inDeal(): bool
+    {
+        return $this->status === 'in_deal';
+    }
 
     public function seller()
     {

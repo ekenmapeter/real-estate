@@ -203,6 +203,75 @@ class UserDashboardController extends Controller
             ]);
         }
 
+        foreach ($creditSwaps->filter(fn($s) => $user && $s->user_id === $user->id) as $swap) {
+            [$label, $icon, $color, $bg] = match ($swap->status) {
+                'pending'   => ['Marketplace Listing Pending Approval', 'bi-hourglass-split', '#d97706', '#fffbeb'],
+                'active'    => ['Marketplace Listing Approved & Live', 'bi-check-circle-fill', '#16a34a', '#f0fdf4'],
+                'in_deal'   => ['Marketplace Deal in Progress', 'bi-arrow-left-right', '#2563eb', '#eff6ff'],
+                'paused'    => ['Marketplace Listing Paused', 'bi-pause-circle-fill', '#d97706', '#fffbeb'],
+                'rejected'  => ['Marketplace Listing Rejected', 'bi-x-circle-fill', '#dc2626', '#fef2f2'],
+                'completed' => ['Marketplace Deal Completed', 'bi-arrow-repeat', '#2563eb', '#eff6ff'],
+                default     => ['Marketplace Listing ' . ucfirst($swap->status), 'bi-arrow-repeat', '#64748b', '#f1f5f9'],
+            };
+
+            $notifications->push((object)[
+                'date' => $swap->updated_at ?? $swap->created_at,
+                'icon' => $icon,
+                'color' => $color,
+                'bg' => $bg,
+                'title' => $label . ' — ' . $swap->listingLabel(),
+                'description' => match ($swap->status) {
+                    'pending' => 'Your ' . strtoupper($swap->offer_type) . ' listing for ' . format_avc($swap->amount) . ' is awaiting admin approval. It will go live once approved.',
+                    'active' => 'Your ' . strtoupper($swap->offer_type) . ' listing for ' . format_avc($swap->amount) . ' has been approved and is now live on the marketplace.',
+                    'in_deal' => 'A deal has started on your ' . strtoupper($swap->offer_type) . ' listing ' . $swap->listingLabel() . ' (' . format_avc($swap->amount) . '). The finance team is handling it.',
+                    'paused' => 'Your listing ' . $swap->listingLabel() . ' has been paused by admin. Contact support for details.',
+                    'rejected' => 'Your ' . strtoupper($swap->offer_type) . ' listing for ' . format_avc($swap->amount) . ' was rejected.' . ($swap->admin_note ? ' Reason: ' . $swap->admin_note : '') . ($swap->offer_type === 'sell' ? ' Your escrowed AVC has been refunded.' : ''),
+                    'completed' => 'Your ' . strtoupper($swap->offer_type) . ' deal ' . $swap->listingLabel() . ' (' . format_avc($swap->amount) . ') was completed by the finance team.',
+                    default => 'Status updated to ' . ucfirst($swap->status) . '.',
+                },
+                'action' => null,
+            ]);
+        }
+
+        foreach ($creditSwaps->filter(fn($s) => $user && ($s->buyer_id === $user->id || $s->seller_id === $user->id) && $s->user_id !== $user->id) as $swap) {
+            $isYourBuy = $swap->buyer_id === $user->id;
+            if ($swap->status === 'in_deal') {
+                $notifications->push((object)[
+                    'date' => $swap->updated_at ?? $swap->created_at,
+                    'icon' => 'bi-arrow-left-right',
+                    'color' => '#2563eb',
+                    'bg' => '#eff6ff',
+                    'title' => 'Marketplace Deal Started — ' . $swap->listingLabel(),
+                    'description' => $isYourBuy
+                        ? 'You started a deal to buy ' . format_avc($swap->amount) . '. The finance team will contact you via Telegram to complete it.'
+                        : 'You started a deal to sell your AVC for ' . format_avc($swap->amount) . '. ' . format_avc($swap->amount) . ' is held in escrow until the finance team completes the deal.',
+                    'action' => null,
+                ]);
+            } elseif ($swap->status === 'completed') {
+                $notifications->push((object)[
+                    'date' => $swap->updated_at ?? $swap->created_at,
+                    'icon' => 'bi-check-circle-fill',
+                    'color' => '#16a34a',
+                    'bg' => '#f0fdf4',
+                    'title' => 'Marketplace Deal Completed — ' . $swap->listingLabel(),
+                    'description' => $isYourBuy
+                        ? 'Your purchase of ' . format_avc($swap->amount) . ' is complete. The credits have been added to your AVC balance.'
+                        : 'Your sale of ' . format_avc($swap->amount) . ' is complete. Thank you for using the marketplace.',
+                    'action' => null,
+                ]);
+            } elseif ($swap->status === 'paused') {
+                $notifications->push((object)[
+                    'date' => $swap->updated_at ?? $swap->created_at,
+                    'icon' => 'bi-pause-circle-fill',
+                    'color' => '#d97706',
+                    'bg' => '#fffbeb',
+                    'title' => 'Marketplace Deal Paused — ' . $swap->listingLabel(),
+                    'description' => 'The deal on ' . $swap->listingLabel() . ' has been paused by the finance team. Contact support on Telegram for updates.',
+                    'action' => null,
+                ]);
+            }
+        }
+
         $notifications = $notifications->sortByDesc('date')->values();
 
         $showTour = $user && $transactions->isEmpty() && !session()->has('tour_seen');
@@ -567,7 +636,8 @@ class UserDashboardController extends Controller
             'offer_type'      => 'required|in:buy,sell',
             'country'         => 'required|string|max:255',
             'payment_method'  => 'required|string',
-            'payment_details' => 'required|string',
+            'payment_details' => 'nullable|string',
+            'notes'           => 'nullable|string|max:1000',
         ]);
 
         /** @var User $user */
@@ -579,7 +649,7 @@ class UserDashboardController extends Controller
         $isSell = $request->offer_type === 'sell';
 
         if ($isSell && $user->wallet_balance < $request->amount) {
-            return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Insufficient AVC balance to post this marketplace offer.');
+            return redirect()->to(route('marketplace'))->with('error', 'Insufficient AVC balance to post this marketplace listing.');
         }
 
         if ($isSell) {
@@ -590,22 +660,158 @@ class UserDashboardController extends Controller
 
         $ref = 'CSWAP-' . strtoupper(Str::random(8));
 
-        CreditSwap::create([
+        $swap = CreditSwap::create([
             'user_id'         => $user->id,
             'offer_type'      => $request->offer_type,
             'country'         => $request->country,
             'amount'          => $request->amount,
             'payment_method'  => $request->payment_method,
             'payment_details' => $request->payment_details,
-            'status'          => 'active',
+            'notes'           => $request->notes,
+            'status'          => 'pending',
             'reference'       => $ref,
         ]);
 
-        $message = $isSell
-            ? 'Sell offer posted successfully! ' . format_avc($request->amount) . ' held in escrow.'
-            : 'Buy offer posted successfully! Sellers can now respond with their AVC.';
+        $swap->appendLog('Listing submitted for admin review.', $user->name);
+        $swap->save();
 
-        return redirect()->to(route('dashboard') . '#credit_swap')->with('success', $message);
+        $message = $isSell
+            ? 'Sell listing submitted for admin review! ' . format_avc($request->amount) . ' held in escrow. You will be notified once it is approved.'
+            : 'Buy listing submitted for admin review! You will be notified once it is approved.';
+
+        return redirect()->to(route('marketplace'))->with('success', $message);
+    }
+
+    public function dealCreditSwap(Request $request, $id)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $swap = CreditSwap::with(['seller', 'buyer', 'responder'])->findOrFail($id);
+
+        if ($swap->status !== 'active') {
+            return redirect()->to(route('marketplace'))->with('error', 'This listing is no longer available on the marketplace.');
+        }
+
+        if ($swap->user_id === $user->id) {
+            return redirect()->to(route('marketplace'))->with('error', 'You cannot start a deal on your own listing.');
+        }
+
+        if ($swap->inDeal()) {
+            return redirect()->to(route('marketplace'))->with('error', 'A deal is already in progress for ' . $swap->listingLabel() . '.');
+        }
+
+        if ($swap->offer_type === 'sell') {
+            // The logged-in user is the buyer on a sell listing
+            $swap->buyer_id = $user->id;
+        } else {
+            // The logged-in user is the seller responding to a buy listing — escrow their AVC
+            if ($user->wallet_balance < $swap->amount) {
+                return redirect()->to(route('marketplace'))->with('error', 'Insufficient AVC balance to cover ' . $swap->listingLabel() . '.');
+            }
+            $user->wallet_balance -= $swap->amount;
+            $user->save();
+            $swap->seller_id = $user->id;
+        }
+
+        $swap->status = 'in_deal';
+        $swap->appendLog('Deal started by ' . $user->name . '.', $user->name);
+        $swap->save();
+
+        $isBuyer = $swap->offer_type === 'sell';
+        $message = $isBuyer
+            ? 'Hello Finance Team, I\'m interested in Listing #' . $swap->listingLabel() . '. I\'d like to buy ' . format_avc($swap->amount) . ' (' . $swap->payment_method . '). Please guide me through the next steps.'
+            : 'Hello Finance Team, I\'d like to sell my AVC for Listing #' . $swap->listingLabel() . ' (' . format_avc($swap->amount) . '). Please guide me through the next steps.';
+
+        return redirect(telegram_url($message));
+    }
+
+    public function updateCreditSwap(Request $request, $id)
+    {
+        $request->validate([
+            'amount'          => 'required|numeric|min:10',
+            'country'         => 'required|string|max:255',
+            'payment_method'  => 'required|string',
+            'notes'           => 'nullable|string|max:1000',
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+        $swap = CreditSwap::findOrFail($id);
+
+        if ($swap->user_id !== $user->id) {
+            return redirect()->back()->with('error', 'Unauthorized to edit this listing.');
+        }
+
+        if (!in_array($swap->status, ['pending', 'active', 'rejected'])) {
+            return redirect()->to(route('marketplace'))->with('error', 'This listing cannot be edited while a deal is in progress.');
+        }
+
+        $isSell = $swap->offer_type === 'sell';
+        $diff = $request->amount - $swap->amount;
+
+        if ($isSell) {
+            if ($diff > 0 && $user->wallet_balance < $diff) {
+                return redirect()->to(route('marketplace'))->with('error', 'Insufficient AVC balance for the updated amount.');
+            }
+            if ($diff != 0) {
+                $user->wallet_balance -= $diff;
+                $user->save();
+            }
+        }
+
+        $swap->amount = $request->amount;
+        $swap->country = $request->country;
+        $swap->payment_method = $request->payment_method;
+        $swap->notes = $request->notes;
+        $swap->status = 'pending';
+        $swap->appendLog('Listing edited by ' . $user->name . ' — re-submitted for admin review.', $user->name);
+        $swap->save();
+
+        return redirect()->to(route('marketplace'))->with('success', 'Listing updated and re-submitted for admin review.');
+    }
+
+    public function repostCreditSwap($id)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $swap = CreditSwap::findOrFail($id);
+
+        if ($swap->user_id !== $user->id) {
+            return redirect()->back()->with('error', 'Unauthorized to repost this listing.');
+        }
+
+        if ($swap->offer_type === 'sell' && $user->wallet_balance < $swap->amount) {
+            return redirect()->to(route('marketplace'))->with('error', 'Insufficient AVC balance to repost this listing.');
+        }
+
+        $isSell = $swap->offer_type === 'sell';
+        if ($isSell) {
+            $user->wallet_balance -= $swap->amount;
+            $user->save();
+        }
+
+        $ref = 'CSWAP-' . strtoupper(Str::random(8));
+
+        $newSwap = CreditSwap::create([
+            'user_id'         => $user->id,
+            'offer_type'      => $swap->offer_type,
+            'country'         => $swap->country,
+            'amount'          => $swap->amount,
+            'payment_method'  => $swap->payment_method,
+            'payment_details' => $swap->payment_details,
+            'notes'           => $swap->notes,
+            'status'          => 'pending',
+            'reference'       => $ref,
+        ]);
+
+        $newSwap->appendLog('Reposted from ' . $swap->listingLabel() . '. Awaiting admin review.', $user->name);
+        $newSwap->save();
+
+        return redirect()->to(route('marketplace'))->with('success', 'Listing reposted! It is now awaiting admin review.');
     }
 
     public function buyCreditSwap(Request $request, $id)
@@ -680,7 +886,7 @@ class UserDashboardController extends Controller
             return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Unauthorized to release this AVC Marketplace trade.');
         }
 
-        if (!in_array($swap->status, ['active', 'pending_payment'])) {
+        if (!in_array($swap->status, ['active', 'in_deal', 'pending_payment'])) {
             return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'This AVC Marketplace trade cannot be released.');
         }
 
@@ -740,7 +946,7 @@ class UserDashboardController extends Controller
             ? $swap->seller_id === $user->id
             : $swap->user_id === $user->id;
 
-        $isBuyPoster = $swap->offer_type === 'buy' && $swap->user_id === $user->id && $swap->status === 'active';
+        $isBuyPoster = $swap->offer_type === 'buy' && $swap->user_id === $user->id && in_array($swap->status, ['pending', 'active']);
 
         if (!$isSeller && !$isBuyPoster && $user->role !== 'admin') {
             return redirect()->to(route('dashboard') . '#credit_swap')->with('error', 'Unauthorized to cancel this listing.');

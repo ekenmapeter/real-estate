@@ -310,7 +310,7 @@
                                         <span class="sidebar-group-label px-3" style="font-size:0.65rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#94a3b8; display:block; margin-top:6px; margin-bottom:2px;">Wallet</span>
                                         <a href="{{ url('/dashboard') }}#deposit" class="nav-dropdown-item"><i class="bi bi-arrow-down-circle-fill me-2 text-primary" style="width:16px;"></i>Deposit</a>
                                         <a href="{{ url('/dashboard') }}#withdraw" class="nav-dropdown-item"><i class="bi bi-arrow-up-circle-fill me-2 text-primary" style="width:16px;"></i>Withdraw</a>
-                                        <a href="{{ url('/dashboard') }}#credit_swap" class="nav-dropdown-item"><i class="bi bi-arrow-repeat me-2 text-warning" style="width:16px;"></i>AVC Marketplace</a>
+                                        <a href="{{ url('/marketplace') }}" class="nav-dropdown-item"><i class="bi bi-arrow-repeat me-2 text-warning" style="width:16px;"></i>AVC Marketplace</a>
                                         <a href="{{ url('/dashboard') }}#transactions" class="nav-dropdown-item"><i class="bi bi-arrow-down-up me-2 text-primary" style="width:16px;"></i>Transactions</a>
 
                                         <span class="sidebar-group-label px-3" style="font-size:0.65rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#94a3b8; display:block; margin-top:6px; margin-bottom:2px;">Account</span>
@@ -399,7 +399,7 @@
                         <a href="{{ url('/dashboard') }}#withdraw" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
                             <i class="bi bi-arrow-up-circle-fill"></i> Withdraw
                         </a>
-                        <a href="{{ url('/dashboard') }}#credit_swap" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
+                        <a href="{{ url('/marketplace') }}" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
                             <i class="bi bi-arrow-repeat text-warning"></i> AVC Marketplace
                         </a>
                         <a href="{{ url('/dashboard') }}#transactions" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
@@ -566,7 +566,7 @@
                 <i class="bi bi-wallet2" style="font-size:1.25rem; line-height:1;"></i>
                 <small class="fw-semibold mt-1" style="font-size:0.64rem;">Deposit</small>
             </a>
-            <a href="{{ url('/dashboard') }}#credit_swap" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="credit_swap" onclick="setBottomNavActive(this)">
+            <a href="{{ url('/marketplace') }}" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="credit_swap" onclick="setBottomNavActive(this)">
                 <i class="bi bi-arrow-repeat" style="font-size:1.25rem; line-height:1;"></i>
                 <small class="fw-semibold mt-1" style="font-size:0.64rem;">Trade</small>
             </a>

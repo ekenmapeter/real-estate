@@ -174,7 +174,7 @@
         backdrop-filter: blur(10px) !important;
         z-index: 99999 !important;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
         padding: 1rem;
         overflow-y: auto;
@@ -188,6 +188,7 @@
         width: 100%;
         border: 1px solid #e2e8f0;
         overflow: hidden;
+        margin: auto;
     }
 
     /* ── 3D Flip Card (Crypto Card Widget) ── */
@@ -288,7 +289,7 @@
                 <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'transfer' }" @click.prevent="activeTab = 'transfer'">
                     <i class="bi bi-send-fill"></i> Transfer
                 </a>
-                <a href="#credit_swap" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'credit_swap' }" @click="activeTab = 'credit_swap'">
+                <a href="{{ route('marketplace') }}" class="nav-link-sidebar nav-link-sub">
                     <i class="bi bi-arrow-repeat text-warning"></i> AVC Marketplace
                 </a>
                 <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'transactions' }" @click.prevent="activeTab = 'transactions'">
@@ -415,7 +416,7 @@
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'deposit' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'deposit'">Deposit</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'withdraw' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'withdraw'">Withdraw</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'transfer' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'transfer'">Transfer</button>
-                    <a href="#credit_swap" class="btn btn-sm fw-semibold text-decoration-none" :class="activeTab === 'credit_swap' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'credit_swap'">AVC Marketplace</a>
+                    <a href="{{ route('marketplace') }}" class="btn btn-sm btn-warning fw-semibold text-dark text-decoration-none">AVC Marketplace</a>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'transactions' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'transactions'">Transactions</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'notifications' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'notifications'">Notifications</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'referrals' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'referrals'">Referrals</button>
@@ -893,7 +894,7 @@
                                     <button class="btn btn-sm btn-light fw-bold rounded-3 text-primary" @click="openReceiveModal = true">
                                         <i class="bi bi-box-arrow-in-down me-1"></i> Receive Funds
                                     </button>
-                                    <a href="#credit_swap" class="btn btn-sm btn-warning fw-bold rounded-3 text-dark" @click="activeTab = 'credit_swap'">
+                                    <a href="{{ route('marketplace') }}" class="btn btn-sm btn-warning fw-bold rounded-3 text-dark">
                                         <i class="bi bi-arrow-repeat me-1"></i> AVC Marketplace
                                     </a>
                                 </div>
@@ -1934,7 +1935,7 @@
                             <div class="text-center py-5" style="color:#94a3b8;">
                                 <i class="bi bi-bell-slash fs-1 d-block mb-2 opacity-25"></i>
                                 <div class="fw-semibold" style="font-size:0.95rem;">No notifications yet</div>
-                                <small style="font-size:0.8rem;">Activity from deposits, withdrawals, and investments will appear here.</small>
+                                <small style="font-size:0.8rem;">Activity from deposits, withdrawals, investments, and marketplace offers will appear here.</small>
                             </div>
                         @endforelse
                     </div>
@@ -2299,207 +2300,30 @@
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                     <div>
                         <h2 class="fw-bold mb-1" style="font-size:1.6rem; color:#0f172a;"><i class="bi bi-arrow-repeat text-warning me-2"></i>AVC Marketplace</h2>
-                        <p class="mb-0 text-muted" style="font-size:0.9rem;">Sell your AVC for cash or buy AVC directly from other investors. (1 AVC = 1 USD)</p>
+                        <p class="mb-0 text-muted" style="font-size:0.9rem;">Buy and sell AVC with admin-escrowed, Telegram-mediated deals.</p>
                     </div>
-                    <button class="btn btn-warning fw-bold px-4 py-2 rounded-3 shadow-sm text-dark" @click="showCreateSwapModal = true">
-                        <i class="bi bi-plus-circle-fill me-1"></i> Post Marketplace Offer
-                    </button>
+                    <a href="{{ route('marketplace') }}" class="btn btn-warning fw-bold px-4 py-2 rounded-3 shadow-sm text-dark">
+                        <i class="bi bi-box-arrow-up-right me-1"></i> Open Marketplace
+                    </a>
                 </div>
 
-                <!-- Info Notice Card (matches Withdrawal Info style) -->
-                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                        <h6 class="fw-bold mb-0" style="color:#0f172a; font-size:0.85rem;"><i class="bi bi-info-circle me-2" style="color:#2563eb;"></i>How the AVC Marketplace Works</h6>
-                        <span class="badge fw-semibold rounded-pill px-3 py-1.5" style="background:#eff6ff; color:#2563eb;">AVC Balance: {{ format_avc($walletBalance) }}</span>
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-5 text-center">
+                    <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle" style="width:72px; height:72px; background:#fef3c7;">
+                        <i class="bi bi-shop fs-2 text-warning"></i>
                     </div>
-                    <ul class="list-unstyled mb-0 small" style="color:#475569;">
-                        <li class="d-flex gap-2 mb-2"><i class="bi bi-1-circle text-primary flex-shrink-0 mt-0.5"></i><span><strong class="text-dark">Buy or sell an offer</strong> &mdash; post a <strong>Sell</strong> offer to sell your AVC for cash (escrowed instantly), or a <strong>Buy</strong> offer to purchase AVC from other investors.</span></li>
-                        <li class="d-flex gap-2 mb-2"><i class="bi bi-2-circle text-primary flex-shrink-0 mt-0.5"></i><span><strong class="text-dark">Counterparty pays offline</strong> &mdash; cash or bank transfer sent directly between both parties. Every offer shows the country of the person posting it.</span></li>
-                        <li class="d-flex gap-2"><i class="bi bi-3-circle text-primary flex-shrink-0 mt-0.5"></i><span><strong class="text-dark">AVC are released</strong> &mdash; the seller confirms payment and AVC transfer instantly to the buyer.</span></li>
-                    </ul>
-                </div>
-
-                <!-- Active Swap Offers Grid -->
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-shop text-primary me-2"></i>Available Offers</h5>
-                        <span class="badge bg-light text-muted fw-bold rounded-pill px-3 py-1.5">{{ $creditSwaps->where('status', 'active')->count() }} open</span>
-                    </div>
-                    <div class="row g-3">
-                        @forelse($creditSwaps->where('status', 'active') as $swap)
-                            @php
-                                $isBuyOffer = $swap->offer_type === 'buy';
-                                $posterName = $swap->seller->name ?? 'Investor';
-                            @endphp
-                            <div class="col-md-6 col-xl-4">
-                                <div class="card border-0 rounded-4 shadow-sm bg-white h-100 d-flex flex-column" style="padding:1.25rem;">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="badge fw-bold px-2.5 py-1 rounded-pill" style="background:#eff6ff; color:#2563eb; font-size:0.7rem;">
-                                            <i class="bi bi-tag-fill me-1"></i> {{ $swap->reference }}
-                                        </span>
-                                        <span class="badge fw-bold px-2 py-1 rounded-pill" style="{{ $isBuyOffer ? 'background:#f0fdf4; color:#16a34a;' : 'background:#eff6ff; color:#2563eb;' }} font-size:0.65rem;">
-                                            {{ $isBuyOffer ? 'BUY OFFER' : 'SELL OFFER' }}
-                                        </span>
-                                    </div>
-                                    <div class="d-flex flex-wrap gap-2 mb-2">
-                                        <span class="badge fw-semibold rounded-pill px-2 py-1" style="background:#f8fafc; color:#475569; font-size:0.68rem; border:1px solid #e2e8f0;">
-                                            <i class="bi bi-geo-alt-fill me-1" style="color:#2563eb;"></i> {{ $swap->country ?? 'Not specified' }}
-                                        </span>
-                                        <span class="badge bg-success bg-opacity-15 text-success fw-bold px-2 py-1 rounded-pill" style="font-size:0.65rem;">Active</span>
-                                    </div>
-                                    <h3 class="fw-bold text-dark mb-1">{{ format_avc($swap->amount) }}</h3>
-                                    <div class="small text-muted mb-3">
-                                        <i class="bi bi-person-circle text-primary me-1"></i> {{ $isBuyOffer ? 'Looking to Buy from' : 'Seller' }}: <strong class="text-dark">{{ $posterName }}</strong>
-                                        <span class="d-block text-secondary mt-1" style="font-size:0.72rem;"><i class="bi bi-globe2 me-1"></i> Offering from {{ $swap->country ?? 'N/A' }}</span>
-                                    </div>
-                                    <div class="p-2.5 rounded-3 bg-light border small mb-3">
-                                        <div class="text-muted" style="font-size:0.7rem;">{{ $isBuyOffer ? 'Preferred payment method' : 'Accepts payment via' }}</div>
-                                        <div class="fw-bold text-primary" style="font-size:0.8rem;"><i class="bi bi-credit-card me-1"></i> {{ ucwords(str_replace('_', ' ', $swap->payment_method)) }}</div>
-                                        @if($isBuyOffer)
-                                            <div class="text-secondary" style="font-size:0.72rem;">AVC from you: {{ ucwords(str_replace('_', ' ', $swap->payment_method)) }}</div>
-                                        @else
-                                            <div class="text-secondary text-truncate" style="font-size:0.72rem;">Account: {{ $swap->payment_details }}</div>
-                                        @endif
-                                    </div>
-                                    <div class="mt-auto">
-                                        @if($user && $swap->user_id === $user->id)
-                                            <button class="btn btn-outline-secondary btn-sm w-100 fw-bold rounded-3" disabled><i class="bi bi-person-check me-1"></i> Your Listing</button>
-                                        @elseif($isBuyOffer)
-                                            @php
-                                                $yourWallet = $walletBalance;
-                                                $hasBalance = $yourWallet >= $swap->amount;
-                                            @endphp
-                                            <form action="{{ route('credit-swap.buy', $swap->id) }}" method="POST">
-                                                @csrf
-                                                <div class="mb-2">
-                                                    <label class="form-label small fw-semibold text-dark mb-1" style="font-size:0.7rem;">Your receiving Account Details <span class="text-danger">*</span></label>
-                                                    <textarea name="payment_details" class="form-control form-control-sm rounded-3" rows="2" placeholder="e.g. Bank Name: BDO | Account No: 123456789 | Account Name: Your Name" required></textarea>
-                                                </div>
-                                                @if(!$hasBalance)
-                                                    <small class="text-danger d-block mb-2" style="font-size:0.68rem;"><i class="bi bi-exclamation-circle me-1"></i>Insufficient balance to cover this sale.</small>
-                                                @endif
-                                                <button type="submit" class="btn btn-success btn-sm w-100 fw-bold rounded-3 py-2" @if(!$hasBalance) disabled @endif>
-                                                    <i class="bi bi-cash-coin me-1"></i> Sell AVC to This Buyer
-                                                </button>
-                                            </form>
-                                        @else
-                                            <form action="{{ route('credit-swap.buy', $swap->id) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold rounded-3 py-2" style="background:#2563eb;" onclick="return confirm('Request to buy {{ format_avc($swap->amount) }} from {{ $swap->seller->name }}? You will be given payment instructions to send money directly to the seller.')">
-                                                    <i class="bi bi-cart-plus me-1"></i> Buy AVC ({{ format_avc($swap->amount) }})
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="col-12">
-                                <div class="card border-0 rounded-4 shadow-sm bg-white p-5 text-center text-muted">
-                                    <i class="bi bi-arrow-repeat fs-1 d-block mb-2 text-warning opacity-50"></i>
-                                    <h6 class="fw-bold text-dark">No Active Marketplace Offers Yet</h6>
-                                    <p class="small mb-3">Be the first to post a buy or sell AVC offer from your balance.</p>
-                                    <div>
-                                        <button class="btn btn-primary btn-sm fw-bold px-4 py-2 rounded-3" style="background:#2563eb;" @click="showCreateSwapModal = true">
-                                            <i class="bi bi-plus-lg me-1"></i> Post Swap Offer
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
-
-                <!-- My Marketplace Activity Section -->
-                <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <h6 class="fw-bold text-dark mb-0"><i class="bi bi-journal-text me-2 text-primary"></i>My Marketplace Activity</h6>
-                        <span class="badge bg-light text-muted fw-bold rounded-pill px-3 py-1.5">{{ $creditSwaps->filter(fn($s) => $s->user_id === $user->id || $s->buyer_id === $user->id || $s->seller_id === $user->id)->count() }} records</span>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0" style="font-size:0.85rem; border-collapse:separate; border-spacing:0;">
-                            <thead>
-                                <tr style="background:#f8fafc;">
-                                    <th class="px-3 py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">REF</th>
-                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">ROLE</th>
-                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">OFFER</th>
-                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">AMOUNT</th>
-                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">COUNTRY</th>
-                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">PAYMENT METHOD</th>
-                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">COUNTERPARTY</th>
-                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">STATUS</th>
-                                    <th class="px-3 py-2.5 small fw-bold text-muted text-end" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">ACTION</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($creditSwaps->filter(fn($s) => $s->user_id === $user->id || $s->buyer_id === $user->id || $s->seller_id === $user->id) as $mySwap)
-                                    @php
-                                        $mySwapIsBuy = $mySwap->offer_type === 'buy';
-                                        $mySwapIsSeller = $mySwapIsBuy
-                                            ? $mySwap->seller_id === $user->id
-                                            : $mySwap->user_id === $user->id;
-                                        $counterparty = $mySwapIsBuy
-                                            ? ($mySwapIsSeller ? $mySwap->seller : $mySwap->responder)
-                                            : ($mySwapIsSeller ? $mySwap->buyer : $mySwap->seller);
-                                    @endphp
-                                    <tr style="border-bottom:1px solid #f1f5f9;">
-                                        <td class="px-3 py-3"><code class="fw-bold text-primary">{{ $mySwap->reference }}</code></td>
-                                        <td class="py-3">
-                                            <span class="badge fw-bold px-2 py-1 rounded-pill" style="{{ $mySwapIsSeller ? 'background:#eff6ff; color:#2563eb;' : 'background:#f0fdf4; color:#16a34a;' }}">
-                                                {{ $mySwapIsSeller ? 'Seller' : 'Buyer' }}
-                                            </span>
-                                        </td>
-                                        <td class="py-3">
-                                            <span class="badge fw-bold px-2 py-1 rounded-pill" style="{{ $mySwapIsBuy ? 'background:#f0fdf4; color:#16a34a;' : 'background:#eff6ff; color:#2563eb;' }}">
-                                                {{ $mySwapIsBuy ? 'BUY' : 'SELL' }}
-                                            </span>
-                                        </td>
-                                        <td class="py-3 fw-bold">{{ format_avc($mySwap->amount) }}</td>
-                                        <td class="py-3"><i class="bi bi-geo-alt-fill me-1" style="color:#2563eb; font-size:0.75rem;"></i>{{ $mySwap->country ?? 'N/A' }}</td>
-                                        <td class="py-3">{{ ucwords(str_replace('_', ' ', $mySwap->payment_method)) }}</td>
-                                        <td class="py-3">
-                                            {{ $counterparty ? $counterparty->name : ($mySwapIsSeller ? 'Waiting for Counterparty' : 'Waiting for Seller') }}
-                                        </td>
-                                        <td class="py-3">
-                                            <span class="badge fw-bold px-2 py-1 rounded-pill" style="{{ $mySwap->status === 'completed' ? 'background:#f0fdf4; color:#16a34a;' : ($mySwap->status === 'pending_payment' ? 'background:#fffbeb; color:#d97706;' : ($mySwap->status === 'active' ? 'background:#eff6ff; color:#2563eb;' : 'background:#fef2f2; color:#dc2626;')) }}">
-                                                {{ ucfirst(str_replace('_', ' ', $mySwap->status)) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-3 py-3 text-end">
-                                            @if($mySwapIsSeller && in_array($mySwap->status, ['active', 'pending_payment']))
-                                                <form action="{{ route('credit-swap.release', $mySwap->id) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-success fw-bold px-2.5 py-1 rounded-3 me-1" onclick="return confirm('Confirm that you have received payment for this trade? This will instantly transfer {{ format_avc($mySwap->amount) }} to the buyer.')">
-                                                        <i class="bi bi-check-circle me-1"></i> Release AVC
-                                                    </button>
-                                                </form>
-                                                <form action="{{ route('credit-swap.cancel', $mySwap->id) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger fw-bold px-2.5 py-1 rounded-3" onclick="return confirm('Cancel this listing and return the escrowed AVC to your balance?')">
-                                                        Cancel
-                                                    </button>
-                                                </form>
-                                            @elseif(!$mySwapIsSeller && $mySwap->status === 'pending_payment')
-                                                <span class="text-warning fw-bold small"><i class="bi bi-clock me-1"></i> Awaiting Seller Release</span>
-                                            @elseif($mySwapIsBuy && $mySwap->user_id === $user->id && $mySwap->status === 'active')
-                                                <form action="{{ route('credit-swap.cancel', $mySwap->id) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger fw-bold px-2.5 py-1 rounded-3" onclick="return confirm('Cancel this buy offer listing?')">
-                                                        Cancel
-                                                    </button>
-                                                </form>
-                                            @else
-                                                <span class="text-muted small">--</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="9" class="text-center py-4 text-muted">No marketplace activity yet.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                    <h5 class="fw-bold text-dark mb-2">The AVC Marketplace now lives on its own page</h5>
+                    <p class="text-muted small mb-4" style="max-width:520px; margin-inline:auto;">
+                        Browse listings, create buy or sell offers, and manage deals with the finance team on the dedicated marketplace page.
+                    </p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <a href="{{ route('marketplace') }}" class="btn btn-warning fw-bold px-4 py-2 rounded-3 text-dark">
+                            <i class="bi bi-arrow-repeat me-1"></i> Go to AVC Marketplace
+                        </a>
+                        @if(telegram_handle())
+                            <a href="{{ telegram_url('Hello Finance Team, I have a question about the CreditSwap Marketplace.') }}" target="_blank" rel="noopener" class="btn btn-outline-secondary fw-bold px-4 py-2 rounded-3">
+                                <i class="bi bi-telegram me-1"></i> Contact Finance Team
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -2957,110 +2781,6 @@
     </div>
 </div>
 
-<!-- Create AVC Marketplace Offer Modal -->
-<div x-show="showCreateSwapModal" x-cloak class="custom-modal-backdrop">
-    <div class="custom-modal-card p-4" style="max-width:540px;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-arrow-repeat text-warning me-2"></i>Post Marketplace Offer</h5>
-            <button type="button" class="btn-close" @click="showCreateSwapModal = false"></button>
-        </div>
-        <p class="text-muted small mb-3">Post a <strong class="text-dark">Sell</strong> offer to trade your AVC for cash, or a <strong class="text-dark">Buy</strong> offer to purchase AVC from other investors. (1 AVC = 1 USD)</p>
-
-        <form action="{{ route('credit-swap.create') }}" method="POST" x-data="{ swapType: 'sell' }">
-            @csrf
-
-            <!-- Offer Type -->
-            <div class="mb-3">
-                <label class="form-label fw-bold small text-dark">Offer Type <span class="text-danger">*</span></label>
-                <div class="btn-group w-100" role="group">
-                    <input type="radio" class="btn-check" name="offer_type" id="swap_type_sell" value="sell" checked @change="swapType = 'sell'">
-                    <label class="btn btn-outline-primary fw-bold" for="swap_type_sell"><i class="bi bi-cash-coin me-1"></i>Sell AVC</label>
-                    <input type="radio" class="btn-check" name="offer_type" id="swap_type_buy" value="buy" @change="swapType = 'buy'">
-                    <label class="btn btn-outline-success fw-bold" for="swap_type_buy"><i class="bi bi-bag-plus me-1"></i>Buy AVC</label>
-                </div>
-                <div class="form-text small text-muted" x-show="swapType === 'buy'">You have cash and want to buy AVC from sellers who respond to your offer.</div>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label fw-bold small text-dark">Your Country <span class="text-danger">*</span></label>
-                <select name="country" class="form-select rounded-3" required>
-                    <option value="">Select your country...</option>
-                    <option value="United States">United States</option>
-                    <option value="United Kingdom">United Kingdom</option>
-                    <option value="Canada">Canada</option>
-                    <option value="Australia">Australia</option>
-                    <option value="Singapore">Singapore</option>
-                    <option value="Nigeria">Nigeria</option>
-                    <option value="Ghana">Ghana</option>
-                    <option value="Kenya">Kenya</option>
-                    <option value="South Africa">South Africa</option>
-                    <option value="Philippines">Philippines</option>
-                    <option value="Indonesia">Indonesia</option>
-                    <option value="Vietnam">Vietnam</option>
-                    <option value="India">India</option>
-                    <option value="Pakistan">Pakistan</option>
-                    <option value="Bangladesh">Bangladesh</option>
-                    <option value="United Arab Emirates">United Arab Emirates</option>
-                    <option value="Saudi Arabia">Saudi Arabia</option>
-                    <option value="Qatar">Qatar</option>
-                    <option value="China">China</option>
-                    <option value="Hong Kong">Hong Kong</option>
-                    <option value="Japan">Japan</option>
-                    <option value="South Korea">South Korea</option>
-                    <option value="Brazil">Brazil</option>
-                    <option value="Mexico">Mexico</option>
-                    <option value="Argentina">Argentina</option>
-                    <option value="France">France</option>
-                    <option value="Germany">Germany</option>
-                    <option value="Spain">Spain</option>
-                    <option value="Italy">Italy</option>
-                    <option value="Netherlands">Netherlands</option>
-                    <option value="Poland">Poland</option>
-                    <option value="Turkey">Turkey</option>
-                    <option value="Others">Others</option>
-                </select>
-                <div class="form-text small text-muted">So buyers &amp; sellers can see which country you are offering from.</div>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label fw-bold small text-dark" x-text="swapType === 'sell' ? 'Amount to Sell (AVC)' : 'Amount I Want to Buy (AVC)'"><span class="text-danger"></span></label>
-                <div class="input-group">
-                    <span class="input-group-text bg-light text-muted fw-bold">AVC</span>
-                    <input type="number" step="0.01" min="10" :max="swapType === 'sell' ? {{ $walletBalance }} : ''" name="amount" class="form-control fw-bold" placeholder="e.g. 500.00" required>
-                </div>
-                <div class="d-flex justify-content-between small text-muted mt-1">
-                    <span>Available: {{ format_avc($walletBalance) }}</span>
-                    <span>Min: 10.00 AVC</span>
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label fw-bold small text-dark" x-text="swapType === 'sell' ? 'Accepted Payment Method' : 'Preferred Payment Method'"></label>
-                <select name="payment_method" class="form-select rounded-3" required>
-                    <option value="bank_transfer">Bank Transfer (Wire / Online Bank)</option>
-                    <option value="GCash">GCash / Mobile Money</option>
-                    <option value="cash">Cash / In Person</option>
-                    <option value="crypto">Crypto (USDT / BTC)</option>
-                </select>
-            </div>
-
-            <div class="mb-4">
-                <label class="form-label fw-bold small text-dark" x-text="swapType === 'sell' ? 'Your Receiving Account Details' : 'Your Contact Details'"></label>
-                <textarea name="payment_details" class="form-control rounded-3" rows="3" placeholder="e.g. Bank Name: BDO | Account No: 123456789 | Account Name: Your Name" required></textarea>
-                <div class="form-text small text-muted" x-show="swapType === 'sell'">Buyers will send cash payment directly to these details before you release the AVC.</div>
-                <div class="form-text small text-muted" x-show="swapType === 'buy'">Sellers will see these details to arrange payment. The AVC you buy are added to your balance after the seller confirms.</div>
-            </div>
-
-            <div class="d-flex gap-2">
-                <button type="button" class="btn btn-outline-secondary fw-bold w-50 py-2 rounded-3" @click="showCreateSwapModal = false">Cancel</button>
-                <button type="submit" class="btn btn-warning fw-bold w-50 py-2 rounded-3 text-dark shadow-sm">
-                    <i class="bi bi-upload me-1"></i> Post Swap Offer
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
 </div>
 
 <!-- Alpine JS Dashboard Engine -->
@@ -3086,7 +2806,6 @@
             requestFilter: 'all',
             propFilter: 'all',
             showFinanceModal: false,
-            showCreateSwapModal: false,
             showSubmittedModal: {{ session('submitted_request_id') ? 'true' : 'false' }},
             submittedRequestId: @json(session('submitted_request_id')),
             submittedRequestType: @json(session('submitted_request_type', 'deposit')),

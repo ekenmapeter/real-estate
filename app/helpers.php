@@ -82,3 +82,48 @@ if (! function_exists('avc_equivalent')) {
         return '≈ ' . number_format(avc_to_fiat($avc, $currency), 2) . ' ' . $currency;
     }
 }
+
+if (! function_exists('telegram_handle')) {
+    /**
+     * The official Finance Team Telegram handle configured in the admin settings.
+     */
+    function telegram_handle(): string
+    {
+        $handle = Setting::get('telegram_handle', '');
+
+        return ltrim(trim($handle), '@');
+    }
+}
+
+if (! function_exists('telegram_url')) {
+    /**
+     * Build a t.me share link with a pre-filled message.
+     */
+    function telegram_url(string $message): string
+    {
+        if (! telegram_handle()) {
+            return '#';
+        }
+
+        return 'https://t.me/' . telegram_handle() . '?text=' . rawurlencode($message);
+    }
+}
+
+if (! function_exists('masked_name')) {
+    /**
+     * Mask a user's name for public marketplace listings, e.g. "John D.**".
+     */
+    function masked_name(?string $name): string
+    {
+        $name = trim((string) $name);
+        if ($name === '') {
+            return 'Verified User';
+        }
+
+        $parts = preg_split('/\s+/', $name);
+        $first = $parts[0] ?? '';
+        $last = isset($parts[1]) ? mb_substr($parts[1], 0, 1) : '';
+
+        return ucwords($first) . ($last !== '' ? ' ' . strtoupper($last) . '.**' : '');
+    }
+}

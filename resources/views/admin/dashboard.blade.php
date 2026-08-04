@@ -54,7 +54,7 @@
         backdrop-filter: blur(10px) !important;
         z-index: 99999 !important;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
         padding: 1rem;
         overflow-y: auto;
@@ -68,6 +68,7 @@
         width: 100%;
         border: 1px solid #e2e8f0;
         overflow: hidden;
+        margin: auto;
     }
 </style>
 
@@ -127,6 +128,12 @@
                 </a>
                 <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'referrals' }" @click.prevent="activeAdminTab = 'referrals'">
                     <i class="bi bi-gift-fill"></i> Referral Bonuses
+                </a>
+                <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'credit_swaps' }" @click.prevent="activeAdminTab = 'credit_swaps'">
+                    <i class="bi bi-arrow-repeat"></i> Marketplace Offers
+                    @if($creditSwaps->where('status', 'pending')->count() > 0)
+                        <span class="badge bg-warning text-dark ms-auto rounded-pill">{{ $creditSwaps->where('status', 'pending')->count() }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('dashboard') }}" class="nav-link-admin text-info">
                     <i class="bi bi-person-workspace"></i> User View Dashboard
@@ -599,6 +606,221 @@
                 </div>
             </div>
 
+            <!-- MARKETPLACE OFFERS TAB (AVC Credit Swaps) -->
+            <div x-show="activeAdminTab === 'credit_swaps'" x-transition>
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <div>
+                        <span class="text-uppercase fw-bold text-purple small" style="color:#7c3aed;">MARKETPLACE OFFERS</span>
+                        <h3 class="fw-bold text-dark mb-0">AVC Buy / Sell Offers</h3>
+                    </div>
+                    <span class="badge fw-semibold rounded-pill px-3 py-2" style="background:#f1f5f9; color:#475569;">
+                        {{ $creditSwaps->where('status', 'pending')->count() }} waiting approval
+                    </span>
+                </div>
+
+                <!-- Pending Approvals -->
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-hourglass-split me-2 text-warning"></i>Pending Approvals</h6>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0" style="font-size:0.85rem; border-collapse:separate; border-spacing:0;">
+                            <thead>
+                                <tr style="background:#f8fafc;">
+                                    <th class="px-3 py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">REF</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">USER</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">TYPE</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">AMOUNT</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">COUNTRY</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">PAYMENT METHOD</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">POSTED</th>
+                                    <th class="px-3 py-2.5 small fw-bold text-muted text-end" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($creditSwaps->where('status', 'pending') as $swap)
+                                    <tr style="border-bottom:1px solid #f1f5f9;">
+                                        <td class="px-3 py-3"><code class="fw-bold text-primary">{{ $swap->reference }}</code></td>
+                                        <td class="py-3">
+                                            <div class="fw-bold small text-dark">{{ $swap->seller->name ?? 'Unknown' }}</div>
+                                            <small class="text-muted" style="font-size:0.7rem;">{{ $swap->seller->email ?? '' }}</small>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge fw-bold px-2 py-1 rounded-pill" style="{{ $swap->offer_type === 'buy' ? 'background:#f0fdf4; color:#16a34a;' : 'background:#eff6ff; color:#2563eb;' }}">
+                                                {{ strtoupper($swap->offer_type) }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3 fw-bold">{{ format_avc($swap->amount) }}</td>
+                                        <td class="py-3">{{ $swap->country ?? 'N/A' }}</td>
+                                        <td class="py-3">{{ ucwords(str_replace('_', ' ', $swap->payment_method)) }}</td>
+                                        <td class="py-3 text-muted" style="font-size:0.75rem;">{{ $swap->created_at->diffForHumans() }}</td>
+                                        <td class="px-3 py-3 text-end">
+                                            <form action="{{ route('admin.credit-swap.approve', $swap->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-success fw-bold px-3 py-1.5 rounded-3">
+                                                    <i class="bi bi-check-circle me-1"></i> Approve
+                                                </button>
+                                            </form>
+                                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold px-3 py-1.5 rounded-3" @click="openRejectSwap({{ $swap->id }}, '{{ addslashes($swap->reference) }}')">
+                                                <i class="bi bi-x-circle me-1"></i> Reject
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="text-center py-5" style="color:#94a3b8;">
+                                            <i class="bi bi-check2-circle fs-2 d-block mb-2 opacity-25"></i>
+                                            <span style="font-size:0.9rem;">No offers waiting for approval.</span>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Deals in Progress -->
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-people me-2 text-purple" style="color:#7c3aed;"></i>Deals in Progress</h6>
+                        <span class="badge fw-semibold rounded-pill px-2 py-1" style="background:#f1f5f9; color:#475569; font-size:0.68rem;">
+                            {{ $creditSwaps->whereIn('status', ['in_deal', 'pending_payment', 'paused'])->count() }} active deals
+                        </span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0" style="font-size:0.85rem; border-collapse:separate; border-spacing:0;">
+                            <thead>
+                                <tr style="background:#f8fafc;">
+                                    <th class="px-3 py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">LISTING</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">TYPE</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">AMOUNT</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">SELLER</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">BUYER</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">STATUS</th>
+                                    <th class="px-3 py-2.5 small fw-bold text-muted text-end" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($creditSwaps->whereIn('status', ['in_deal', 'pending_payment', 'paused']) as $swap)
+                                    <tr style="border-bottom:1px solid #f1f5f9;">
+                                        <td class="px-3 py-3">
+                                            <code class="fw-bold text-primary">#{{ $swap->listingLabel() }}</code>
+                                            <small class="text-muted d-block" style="font-size:0.7rem;">{{ $swap->reference }}</small>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge fw-bold px-2 py-1 rounded-pill" style="{{ $swap->offer_type === 'buy' ? 'background:#f0fdf4; color:#16a34a;' : 'background:#eff6ff; color:#2563eb;' }}">
+                                                {{ strtoupper($swap->offer_type) }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3 fw-bold">{{ format_avc($swap->amount) }}</td>
+                                        <td class="py-3">
+                                            <div class="fw-bold small text-dark">{{ $swap->seller->name ?? '—' }}</div>
+                                        </td>
+                                        <td class="py-3">
+                                            <div class="fw-bold small text-dark">{{ $swap->buyer->name ?? '—' }}</div>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge fw-bold px-2 py-1 rounded-pill" style="{{ $swap->status === 'in_deal' ? 'background:#f0fdf4; color:#16a34a;' : ($swap->status === 'pending_payment' ? 'background:#fffbeb; color:#d97706;' : 'background:#fef3c7; color:#b45309;') }}">
+                                                {{ ucfirst(str_replace('_', ' ', $swap->status)) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-3 py-3 text-end">
+                                            <form action="{{ route('admin.credit-swap.complete', $swap->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-success fw-bold px-2 py-1 rounded-3" onclick="return confirm('Release escrow to the buyer and mark this deal completed?')" title="Release escrow to buyer">
+                                                    <i class="bi bi-check2-circle me-1"></i> Complete
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('admin.credit-swap.pause', $swap->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm fw-bold px-2 py-1 rounded-3 {{ $swap->status === 'paused' ? 'btn-success' : 'btn-warning' }}" style="color:{{ $swap->status === 'paused' ? '#fff' : '#000' }};" title="{{ $swap->status === 'paused' ? 'Resume this listing' : 'Pause this deal' }}">
+                                                    <i class="bi {{ $swap->status === 'paused' ? 'bi-play-fill' : 'bi-pause-fill' }} me-1"></i> {{ $swap->status === 'paused' ? 'Resume' : 'Pause' }}
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('admin.credit-swap.cancel-deal', $swap->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-danger fw-bold px-2 py-1 rounded-3" onclick="return confirm('Cancel this deal and refund the escrowed AVC to its holder?')" title="Cancel deal, refund escrow">
+                                                    <i class="bi bi-x-circle me-1"></i> Cancel
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5" style="color:#94a3b8;">
+                                            <i class="bi bi-people fs-2 d-block mb-2 opacity-25"></i>
+                                            <span style="font-size:0.9rem;">No deals in progress. Deals start when a buyer clicks "Deal via Telegram" on an active listing.</span>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- All Offers History -->
+                <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2 text-primary"></i>All Offers</h6>
+                        <span class="badge fw-semibold rounded-pill px-2 py-1" style="background:#f1f5f9; color:#475569; font-size:0.68rem;">{{ $creditSwaps->count() }} total</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0" style="font-size:0.85rem; border-collapse:separate; border-spacing:0;">
+                            <thead>
+                                <tr style="background:#f8fafc;">
+                                    <th class="px-3 py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">LISTING</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">USER</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">TYPE</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">AMOUNT</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">COUNTRY</th>
+                                    <th class="py-2.5 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">STATUS</th>
+                                    <th class="px-3 py-2.5 small fw-bold text-muted text-end" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">POSTED</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($creditSwaps as $swap)
+                                    <tr style="border-bottom:1px solid #f1f5f9;">
+                                        <td class="px-3 py-3">
+                                            <code class="fw-bold text-primary">#{{ $swap->listingLabel() }}</code>
+                                            <small class="text-muted d-block" style="font-size:0.7rem;">{{ $swap->reference }}</small>
+                                        </td>
+                                        <td class="py-3">
+                                            <div class="fw-bold small text-dark">{{ $swap->seller->name ?? 'Unknown' }}</div>
+                                            <small class="text-muted" style="font-size:0.7rem;">{{ $swap->seller->email ?? '' }}</small>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge fw-bold px-2 py-1 rounded-pill" style="{{ $swap->offer_type === 'buy' ? 'background:#f0fdf4; color:#16a34a;' : 'background:#eff6ff; color:#2563eb;' }}">
+                                                {{ strtoupper($swap->offer_type) }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3 fw-bold">{{ format_avc($swap->amount) }}</td>
+                                        <td class="py-3">{{ $swap->country ?? 'N/A' }}</td>
+                                        <td class="py-3">
+                                            <span class="badge fw-bold px-2 py-1 rounded-pill" style="{{ $swap->status === 'completed' ? 'background:#f0fdf4; color:#16a34a;' : ($swap->status === 'active' ? 'background:#eff6ff; color:#2563eb;' : ($swap->status === 'pending' || $swap->status === 'pending_payment' ? 'background:#fffbeb; color:#d97706;' : ($swap->status === 'in_deal' ? 'background:#fce7f3; color:#db2777;' : ($swap->status === 'paused' ? 'background:#fef3c7; color:#b45309;' : 'background:#fef2f2; color:#dc2626;')))) }}">
+                                                {{ ucfirst(str_replace('_', ' ', $swap->status)) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-3 py-3 text-end">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary fw-bold px-2 py-1 rounded-3 me-2" @click="openSwapLogs({{ $swap->id }}, '{{ addslashes($swap->listingLabel()) }}', {{ json_encode($swap->logs ?? []) }})" title="View history log">
+                                                <i class="bi bi-clock-history me-1"></i> History
+                                            </button>
+                                            <span class="text-muted" style="font-size:0.75rem;">{{ $swap->created_at->diffForHumans() }}</span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5" style="color:#94a3b8;">
+                                            <i class="bi bi-arrow-repeat fs-2 d-block mb-2 opacity-25"></i>
+                                            <span style="font-size:0.9rem;">No marketplace offers yet.</span>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- USERS TAB -->
             <div x-show="activeAdminTab === 'users'" x-transition>
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -1048,9 +1270,14 @@
                                 <label class="form-label fw-semibold text-dark small">Referral Bonus ($)</label>
                                 <input type="number" step="0.01" min="0" name="referral_bonus_amount" class="form-control" value="{{ $settings['referral_bonus_amount'] ?? 10 }}" required>
                             </div>
-                            <div class="col-12">
+                            <div class="col-md-6">
                                 <label class="form-label fw-semibold text-dark small">Support Email</label>
                                 <input type="email" name="support_email" class="form-control" value="{{ $settings['support_email'] ?? 'support@radiantdreamrealty.com' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">Telegram Handle (Marketplace)</label>
+                                <input type="text" name="telegram_handle" class="form-control" value="{{ $settings['telegram_handle'] ?? '' }}" maxlength="50" placeholder="rdrfinance">
+                                <small class="text-muted d-block mt-1">Handle shown in the AVC Marketplace for deal contacts. Leave empty to hide Telegram buttons.</small>
                             </div>
                         </div>
                         <button type="submit" class="btn fw-bold px-4 py-2 rounded-3 text-white mt-3" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">
@@ -1388,6 +1615,67 @@
         </div>
     </div>
 </div>
+
+<!-- REJECT MARKETPLACE OFFER MODAL -->
+<div x-show="selectedSwapForReject" x-cloak class="custom-modal-backdrop">
+    <div class="custom-modal-card p-4" style="max-width: 520px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h5 class="fw-bold text-dark mb-0">Reject Marketplace Offer</h5>
+                <small class="text-muted">Offer <strong class="text-primary" x-text="selectedSwapForReject?.reference"></strong></small>
+            </div>
+            <button type="button" class="btn-close" @click="selectedSwapForReject = null"></button>
+        </div>
+        <form :action="'/admin/credit-swap/reject/' + (selectedSwapForReject?.id || '')" method="POST">
+            @csrf
+            <div class="mb-3">
+                <label class="form-label fw-semibold text-dark small">Rejection Reason <span class="text-muted">(optional)</span></label>
+                <textarea name="admin_note" class="form-control rounded-3" rows="3" placeholder="e.g. Payment details are incomplete."></textarea>
+                <div class="form-text small text-muted">The user will see this reason in their notification. Escrowed AVC is automatically refunded for sell offers.</div>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary fw-bold w-50 py-2 rounded-3" @click="selectedSwapForReject = null">Cancel</button>
+                <button type="submit" class="btn btn-danger fw-bold w-50 py-2 rounded-3">
+                    <i class="bi bi-x-circle me-1"></i> Reject Offer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- SWAP HISTORY LOG MODAL -->
+<div x-show="selectedSwapForLogs" x-cloak class="custom-modal-backdrop">
+    <div class="custom-modal-card p-4" style="max-width: 560px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h5 class="fw-bold text-dark mb-0">Listing History</h5>
+                <small class="text-muted">Listing <strong class="text-primary">#<span x-text="selectedSwapForLogs?.listing"></span></strong></small>
+            </div>
+            <button type="button" class="btn-close" @click="selectedSwapForLogs = null"></button>
+        </div>
+        <div class="border rounded-3 p-3" style="max-height: 380px; overflow-y:auto; background:#f8fafc;">
+            <template x-if="(selectedSwapForLogs?.logs || []).length === 0">
+                <p class="text-muted small mb-0">No activity recorded for this listing yet.</p>
+            </template>
+            <template x-for="(entry, index) in (selectedSwapForLogs?.logs || [])" :key="index">
+                <div class="d-flex gap-3 mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0" style="width:32px;height:32px;background:#7c3aed; font-size:0.8rem;">
+                        <i class="bi bi-activity"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <p class="mb-0 small text-dark fw-semibold" x-text="entry.message"></p>
+                        <small class="text-muted" style="font-size:0.7rem;">
+                            <span x-text="entry.actor || 'System'"></span> · <span x-text="entry.at"></span>
+                        </small>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+            <button type="button" class="btn btn-outline-secondary fw-bold px-4" @click="selectedSwapForLogs = null">Close</button>
+        </div>
+    </div>
+</div>
 </div>
 
 <script>
@@ -1395,7 +1683,7 @@
         return {
             activeAdminTab: (function() {
                 var tab = new URLSearchParams(window.location.search).get('tab');
-                var valid = ['finance_requests','properties','projects','users','kyc_reviews','withdrawals','cards','referrals','settings'];
+                var valid = ['finance_requests','properties','projects','users','kyc_reviews','withdrawals','cards','referrals','credit_swaps','settings'];
                 return valid.indexOf(tab) !== -1 ? tab : 'finance_requests';
             })(),
             filterType: 'all',
@@ -1404,12 +1692,22 @@
             selectedDepForInstruction: null,
             selectedDepForReview: null,
             selectedUserForPreview: null,
+            selectedSwapForReject: null,
+            selectedSwapForLogs: null,
             previewTab: 'investments',
             totalInvestedPreview: 0,
             usersSearch: '',
             usersKycFilter: 'all',
             usersSortBy: 'newest',
             usersVisible: {{ $users->count() }},
+
+            openRejectSwap(id, reference) {
+                this.selectedSwapForReject = { id: id, reference: reference };
+            },
+
+            openSwapLogs(id, listing, logs) {
+                this.selectedSwapForLogs = { id: id, listing: listing, logs: logs || [] };
+            },
 
             openInstructionModal(dep) {
                 this.selectedDepForInstruction = dep;
