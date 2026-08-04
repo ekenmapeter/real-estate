@@ -92,7 +92,6 @@
         background-color: #0b1329 !important;
         color: #ffffff;
         min-height: calc(100vh - 70px);
-        overflow-y: auto;
     }
 
     .sidebar-dark .nav-link-sidebar {

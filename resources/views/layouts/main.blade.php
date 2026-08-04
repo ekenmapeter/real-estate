@@ -287,7 +287,7 @@
                                         </div>
                                         <i class="bi bi-chevron-down" style="font-size:0.65rem; color:#64748b; transition:transform 0.2s;"></i>
                                     </button>
-                                    <div class="nav-dropdown-menu" style="display:none; position:absolute; top:calc(100% + 6px); right:0; left:auto; background:#ffffff; min-width:230px; border-radius:12px; box-shadow:0 12px 40px rgba(15,23,42,0.18); border:1px solid #e2e8f0; padding:8px 0; z-index:999999;">
+                                    <div class="nav-dropdown-menu" style="display:none; position:absolute; top:calc(100% + 6px); right:0; left:auto; background:#ffffff; min-width:230px; border-radius:12px; box-shadow:0 12px 40px rgba(15,23,42,0.18); border:1px solid #e2e8f0; padding:8px 0; z-index:999999; max-height:calc(100vh - 96px); overflow-y:auto;">
                                         <!-- User Info -->
                                         <div class="px-3 py-2 border-bottom mb-1">
                                             <div class="d-flex align-items-center gap-2">
