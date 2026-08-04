@@ -270,8 +270,14 @@
         loadingEl.style.display = 'block';
         contentEl.style.display = 'none';
 
-        const bsModal = new bootstrap.Modal(modalEl);
-        bsModal.show();
+        if (window.bootstrap && window.bootstrap.Modal) {
+            const bsModal = window.bootstrap.Modal.getInstance(modalEl) || new window.bootstrap.Modal(modalEl);
+            bsModal.show();
+        } else {
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+            document.body.classList.add('modal-open');
+        }
 
         fetch('/project/' + projectUuid + '/reviews')
             .then(res => res.json())
