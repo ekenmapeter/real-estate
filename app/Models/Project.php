@@ -63,6 +63,40 @@ class Project extends Model
         return $this->hasMany(ProjectImage::class)->orderBy('sort_order');
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(ProjectReview::class)->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get the computed average rating from reviews, falling back to admin-set rating.
+     */
+    public function averageRating(): float
+    {
+        if ($this->relationLoaded('reviews') && $this->reviews->count() > 0) {
+            return round($this->reviews->avg('rating'), 1);
+        }
+
+        $avg = $this->reviews()->avg('rating');
+        if ($avg !== null && $avg > 0) {
+            return round((float) $avg, 1);
+        }
+
+        return (float) $this->rating;
+    }
+
+    /**
+     * Get the total number of reviews.
+     */
+    public function reviewCount(): int
+    {
+        if ($this->relationLoaded('reviews')) {
+            return $this->reviews->count();
+        }
+
+        return $this->reviews()->count();
+    }
+
     public function galleryUrls(): array
     {
         $urls = collect($this->images->map(fn ($img) => $img->url()));
@@ -115,7 +149,7 @@ class Project extends Model
 
     public function ratingWidth(): int
     {
-        return (int) round(min(5, max(0, (float) $this->rating)) / 5 * 100);
+        return (int) round(min(5, max(0, $this->averageRating())) / 5 * 100);
     }
 
     public function statusLabel(): string

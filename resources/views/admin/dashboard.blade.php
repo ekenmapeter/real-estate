@@ -493,9 +493,9 @@
                                 <tr style="background:#f8fafc;">
                                     <th class="px-4 py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">PROJECT</th>
                                     <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">TARGET</th>
-                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">MIN INVEST</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">SHARE PRICE</th>
                                     <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">RETURN %</th>
-                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">RATING</th>
+                                    <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">RATING & REVIEWS</th>
                                     <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">DURATION</th>
                                     <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">INVESTORS</th>
                                     <th class="py-3 small fw-bold text-muted" style="border-bottom:1px solid #e2e8f0; font-size:0.7rem; letter-spacing:0.06em;">STATUS</th>
@@ -513,11 +513,10 @@
                                         <td class="py-3"><span class="small text-muted">${{ number_format($proj->minimum_investment, 2) }}</span></td>
                                         <td class="py-3"><span class="fw-bold" style="color:#7c3aed;">{{ $proj->expected_return_percentage }}%</span></td>
                                         <td class="py-3">
-                                            @if($proj->rating > 0)
-                                                <span class="fw-bold" style="color:#f59e0b;"><i class="bi bi-star-fill me-1"></i>{{ number_format((float) $proj->rating, 1) }}</span>
-                                            @else
-                                                <span class="text-muted small">—</span>
-                                            @endif
+                                            <div class="d-flex align-items-center gap-1">
+                                                <span class="fw-bold" style="color:#f59e0b;"><i class="bi bi-star-fill me-1"></i>{{ number_format($proj->averageRating(), 1) }}</span>
+                                                <span class="badge bg-light text-dark border small" style="font-size:0.65rem;">{{ $proj->reviews_count ?? $proj->reviewCount() }} review(s)</span>
+                                            </div>
                                         </td>
                                         <td class="py-3"><span class="small text-muted">{{ $proj->investment_duration_months }} mos</span></td>
                                         <td class="py-3"><span class="small text-muted">{{ $proj->investments_count }} investor(s)</span></td>
@@ -525,10 +524,13 @@
                                             <span class="badge fw-semibold rounded-pill" style="background:{{ $proj->status === 'active' ? '#f0fdf4' : '#f1f5f9' }}; color:{{ $proj->status === 'active' ? '#16a34a' : '#64748b' }}; font-size:0.62rem;">{{ $proj->status }}</span>
                                         </td>
                                         <td class="py-3">
-                                            <div class="d-flex gap-1">
+                                            <div class="d-flex gap-1 flex-wrap">
                                                 <a href="{{ route('admin.project.edit', $proj->id) }}" class="btn btn-sm fw-bold rounded-pill px-3 text-white" style="background:#7c3aed; border:none; font-size:0.7rem;">
-                                                    <i class="bi bi-pencil me-1"></i> Edit
+                                                    <i class="bi bi-pencil me-1"></i> Edit & Reviews
                                                 </a>
+                                                <button type="button" class="btn btn-sm fw-bold rounded-pill px-2 text-dark bg-warning border-0" style="font-size:0.7rem;" data-bs-toggle="modal" data-bs-target="#adminAddReviewModal{{ $proj->id }}">
+                                                    <i class="bi bi-star-fill me-1"></i> + Review
+                                                </button>
                                                 <form action="{{ route('admin.project.delete', $proj->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     <button type="submit" class="btn btn-sm fw-bold rounded-pill px-3 text-danger" style="background:#fef2f2; border:1px solid #fecaca; font-size:0.7rem;" onclick="return confirm('Delete project &quot;{{ $proj->title }}&quot;? This also removes all investments and saved records.')">
@@ -536,10 +538,50 @@
                                                     </button>
                                                 </form>
                                             </div>
+
+                                            <!-- Admin Add Review Modal for {{ $proj->title }} -->
+                                            <div class="modal fade" id="adminAddReviewModal{{ $proj->id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content rounded-4 border-0 shadow-lg text-start">
+                                                        <form action="{{ route('admin.project-review.store', $proj->id) }}" method="POST">
+                                                            @csrf
+                                                            <div class="modal-header border-0 pb-0">
+                                                                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-star-fill text-warning me-2"></i>Add Admin Review</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body p-4">
+                                                                <p class="small text-muted mb-3">Add a verified investor review for <strong>{{ $proj->title }}</strong>.</p>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label small fw-bold text-dark">Reviewer Name</label>
+                                                                    <input type="text" name="reviewer_name" class="form-control rounded-3" placeholder="e.g. Marcus Vance or Anonymous Investor" required>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label small fw-bold text-dark">Rating (1 to 5 Stars)</label>
+                                                                    <select name="rating" class="form-select rounded-3" required>
+                                                                        <option value="5">5 Stars - Excellent</option>
+                                                                        <option value="4">4 Stars - Very Good</option>
+                                                                        <option value="3">3 Stars - Average</option>
+                                                                        <option value="2">2 Stars - Poor</option>
+                                                                        <option value="1">1 Star - Terrible</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label small fw-bold text-dark">Review Text</label>
+                                                                    <textarea name="review" class="form-control rounded-3" rows="3" placeholder="Enter review content..."></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer border-0 pt-0">
+                                                                <button type="button" class="btn btn-light fw-bold rounded-3" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-warning text-dark fw-bold rounded-3 px-4">Submit Review</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="8" class="text-center py-5" style="color:#94a3b8;"><i class="bi bi-rocket-takeoff fs-2 d-block mb-2 opacity-25"></i><span style="font-size:0.9rem;">No projects yet. Publish your first investment project above.</span></td></tr>
+                                    <tr><td colspan="9" class="text-center py-5" style="color:#94a3b8;"><i class="bi bi-rocket-takeoff fs-2 d-block mb-2 opacity-25"></i><span style="font-size:0.9rem;">No projects yet. Publish your first investment project above.</span></td></tr>
                                 @endforelse
                             </tbody>
                         </table>

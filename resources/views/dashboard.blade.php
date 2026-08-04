@@ -942,12 +942,13 @@
                                             <span class="position-absolute top-0 start-0 d-inline-flex gap-1 overflow-hidden" style="width:{{ $proj->ratingWidth() }}%; color:#f59e0b;">
                                                 <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                                             </span>
-                                            <b class="text-dark">{{ number_format((float) $proj->rating, 1) }}</b>
+                                            <b class="text-dark ms-1">{{ number_format($proj->averageRating(), 1) }}</b>
+                                            <small class="text-primary fw-semibold ms-1">({{ $proj->reviewCount() }})</small>
                                         </span>
                                         <span class="text-muted"><i class="bi bi-clock-history me-1" style="color:#f59e0b;"></i>{{ $proj->investment_duration_months }} mos</span>
                                     </div>
                                     <div class="d-flex justify-content-between small mb-1">
-                                        <span class="text-muted">Min Invest</span>
+                                        <span class="text-muted">Share Price</span>
                                         <strong class="text-dark">${{ number_format($proj->minimum_investment, 2) }}</strong>
                                     </div>
                                     <div class="mb-2">
@@ -1049,12 +1050,13 @@
                                             <span class="position-absolute top-0 start-0 d-inline-flex gap-1 overflow-hidden" style="width:{{ $proj->ratingWidth() }}%; color:#f59e0b;">
                                                 <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                                             </span>
-                                            <b class="text-dark">{{ number_format((float) $proj->rating, 1) }}</b>
+                                            <b class="text-dark ms-1">{{ number_format($proj->averageRating(), 1) }}</b>
+                                            <small class="text-primary fw-semibold ms-1">({{ $proj->reviewCount() }})</small>
                                         </span>
                                         <span class="text-muted"><i class="bi bi-clock-history me-1" style="color:#f59e0b;"></i>{{ $proj->investment_duration_months }} mos</span>
                                     </div>
                                     <div class="d-flex justify-content-between small mb-1">
-                                        <span class="text-muted">Min Invest</span>
+                                        <span class="text-muted">Share Price</span>
                                         <strong class="text-dark">${{ number_format($proj->minimum_investment, 2) }}</strong>
                                     </div>
                                     <div class="mb-2">

@@ -70,8 +70,8 @@
                             <span class="badge bg-warning text-dark fs-6 px-3 py-2">{{ $project->category }}</span>
                             <span class="badge bg-success fs-6 px-3 py-2">{{ $project->expected_return_percentage }}% Target Return</span>
                             <span class="badge bg-primary fs-6 px-3 py-2"><i class="bi bi-clock-history me-1"></i>{{ $project->investment_duration_months }} Months</span>
-                            <span class="badge bg-dark fs-6 px-3 py-2 text-warning" title="{{ $rating }} / 5">
-                                <i class="bi bi-star-fill me-1"></i>{{ number_format($rating, 1) }} Rating
+                            <span class="badge bg-dark fs-6 px-3 py-2 text-warning" title="{{ number_format($project->averageRating(), 1) }} / 5">
+                                <i class="bi bi-star-fill me-1"></i>{{ number_format($project->averageRating(), 1) }} Rating ({{ $project->reviews->count() }})
                             </span>
                         </div>
                     </div>
@@ -112,16 +112,16 @@
                         <div class="d-flex align-items-center gap-3 text-muted flex-wrap">
                             <span><i class="bi bi-geo-alt me-1" style="color:#f59e0b;"></i> {{ $project->location }}</span>
                             <span class="d-flex align-items-center"><i class="bi bi-shield-check me-1 text-success"></i> Verified Project</span>
-                            <span class="position-relative d-inline-flex align-items-center gap-1" style="white-space:nowrap;" title="{{ $rating }} / 5 rating">
+                            <a href="#reviewsSection" class="position-relative d-inline-flex align-items-center gap-1 text-decoration-none" style="white-space:nowrap;" title="{{ number_format($project->averageRating(), 1) }} / 5 rating">
                                 <span class="d-inline-flex gap-1 text-muted">
                                     <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                                 </span>
                                 <span class="position-absolute top-0 start-0 d-inline-flex gap-1 overflow-hidden" style="width:{{ $project->ratingWidth() }}%; color:#f59e0b;">
                                     <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                                 </span>
-                                <b class="text-dark">{{ number_format($rating, 1) }}</b>
-                                <span class="text-muted">({{ $project->investments()->count() }} investors)</span>
-                            </span>
+                                <b class="text-dark ms-1">{{ number_format($project->averageRating(), 1) }}</b>
+                                <span class="text-primary fw-semibold ms-1">({{ $project->reviews->count() }} reviews)</span>
+                            </a>
                         </div>
                     </div>
                     <div class="d-flex gap-2">
@@ -207,7 +207,7 @@
                             <div class="p-3 rounded-3 d-flex align-items-center gap-3 h-100" style="background:#f8fafc; border:1px solid #e2e8f0;">
                                 <i class="bi bi-currency-dollar fs-4" style="color:#f59e0b;"></i>
                                 <div>
-                                    <small class="text-muted d-block">Minimum Investment</small>
+                                    <small class="text-muted d-block">Share Price</small>
                                     <span class="fw-bold text-dark">${{ number_format($project->minimum_investment, 2) }}</span>
                                 </div>
                             </div>
@@ -249,7 +249,7 @@
                             <div class="rounded-3 d-inline-flex align-items-center justify-content-center mb-2" style="width:40px; height:40px; background:#f0fdf4;">
                                 <i class="bi bi-currency-dollar text-success fs-5"></i>
                             </div>
-                            <small class="text-muted d-block">Minimum Invest</small>
+                            <small class="text-muted d-block">Share Price</small>
                             <h5 class="fw-bold mb-0 text-success">${{ number_format($project->minimum_investment, 0) }}</h5>
                         </div>
                     </div>
@@ -272,6 +272,104 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Investor Reviews Section -->
+                <div id="reviewsSection" class="bg-white rounded-4 p-4 shadow-sm mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <div>
+                            <h5 class="fw-bold mb-0" style="color: #0f172a;"><i class="bi bi-star-fill me-2" style="color:#f59e0b;"></i>Investor Reviews</h5>
+                            <small class="text-muted">Real feedback from verified project investors</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 bg-light px-3 py-2 rounded-pill">
+                            <span class="fw-bold fs-5 text-dark">{{ number_format($project->averageRating(), 1) }}</span>
+                            <div class="d-flex text-warning small">
+                                @for($i = 1; $i <= 5; $i++)
+                                    @if($i <= floor($project->averageRating()))
+                                        <i class="bi bi-star-fill"></i>
+                                    @elseif($i - 0.5 <= $project->averageRating())
+                                        <i class="bi bi-star-half"></i>
+                                    @else
+                                        <i class="bi bi-star text-muted opacity-50"></i>
+                                    @endif
+                                @endfor
+                            </div>
+                            <span class="text-muted small">({{ $project->reviews->count() }})</span>
+                        </div>
+                    </div>
+
+                    <!-- Review Form for Eligible Investors -->
+                    @auth
+                        @if($canReview ?? false)
+                            <div class="p-3 rounded-4 mb-4" style="background:#fffbeb; border:1px solid #fde68a;">
+                                <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-pencil-square me-1" style="color:#b45309;"></i> Leave Your Investor Review</h6>
+                                <p class="small text-muted mb-3">You have invested in this project. Share your feedback with other potential investors.</p>
+                                <form action="{{ route('project.review', $project) }}" method="POST">
+                                    @csrf
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-dark">Your Rating</label>
+                                        <div class="d-flex gap-2 align-items-center rating-select" x-data="{ selectedRating: 5 }">
+                                            <input type="hidden" name="rating" :value="selectedRating">
+                                            <template x-for="star in [1, 2, 3, 4, 5]">
+                                                <button type="button" @click="selectedRating = star" class="btn btn-link p-0 text-decoration-none border-0" style="font-size:1.5rem;">
+                                                    <i class="bi" :class="star <= selectedRating ? 'bi-star-fill text-warning' : 'bi-star text-muted opacity-50'"></i>
+                                                </button>
+                                            </template>
+                                            <span class="ms-2 fw-bold text-dark" x-text="selectedRating + ' Stars'"></span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-dark">Your Review (Optional)</label>
+                                        <textarea name="review" class="form-control rounded-3" rows="3" placeholder="Describe your investment experience or opinion on this project..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-warning text-dark fw-bold px-4 py-2 rounded-3 shadow-sm" style="background:#fbbf24; border:none;">
+                                        <i class="bi bi-send me-1"></i> Submit Review
+                                    </button>
+                                </form>
+                            </div>
+                        @elseif($hasReviewed ?? false)
+                            <div class="alert alert-success rounded-3 small mb-4">
+                                <i class="bi bi-check-circle-fill me-1"></i> Thank you! You have submitted your review for this project.
+                            </div>
+                        @endif
+                    @endauth
+
+                    <!-- Reviews List -->
+                    <div class="d-flex flex-column gap-3">
+                        @forelse($project->reviews as $rev)
+                            <div class="p-3 rounded-3 border bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-circle bg-warning text-dark fw-bold d-flex align-items-center justify-content-center" style="width:36px; height:36px; font-size:0.85rem;">
+                                            {{ $rev->initials() }}
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-dark small">
+                                                {{ $rev->displayName() }}
+                                                @if($rev->is_admin)
+                                                    <span class="badge bg-secondary ms-1" style="font-size:0.65rem;">Verified</span>
+                                                @else
+                                                    <span class="badge bg-success ms-1" style="font-size:0.65rem;">Investor</span>
+                                                @endif
+                                            </h6>
+                                            <small class="text-muted" style="font-size:0.75rem;">{{ $rev->created_at->diffForHumans() }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-1 text-warning small">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <i class="bi bi-star-fill {{ $i <= $rev->rating ? 'text-warning' : 'text-muted opacity-25' }}"></i>
+                                        @endfor
+                                    </div>
+                                </div>
+                                <p class="mb-0 small text-secondary" style="line-height:1.6;">{{ $rev->review ?: 'No written comment provided.' }}</p>
+                            </div>
+                        @empty
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-chat-square-text fs-2 opacity-50 d-block mb-2"></i>
+                                <p class="mb-0 small">No investor reviews yet for this project.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
             </div>
 
             <!-- Right: Invest Card -->
@@ -288,7 +386,7 @@
                     <div class="p-4">
                         <div class="p-3 rounded-3 mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="text-muted fw-semibold">Minimum Investment</span>
+                                <span class="text-muted fw-semibold">Share Price</span>
                                 <strong class="fs-4 fw-bold" style="color:#0f172a;">${{ number_format($project->minimum_investment, 2) }}</strong>
                             </div>
                             <hr class="my-2" style="border-color:#e2e8f0;">
@@ -302,7 +400,7 @@
                             </div>
                             <div class="d-flex justify-content-between mt-1">
                                 <span class="text-muted small">Rating</span>
-                                <span class="fw-bold" style="color:#f59e0b;"><i class="bi bi-star-fill me-1"></i>{{ number_format($rating, 1) }} / 5</span>
+                                <span class="fw-bold" style="color:#f59e0b;"><i class="bi bi-star-fill me-1"></i>{{ number_format($project->averageRating(), 1) }} / 5 ({{ $project->reviews->count() }})</span>
                             </div>
                         </div>
 

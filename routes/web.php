@@ -64,6 +64,8 @@ Route::prefix('admin')->name('admin.')->middleware(['admin', 'throttle:admin'])-
     Route::post('/credit-swap/pause/{id}', [AdminDashboardController::class, 'pauseCreditSwap'])->name('credit-swap.pause');
     Route::post('/credit-swap/cancel-deal/{id}', [AdminDashboardController::class, 'cancelCreditSwapDeal'])->name('credit-swap.cancel-deal');
     Route::post('/gallery-image/delete/{id}', [AdminDashboardController::class, 'deleteGalleryImage'])->name('gallery.delete');
+    Route::post('/project/{id}/review', [AdminDashboardController::class, 'storeProjectReview'])->name('project-review.store');
+    Route::post('/project-review/delete/{id}', [AdminDashboardController::class, 'deleteProjectReview'])->name('project-review.delete');
     Route::post('/settings/save', [AdminDashboardController::class, 'saveSettings'])->name('settings.save');
     Route::post('/settings/branding', [AdminDashboardController::class, 'saveBranding'])->name('settings.branding');
     Route::post('/settings/account', [AdminDashboardController::class, 'updateAdminAccount'])->name('settings.account');
@@ -91,9 +93,11 @@ Route::middleware('auth')->group(function () {
 Route::get('/invest', [InvestController::class, 'index'])->name('invest.index');
 Route::get('/project/{project}', [InvestController::class, 'show'])->name('project.show');
 Route::get('/project/{project}/download', [InvestController::class, 'downloadDocument'])->name('project.download');
+Route::get('/project/{project}/reviews', [InvestController::class, 'getReviews'])->name('project.reviews');
 Route::middleware('auth')->group(function () {
     Route::post('/project/{project}/save', [InvestController::class, 'toggleSave'])->name('project.save')->middleware('throttle:forms');
     Route::post('/project/{project}/invest', [InvestController::class, 'invest'])->name('project.invest')->middleware('throttle:forms');
+    Route::post('/project/{project}/review', [InvestController::class, 'storeReview'])->name('project.review')->middleware('throttle:forms');
 });
 
 Route::get('/list-property', function () {

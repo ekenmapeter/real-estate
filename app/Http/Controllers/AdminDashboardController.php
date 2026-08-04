@@ -20,6 +20,7 @@ use App\Models\Transaction;
 use App\Models\Card;
 use App\Models\CreditSwap;
 use App\Models\ProjectImage;
+use App\Models\ProjectReview;
 use App\Models\PropertyImage;
 use App\Models\Setting;
 use Illuminate\Http\Request;
@@ -50,7 +51,7 @@ class AdminDashboardController extends Controller
         $allDeposits = Deposit::with('user')->orderBy('created_at', 'desc')->take(20)->get();
         $allWithdrawals = Withdrawal::with('user')->orderBy('created_at', 'desc')->take(20)->get();
         $properties = Property::orderBy('created_at', 'desc')->get();
-        $projects = Project::withCount('investments')->orderBy('created_at', 'desc')->get();
+        $projects = Project::withCount(['investments', 'reviews'])->orderBy('created_at', 'desc')->get();
         $users = User::with(['investments.property', 'deposits', 'withdrawals', 'transactions', 'referrals'])
             ->where('role', 'user')
             ->orderBy('created_at', 'desc')
@@ -348,7 +349,7 @@ class AdminDashboardController extends Controller
 
     public function editProject($id)
     {
-        $project = Project::findOrFail($id);
+        $project = Project::with(['reviews.user'])->findOrFail($id);
 
         return view('admin.project-edit', compact('project'));
     }
@@ -417,6 +418,45 @@ class AdminDashboardController extends Controller
         $project->delete();
 
         return redirect()->back()->with('success', 'Project "' . $project->title . '" deleted.');
+    }
+
+    public function storeProjectReview(Request $request, $id)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'review' => 'nullable|string|max:1000',
+            'reviewer_name' => 'required|string|max:255',
+        ]);
+
+        $project = Project::findOrFail($id);
+
+        ProjectReview::create([
+            'project_id' => $project->id,
+            'user_id' => null,
+            'rating' => $request->rating,
+            'review' => $request->review,
+            'reviewer_name' => $request->reviewer_name,
+            'is_admin' => true,
+        ]);
+
+        // Recalculate average rating for project
+        $newAvg = $project->reviews()->avg('rating');
+        $project->update(['rating' => round($newAvg, 2)]);
+
+        return redirect()->back()->with('success', 'Review added for "' . $project->title . '".');
+    }
+
+    public function deleteProjectReview($id)
+    {
+        $review = ProjectReview::findOrFail($id);
+        $project = $review->project;
+        $review->delete();
+
+        // Recalculate rating for project
+        $avg = $project->reviews()->avg('rating');
+        $project->update(['rating' => $avg ? round($avg, 2) : 0.00]);
+
+        return redirect()->back()->with('success', 'Review deleted.');
     }
 
     protected function syncGallery($owner, string $kind, Request $request): void

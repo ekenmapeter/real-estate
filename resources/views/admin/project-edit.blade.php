@@ -93,7 +93,7 @@
                     <input type="number" step="0.01" min="1" name="target_amount" class="form-control" value="{{ $project->target_amount }}" required>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label fw-semibold text-dark small">Minimum Investment ($)</label>
+                    <label class="form-label fw-semibold text-dark small">Share Price / Min Investment ($)</label>
                     <input type="number" step="0.01" min="1" name="minimum_investment" class="form-control" value="{{ $project->minimum_investment }}" required>
                 </div>
                 <div class="col-md-3">
@@ -164,6 +164,79 @@
                         <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>No document uploaded yet.</span>
                     @endif
                 </div>
+            </div>
+        </div>
+
+        <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-star-fill me-2" style="color:#f59e0b;"></i>Project Reviews ({{ $project->reviews->count() }})</h6>
+                <button type="button" class="btn btn-sm btn-warning text-dark fw-bold rounded-3" data-bs-toggle="collapse" data-bs-target="#addReviewFormCollapse">
+                    <i class="bi bi-plus-circle me-1"></i> Add Admin Review
+                </button>
+            </div>
+
+            <!-- Add Admin Review Collapse Form -->
+            <div class="collapse mb-4" id="addReviewFormCollapse">
+                <div class="p-3 rounded-3 bg-light border">
+                    <h6 class="fw-bold small text-dark mb-3">New Review for {{ $project->title }}</h6>
+                    <form action="{{ route('admin.project-review.store', $project->id) }}" method="POST">
+                        @csrf
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark">Reviewer Name</label>
+                                <input type="text" name="reviewer_name" class="form-control rounded-3" placeholder="e.g. David Miller" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark">Rating</label>
+                                <select name="rating" class="form-select rounded-3" required>
+                                    <option value="5">5 Stars - Excellent</option>
+                                    <option value="4">4 Stars - Very Good</option>
+                                    <option value="3">3 Stars - Average</option>
+                                    <option value="2">2 Stars - Poor</option>
+                                    <option value="1">1 Star - Terrible</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-dark">Review Comment</label>
+                                <textarea name="review" class="form-control rounded-3" rows="3" placeholder="Write review..."></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-warning text-dark fw-bold btn-sm rounded-3 px-3">Add Review</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Reviews List -->
+            <div class="d-flex flex-column gap-3">
+                @forelse($project->reviews as $rev)
+                    <div class="p-3 rounded-3 border bg-white d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <strong class="text-dark small">{{ $rev->displayName() }}</strong>
+                                @if($rev->is_admin)
+                                    <span class="badge bg-secondary" style="font-size:0.65rem;">Admin/Verified</span>
+                                @else
+                                    <span class="badge bg-success" style="font-size:0.65rem;">Investor</span>
+                                @endif
+                                <div class="d-flex gap-1 text-warning small ms-2">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="bi bi-star-fill {{ $i <= $rev->rating ? 'text-warning' : 'text-muted opacity-25' }}"></i>
+                                    @endfor
+                                </div>
+                            </div>
+                            <p class="mb-1 small text-muted">{{ $rev->review ?: 'No written comment.' }}</p>
+                            <small class="text-muted" style="font-size:0.7rem;">Posted {{ $rev->created_at->diffForHumans() }}</small>
+                        </div>
+                        <form action="{{ route('admin.project-review.delete', $rev->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-outline-danger border-0 p-1" onclick="return confirm('Delete this review?')" title="Delete review">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                @empty
+                    <p class="text-muted small mb-0">No reviews recorded yet for this project.</p>
+                @endforelse
             </div>
         </div>
 

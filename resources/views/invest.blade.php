@@ -130,14 +130,15 @@
 
               <!-- Rating + Duration row -->
               <div class="d-flex align-items-center justify-content-between small text-muted mb-2">
-                <span class="position-relative d-inline-flex align-items-center gap-1" style="white-space:nowrap;" title="{{ $rating }} / 5 rating">
+                <span class="position-relative d-inline-flex align-items-center gap-1 project-rating-trigger" style="white-space:nowrap; cursor:pointer;" onclick="openReviewsModal('{{ $project->uuid }}', '{{ addslashes($project->title) }}')" title="{{ number_format($project->averageRating(), 1) }} / 5 rating (Click to view reviews)">
                   <span class="d-inline-flex gap-1 text-muted">
                     <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                   </span>
                   <span class="position-absolute top-0 start-0 d-inline-flex gap-1 overflow-hidden" style="width:{{ $project->ratingWidth() }}%; color:#f59e0b;">
                     <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                   </span>
-                  <b class="text-dark">{{ number_format($rating, 1) }}</b>
+                  <b class="text-dark ms-1">{{ number_format($project->averageRating(), 1) }}</b>
+                  <small class="text-primary fw-semibold ms-1">({{ $project->reviews_count ?? $project->reviewCount() }})</small>
                 </span>
                 <span><i class="bi bi-clock-history me-1" style="color:#f59e0b;"></i> <b class="text-dark">{{ $project->investment_duration_months }} mos</b> duration</span>
               </div>
@@ -164,7 +165,7 @@
               @endif
 
               <div class="d-flex justify-content-between text-muted small border-bottom pb-3 mb-3">
-                <span><i class="bi bi-currency-dollar me-1"></i> Min: <b class="text-dark">${{ number_format($project->minimum_investment, 0) }}</b></span>
+                <span><i class="bi bi-currency-dollar me-1"></i> Share Price: <b class="text-dark">${{ number_format($project->minimum_investment, 0) }}</b></span>
                 <span><i class="bi bi-graph-up-arrow me-1"></i> Return: <b class="text-success">{{ $project->expected_return_percentage }}%</b></span>
                 <span><i class="bi bi-calendar-check me-1"></i> {{ $project->investment_duration_months }} Mos</span>
               </div>
@@ -209,9 +210,131 @@
   </div>
 </section>
 
+<!-- Project Reviews Modal -->
+<div class="modal fade" id="projectReviewsModal" tabindex="-1" aria-labelledby="projectReviewsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <div>
+          <h5 class="modal-header-title fw-bold mb-0 text-dark" id="projectReviewsModalLabel">Investor Reviews</h5>
+          <p class="modal-header-subtitle text-muted small mb-0" id="projectReviewsModalSubtitle"></p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div id="reviewsModalLoading" class="text-center py-4">
+          <div class="spinner-border text-warning" role="status">
+            <span class="visually-hidden">Loading reviews...</span>
+          </div>
+          <p class="text-muted small mt-2">Loading reviews...</p>
+        </div>
+        <div id="reviewsModalContent" style="display:none;">
+          <div class="d-flex align-items-center gap-3 p-3 rounded-4 bg-light mb-4">
+            <div class="display-5 fw-bold text-dark" id="modalAvgRating">0.0</div>
+            <div>
+              <div class="d-flex gap-1 text-warning fs-5" id="modalStars"></div>
+              <small class="text-muted" id="modalReviewCount">Based on 0 reviews</small>
+            </div>
+          </div>
+          <div id="reviewsList" class="d-flex flex-column gap-3" style="max-height: 400px; overflow-y: auto;">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <a id="modalProjectDetailBtn" href="#" class="btn btn-warning text-dark fw-bold rounded-3">
+          <i class="bi bi-arrow-right-circle me-1"></i> View Project & Add Review
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
     function shareProject(title, url) {
         shareContent(title, url, 'Invest in this project');
+    }
+
+    function openReviewsModal(projectUuid, projectTitle) {
+        const modalEl = document.getElementById('projectReviewsModal');
+        const modalSubtitle = document.getElementById('projectReviewsModalSubtitle');
+        const loadingEl = document.getElementById('reviewsModalLoading');
+        const contentEl = document.getElementById('reviewsModalContent');
+        const listEl = document.getElementById('reviewsList');
+        const avgEl = document.getElementById('modalAvgRating');
+        const starsEl = document.getElementById('modalStars');
+        const countEl = document.getElementById('modalReviewCount');
+        const detailBtn = document.getElementById('modalProjectDetailBtn');
+
+        modalSubtitle.textContent = projectTitle;
+        detailBtn.href = '/project/' + projectUuid;
+        loadingEl.style.display = 'block';
+        contentEl.style.display = 'none';
+
+        const bsModal = new bootstrap.Modal(modalEl);
+        bsModal.show();
+
+        fetch('/project/' + projectUuid + '/reviews')
+            .then(res => res.json())
+            .then(data => {
+                loadingEl.style.display = 'none';
+                contentEl.style.display = 'block';
+
+                avgEl.textContent = data.average_rating.toFixed(1);
+                countEl.textContent = `Based on ${data.review_count} ${data.review_count === 1 ? 'review' : 'reviews'}`;
+
+                // Render stars
+                let starsHtml = '';
+                const fullStars = Math.floor(data.average_rating);
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= fullStars) {
+                        starsHtml += '<i class="bi bi-star-fill"></i>';
+                    } else if (i - 0.5 <= data.average_rating) {
+                        starsHtml += '<i class="bi bi-star-half"></i>';
+                    } else {
+                        starsHtml += '<i class="bi bi-star text-muted opacity-50"></i>';
+                    }
+                }
+                starsEl.innerHTML = starsHtml;
+
+                // Render list
+                if (data.reviews.length === 0) {
+                    listEl.innerHTML = `
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-chat-square-text fs-2 opacity-50 d-block mb-2"></i>
+                            <p class="mb-0 small">No investor reviews yet for this project.</p>
+                        </div>
+                    `;
+                } else {
+                    listEl.innerHTML = data.reviews.map(r => {
+                        let rStars = '';
+                        for (let i = 1; i <= 5; i++) {
+                            rStars += `<i class="bi bi-star-fill ${i <= r.rating ? 'text-warning' : 'text-muted opacity-25'}"></i>`;
+                        }
+                        return `
+                            <div class="p-3 rounded-3 border bg-white shadow-sm">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-circle bg-warning text-dark fw-bold d-flex align-items-center justify-content-center" style="width:36px; height:36px; font-size:0.85rem;">
+                                            ${r.initials}
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-dark small">${r.reviewer_name} ${r.is_admin ? '<span class="badge bg-secondary ms-1" style="font-size:0.65rem;">Verified</span>' : ''}</h6>
+                                            <small class="text-muted" style="font-size:0.75rem;">${r.created_at}</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-1 small">${rStars}</div>
+                                </div>
+                                <p class="mb-0 small text-secondary" style="line-height:1.5;">${r.review || '<em>No written comment provided.</em>'}</p>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            })
+            .catch(err => {
+                loadingEl.style.display = 'none';
+                listEl.innerHTML = '<div class="alert alert-danger mb-0 small">Failed to load reviews. Please try again.</div>';
+                contentEl.style.display = 'block';
+            });
     }
 </script>
 @endsection

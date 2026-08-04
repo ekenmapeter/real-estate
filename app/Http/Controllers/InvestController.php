@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\ProjectInvestmentConfirmationMail;
 use App\Models\Project;
 use App\Models\ProjectInvestment;
+use App\Models\ProjectReview;
 use App\Models\SavedProject;
 use App\Models\Transaction;
 use App\Models\User;
@@ -31,7 +32,7 @@ class InvestController extends Controller
             }
         }
 
-        $projects = $query->orderBy('id', 'desc')->get();
+        $projects = $query->withCount('reviews')->orderBy('id', 'desc')->get();
 
         $savedProjectIds = Auth::check()
             ? SavedProject::where('user_id', Auth::id())->pluck('project_id')->all()
@@ -42,11 +43,16 @@ class InvestController extends Controller
 
     public function show(Project $project)
     {
+        $project->load(['reviews.user']);
         $raisedAmount = $project->raisedAmount();
         $fundedPercent = $project->fundedPercent();
         $isSaved = Auth::check() && SavedProject::where('user_id', Auth::id())->where('project_id', $project->id)->exists();
 
-        return view('project-detail', compact('project', 'raisedAmount', 'fundedPercent', 'isSaved'));
+        $hasInvested = Auth::check() && ProjectInvestment::where('user_id', Auth::id())->where('project_id', $project->id)->exists();
+        $hasReviewed = Auth::check() && ProjectReview::where('user_id', Auth::id())->where('project_id', $project->id)->exists();
+        $canReview = $hasInvested && !$hasReviewed;
+
+        return view('project-detail', compact('project', 'raisedAmount', 'fundedPercent', 'isSaved', 'canReview', 'hasReviewed'));
     }
 
     public function invest(Request $request, Project $project)
@@ -148,5 +154,73 @@ class InvestController extends Controller
         return redirect()->back()->with('success', $saved
             ? 'Project "' . $project->title . '" saved to your list!'
             : 'Project removed from your saved list.');
+    }
+
+    /**
+     * Get reviews for a project as JSON (for modal loading).
+     */
+    public function getReviews(Project $project)
+    {
+        $reviews = $project->reviews()->with('user')->get()->map(function ($review) {
+            return [
+                'id' => $review->id,
+                'rating' => $review->rating,
+                'review' => $review->review,
+                'reviewer_name' => $review->displayName(),
+                'initials' => $review->initials(),
+                'is_admin' => $review->is_admin,
+                'created_at' => $review->created_at->diffForHumans(),
+            ];
+        });
+
+        return response()->json([
+            'reviews' => $reviews,
+            'average_rating' => $project->averageRating(),
+            'review_count' => $reviews->count(),
+        ]);
+    }
+
+    /**
+     * Store a review from an authenticated investor.
+     */
+    public function storeReview(Request $request, Project $project)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'review' => 'nullable|string|max:1000',
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        // Check user has invested in this project
+        $hasInvested = ProjectInvestment::where('user_id', $user->id)->where('project_id', $project->id)->exists();
+        if (!$hasInvested) {
+            return redirect()->back()->with('error', 'You must invest in this project before leaving a review.');
+        }
+
+        // Check user hasn't already reviewed
+        $alreadyReviewed = ProjectReview::where('user_id', $user->id)->where('project_id', $project->id)->exists();
+        if ($alreadyReviewed) {
+            return redirect()->back()->with('error', 'You have already reviewed this project.');
+        }
+
+        ProjectReview::create([
+            'project_id' => $project->id,
+            'user_id' => $user->id,
+            'rating' => $request->rating,
+            'review' => $request->review,
+            'reviewer_name' => $user->name,
+            'is_admin' => false,
+        ]);
+
+        // Update project's cached rating to the new average
+        $newAvg = $project->reviews()->avg('rating');
+        $project->update(['rating' => round($newAvg, 2)]);
+
+        return redirect()->back()->with('success', 'Thank you for your review!');
     }
 }
