@@ -19,6 +19,13 @@ class MarketplaceController extends Controller
 
         $activeOffers = $creditSwaps->where('status', 'active');
 
+        $offersJson = $activeOffers->values()->map(fn ($s) => [
+            'country' => $s->country ?? '',
+            'amount' => (float) $s->amount,
+            'payment' => $s->payment_method ?? '',
+            'type' => $s->offer_type,
+        ]);
+
         $mySwaps = $user
             ? $creditSwaps->filter(fn ($s) => $s->user_id === $user->id
                 || $s->buyer_id === $user->id
@@ -26,6 +33,6 @@ class MarketplaceController extends Controller
                 ->values()
             : collect();
 
-        return view('marketplace', compact('creditSwaps', 'activeOffers', 'mySwaps', 'user', 'walletBalance'));
+        return view('marketplace', compact('creditSwaps', 'activeOffers', 'offersJson', 'mySwaps', 'user', 'walletBalance'));
     }
 }

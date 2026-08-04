@@ -595,7 +595,7 @@
     function marketplaceEngine() {
         return {
             filters: { country: '', amountMin: '', amountMax: '', payment: '', type: '' },
-            offers: @json($activeOffers->map(fn ($s) => ['country' => $s->country ?? '', 'amount' => (float) $s->amount, 'payment' => $s->payment_method ?? '', 'type' => $s->offer_type])->values()),
+            offers: @json($offersJson),
             showCreateModal: false,
             showHowItWorks: false,
             dealSwap: null,
