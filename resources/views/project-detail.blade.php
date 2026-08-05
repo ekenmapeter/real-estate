@@ -334,9 +334,9 @@
                     @endauth
 
                     <!-- Reviews List -->
-                    <div class="d-flex flex-column gap-3">
-                        @forelse($project->reviews as $rev)
-                            <div class="p-3 rounded-3 border bg-light">
+                    <div class="d-flex flex-column gap-3" x-data="{ showAll: false }">
+                        @forelse($project->reviews as $index => $rev)
+                            <div class="p-3 rounded-3 border bg-light" x-show="showAll || {{ $index }} < 3" x-transition.opacity.duration.200ms>
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="rounded-circle bg-warning text-dark fw-bold d-flex align-items-center justify-content-center" style="width:36px; height:36px; font-size:0.85rem;">
@@ -368,6 +368,15 @@
                                 <p class="mb-0 small">No investor reviews yet for this project.</p>
                             </div>
                         @endforelse
+
+                        @if($project->reviews->count() > 3)
+                            <div class="text-center mt-2">
+                                <button type="button" class="btn btn-outline-primary fw-bold px-4 py-2 rounded-3" @click="showAll = !showAll">
+                                    <span x-show="!showAll"><i class="bi bi-eye me-1"></i> View More Reviews ({{ $project->reviews->count() - 3 }})</span>
+                                    <span x-show="showAll" x-cloak><i class="bi bi-eye-slash me-1"></i> Show Less</span>
+                                </button>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

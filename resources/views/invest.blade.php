@@ -186,7 +186,7 @@
 
               @if($isActive)
                 <a href="{{ route('project.show', $project) }}" class="btn btn-warning text-dark fw-bold w-100 py-2 rounded-3 shadow-sm">
-                  <i class="bi bi-lightning-charge-fill me-1"></i> Invest Now
+                  <i class="bi bi-lightning-charge-fill me-1"></i> Buy Shares Now
                 </a>
               @else
                 <button class="btn btn-secondary text-white fw-bold w-100 py-2 rounded-3" disabled>

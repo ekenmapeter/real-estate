@@ -321,7 +321,7 @@
                     </div>
                     <p class="text-white mb-2" style="font-size:0.72rem; opacity:0.8; line-height:1.4;">Start investing today and watch your portfolio grow.</p>
                     <button class="btn btn-warning btn-sm fw-bold w-100 rounded-3" style="font-size:0.75rem;" @click="activeTab = 'invest'">
-                        <i class="bi bi-lightning-fill me-1"></i> Invest Now
+                        <i class="bi bi-lightning-fill me-1"></i> Buy Shares Now
                     </button>
                 </div>
 
@@ -920,8 +920,10 @@
                             <div class="card h-100 border-0 rounded-4 shadow-sm overflow-hidden bg-white">
                                 <div style="height:180px; overflow:hidden; position:relative;">
                                     <img src="{{ $proj->image_url ?? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop' }}" alt="{{ $proj->title }}" style="width:100%; height:100%; object-fit:cover;">
-                                    <span class="badge position-absolute top-0 start-0 m-2 rounded-pill fw-bold {{ $projStatusCls[0] }}" style="font-size:0.75rem;">{{ $projStatusCls[1] }}</span>
-                                    <span class="badge position-absolute top-0 start-0 m-2 mt-4 rounded-pill fw-bold" style="background:#f59e0b; font-size:0.75rem; color:#1a1a1a;">{{ $proj->expected_return_percentage }}% Return</span>
+                                    <div class="position-absolute top-0 start-0 m-2 d-flex flex-column align-items-start gap-1">
+                                        <span class="badge rounded-pill fw-bold {{ $projStatusCls[0] }}" style="font-size:0.75rem;">{{ $projStatusCls[1] }}</span>
+                                        <span class="badge rounded-pill fw-bold" style="background:#f59e0b; font-size:0.75rem; color:#1a1a1a;">{{ $proj->expected_return_percentage }}% Return</span>
+                                    </div>
                                     @auth
                                         <form action="{{ route('project.save', $proj) }}" method="POST" class="js-save-project position-absolute top-0 end-0 m-2">
                                             @csrf
@@ -935,7 +937,7 @@
                                     <h6 class="fw-bold text-dark mb-1">{{ $proj->title }}</h6>
                                     <p class="small text-muted mb-1"><i class="bi bi-geo-alt me-1"></i>{{ $proj->location }}</p>
                                     <div class="d-flex align-items-center justify-content-between small mb-2">
-                                        <span class="position-relative d-inline-flex align-items-center gap-1" style="white-space:nowrap;" title="{{ $proj->rating }} / 5 rating">
+                                        <a href="{{ route('project.show', $proj) }}#reviewsSection" class="position-relative d-inline-flex align-items-center gap-1 text-decoration-none" style="white-space:nowrap; cursor:pointer;" title="{{ $proj->rating }} / 5 rating (Click to view reviews)">
                                             <span class="d-inline-flex gap-1 text-muted">
                                                 <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                                             </span>
@@ -944,7 +946,7 @@
                                             </span>
                                             <b class="text-dark ms-1">{{ number_format($proj->averageRating(), 1) }}</b>
                                             <small class="text-primary fw-semibold ms-1">({{ $proj->reviewCount() }})</small>
-                                        </span>
+                                        </a>
                                         <span class="text-muted"><i class="bi bi-clock-history me-1" style="color:#f59e0b;"></i>{{ $proj->investment_duration_months }} mos</span>
                                     </div>
                                     <div class="d-flex justify-content-between small mb-1">
@@ -982,7 +984,7 @@
                                     </div>
                                     @if($projActive)
                                         <a href="{{ route('project.show', $proj) }}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-2" style="background:#2563eb;">
-                                            <i class="bi bi-lightning-charge me-1"></i> Invest Now
+                                            <i class="bi bi-lightning-charge me-1"></i> Buy Shares Now
                                         </a>
                                     @else
                                         <button class="btn btn-secondary btn-sm w-100 fw-bold rounded-3 mt-2" disabled>
@@ -1030,8 +1032,10 @@
                             <div class="card h-100 border-0 rounded-4 shadow-sm overflow-hidden bg-white">
                                 <div style="height:180px; overflow:hidden; position:relative;">
                                     <img src="{{ $proj->image_url ?? 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800&auto=format&fit=crop' }}" alt="{{ $proj->title }}" style="width:100%; height:100%; object-fit:cover;">
-                                    <span class="badge position-absolute top-0 start-0 m-2 rounded-pill fw-bold {{ $projStatusCls[0] }}" style="font-size:0.75rem;">{{ $projStatusCls[1] }}</span>
-                                    <span class="badge position-absolute top-0 start-0 m-2 mt-4 rounded-pill fw-bold" style="background:#f59e0b; font-size:0.75rem; color:#1a1a1a;">{{ $proj->expected_return_percentage }}% Return</span>
+                                    <div class="position-absolute top-0 start-0 m-2 d-flex flex-column align-items-start gap-1">
+                                        <span class="badge rounded-pill fw-bold {{ $projStatusCls[0] }}" style="font-size:0.75rem;">{{ $projStatusCls[1] }}</span>
+                                        <span class="badge rounded-pill fw-bold" style="background:#f59e0b; font-size:0.75rem; color:#1a1a1a;">{{ $proj->expected_return_percentage }}% Return</span>
+                                    </div>
                                     <form action="{{ route('project.save', $proj) }}" method="POST" class="js-save-project position-absolute top-0 end-0 m-2" data-remove-card>
                                         @csrf
                                         <button type="submit" class="btn btn-sm rounded-circle border-0 shadow-sm bg-white" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center;" title="Remove from saved">
@@ -1043,7 +1047,7 @@
                                     <h6 class="fw-bold text-dark mb-1">{{ $proj->title }}</h6>
                                     <p class="small text-muted mb-1"><i class="bi bi-geo-alt me-1"></i>{{ $proj->location }}</p>
                                     <div class="d-flex align-items-center justify-content-between small mb-2">
-                                        <span class="position-relative d-inline-flex align-items-center gap-1" style="white-space:nowrap;" title="{{ $proj->rating }} / 5 rating">
+                                        <a href="{{ route('project.show', $proj) }}#reviewsSection" class="position-relative d-inline-flex align-items-center gap-1 text-decoration-none" style="white-space:nowrap; cursor:pointer;" title="{{ $proj->rating }} / 5 rating (Click to view reviews)">
                                             <span class="d-inline-flex gap-1 text-muted">
                                                 <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                                             </span>
@@ -1052,7 +1056,7 @@
                                             </span>
                                             <b class="text-dark ms-1">{{ number_format($proj->averageRating(), 1) }}</b>
                                             <small class="text-primary fw-semibold ms-1">({{ $proj->reviewCount() }})</small>
-                                        </span>
+                                        </a>
                                         <span class="text-muted"><i class="bi bi-clock-history me-1" style="color:#f59e0b;"></i>{{ $proj->investment_duration_months }} mos</span>
                                     </div>
                                     <div class="d-flex justify-content-between small mb-1">
@@ -1090,7 +1094,7 @@
                                     </div>
                                     @if($projActive)
                                         <a href="{{ route('project.show', $proj) }}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3 mt-2" style="background:#2563eb;">
-                                            <i class="bi bi-lightning-charge me-1"></i> Invest Now
+                                            <i class="bi bi-lightning-charge me-1"></i> Buy Shares Now
                                         </a>
                                     @else
                                         <button class="btn btn-secondary btn-sm w-100 fw-bold rounded-3 mt-2" disabled>

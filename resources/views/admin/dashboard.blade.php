@@ -1000,12 +1000,6 @@
                                                 <button class="btn btn-sm btn-outline-primary fw-bold" @click="openUserPreview(user)">
                                                     <i class="bi bi-eye me-1"></i> Preview
                                                 </button>
-                                                <form action="{{ route('admin.users.impersonate', $userRow->id) }}" method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm fw-bold text-white" style="background:#7c3aed; border:none;" onclick="return confirm('Impersonate {{ addslashes($userRow->name) }}? You will be logged in as this user.')">
-                                                        <i class="bi bi-person-workspace me-1"></i> Impersonate
-                                                    </button>
-                                                </form>
                                             </div>
                                         </td>
                                     </tr>
@@ -1367,7 +1361,6 @@
         </div>
     </div>
 </div>
-</div>
 
 <!-- ========================================== -->
 <!-- PROVIDE PAYMENT INSTRUCTIONS MODAL (Admin View - From Image) -->
@@ -1448,7 +1441,7 @@
                 <span class="badge bg-primary me-2">Deposit Request</span>
                 <span class="fw-bold text-dark" x-text="selectedDepForReview?.deposit_code">FR-250520-0001</span>
             </div>
-            <span class="badge bg-success bg-opacity-15 text-success fw-bold px-3 py-1" x-text="selectedDepForReview?.status || 'Approved'">Approved</span>
+            <span class="badge bg-success bg-opacity-15 text-white fw-bold px-3 py-1" x-text="selectedDepForReview?.status || 'Approved'">Approved</span>
         </div>
 
         <div class="row g-3 mb-4">
@@ -1647,12 +1640,6 @@
         </div>
 
         <div class="d-flex justify-content-end gap-2 mt-3">
-            <form :action="'/admin/users/' + (selectedUserForPreview?.id || '') + '/impersonate'" method="POST">
-                @csrf
-                <button type="submit" class="btn fw-bold px-4 text-white" style="background:#7c3aed; border:none;">
-                    <i class="bi bi-person-workspace me-1"></i> Impersonate User
-                </button>
-            </form>
             <button type="button" class="btn btn-outline-secondary fw-bold px-4" @click="selectedUserForPreview = null">Close</button>
         </div>
     </div>

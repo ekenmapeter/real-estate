@@ -403,7 +403,7 @@
                   <small class="text-muted d-block">Min. Investment</small>
                   <span class="fw-bold text-primary fs-5">${{ number_format($proj->minimum_investment, 2) }}</span>
                 </div>
-                <a href="{{ route('project.show', $proj) }}" class="btn btn-sm btn-primary fw-bold px-3 py-2 rounded-3">Invest Now</a>
+                <a href="{{ route('project.show', $proj) }}" class="btn btn-sm btn-primary fw-bold px-3 py-2 rounded-3">Buy Shares Now</a>
               </div>
             </div>
           </div>

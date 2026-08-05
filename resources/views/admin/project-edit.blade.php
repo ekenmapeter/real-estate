@@ -45,7 +45,7 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.project.update', $project->id) }}" method="POST" enctype="multipart/form-data">
+    <form id="project-update-form" action="{{ route('admin.project.update', $project->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
             <h6 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle-fill me-2" style="color:#7c3aed;"></i>Project Details</h6>
@@ -134,12 +134,9 @@
                         @foreach($project->images as $image)
                             <div class="position-relative" style="width:120px;">
                                 <img src="{{ $image->url() }}" alt="Gallery image" style="width:120px; height:80px; object-fit:cover; border-radius:10px; border:1px solid #e2e8f0;">
-                                <form action="{{ route('admin.gallery.delete', $image->id) }}" method="POST" class="position-absolute top-0 end-0 m-1">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-danger rounded-circle p-0 d-flex align-items-center justify-content-center" style="width:22px; height:22px;" title="Remove image" onclick="return confirm('Remove this gallery image?')">
-                                        <i class="bi bi-x"></i>
-                                    </button>
-                                </form>
+                                <button type="submit" form="gallery-delete-form-{{ $image->id }}" class="btn btn-sm btn-danger rounded-circle p-0 d-flex align-items-center justify-content-center" style="width:22px; height:22px;" title="Remove image" onclick="return confirm('Remove this gallery image?')">
+                                    <i class="bi bi-x"></i>
+                                </button>
                             </div>
                         @endforeach
                     </div>
@@ -166,10 +163,17 @@
                 </div>
             </div>
         </div>
+    </form>
 
-        <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-star-fill me-2" style="color:#f59e0b;"></i>Project Reviews ({{ $project->reviews->count() }})</h6>
+    @foreach($project->images as $image)
+        <form id="gallery-delete-form-{{ $image->id }}" action="{{ route('admin.gallery.delete', $image->id) }}" method="POST" class="d-none">
+            @csrf
+        </form>
+    @endforeach
+
+    <div class="card border-0 rounded-4 shadow-sm bg-white p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold text-dark mb-0"><i class="bi bi-star-fill me-2" style="color:#f59e0b;"></i>Project Reviews ({{ $project->reviews->count() }})</h6>
                 <button type="button" class="btn btn-sm btn-warning text-dark fw-bold rounded-3" data-bs-toggle="collapse" data-bs-target="#addReviewFormCollapse">
                     <i class="bi bi-plus-circle me-1"></i> Add Admin Review
                 </button>
@@ -241,11 +245,10 @@
         </div>
 
         <div class="d-flex gap-2 mb-5">
-            <button type="submit" class="btn fw-bold px-4 py-2 rounded-3 text-white" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);">
+            <button type="submit" form="project-update-form" class="btn fw-bold px-4 py-2 rounded-3 text-white" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);">
                 <i class="bi bi-check-lg me-1"></i> Save Changes
             </button>
             <a href="{{ route('admin.dashboard', ['tab' => 'projects']) }}" class="btn btn-outline-secondary fw-bold px-4 py-2 rounded-3">Cancel</a>
         </div>
-    </form>
-</div>
+    </div>
 @endsection
