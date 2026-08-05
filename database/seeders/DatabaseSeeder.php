@@ -5,6 +5,10 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Property;
 use App\Models\Project;
+use App\Models\ProjectDurationTier;
+use App\Models\ProjectShareCycle;
+use App\Models\ProjectDocument;
+use App\Models\ProjectUpdate;
 use App\Models\ProjectInvestment;
 use App\Models\Investment;
 use App\Models\Deposit;
@@ -31,7 +35,15 @@ class DatabaseSeeder extends Seeder
         // Fetch seeded admin user
         $admin = User::where('role', 'admin')->first();
 
-        // 3. Create Housing Properties (idempotent)
+        // 1. Ensure user has starting wallet balance for demo
+        if ($user) {
+            $user->wallet_balance = 27500.00;
+            $user->kyc_verified = true;
+            $user->kyc_status = 'approved';
+            $user->save();
+        }
+
+        // 2. Create Housing Properties (idempotent)
         $p1 = Property::firstOrCreate(['title' => 'Aura Grand Penthouse Suites'], [
             'location' => 'Manhattan, New York',
             'category' => 'Luxury Residential',
@@ -60,261 +72,234 @@ class DatabaseSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        $p3 = Property::firstOrCreate(['title' => 'Azure Coast Beachfront Resort'], [
-            'location' => 'Miami Beach, Florida',
-            'category' => 'Beachfront Villa',
-            'image_url' => 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1000&auto=format&fit=crop',
-            'price' => 2400000.00,
-            'price_per_share' => 1000.00,
-            'total_shares' => 500,
-            'available_shares' => 180,
-            'roi_percentage' => 28.00,
-            'investment_duration_months' => 24,
-            'description' => 'Exclusive oceanfront vacation villa offering high holiday rental revenue and tax-advantaged property distributions.',
-            'status' => 'active',
-        ]);
-
-        $p4 = Property::firstOrCreate(['title' => 'The Horizon Skyline Residences'], [
-            'location' => 'Austin, Texas',
-            'category' => 'Apartments',
-            'image_url' => 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1000&auto=format&fit=crop',
-            'price' => 780000.00,
-            'price_per_share' => 300.00,
-            'total_shares' => 1500,
-            'available_shares' => 950,
-            'roi_percentage' => 17.80,
-            'investment_duration_months' => 12,
-            'description' => 'Modern high-density residential towers located in downtown Austin’s fast-growing financial corridor.',
-            'status' => 'active',
-        ]);
-
-        // 3b. Create Investment Projects (idempotent)
-        $projectsData = [
-            ['title' => 'Horizon Towers Development', 'rating' => 4.7],
-            ['title' => 'Palm Grove Condo Estate', 'rating' => 4.5],
-            ['title' => 'Metro Business District Offices', 'rating' => 4.3],
-            ['title' => 'Suburban Garden Homes', 'rating' => 4.1],
-        ];
-        foreach ($projectsData as $pData) {
-            Project::where('title', $pData['title'])->where('rating', 0)->update(['rating' => $pData['rating']]);
-        }
-
-        $prj1 = Project::firstOrCreate(['title' => 'Horizon Towers Development'], [
-            'location' => 'Makati City, Philippines',
-            'category' => 'Residential',
-            'image_url' => 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1000&auto=format&fit=crop',
-            'target_amount' => 500000.00,
-            'minimum_investment' => 100.00,
-            'expected_return_percentage' => 22.00,
-            'investment_duration_months' => 18,
-            'rating' => 4.7,
-            'description' => 'A 42-story premium residential tower in the Makati CBD. Construction is 60% complete with units pre-selling fast. Early investors benefit from the full appreciation cycle.',
-            'status' => 'active',
-        ]);
-
-        $prj2 = Project::firstOrCreate(['title' => 'Palm Grove Condo Estate'], [
-            'location' => 'Davao City, Philippines',
-            'category' => 'Luxury',
-            'image_url' => 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1000&auto=format&fit=crop',
-            'target_amount' => 250000.00,
-            'minimum_investment' => 50.00,
-            'expected_return_percentage' => 28.00,
-            'investment_duration_months' => 24,
-            'rating' => 4.5,
-            'description' => 'Beachfront condominium estate with resort amenities. Located in one of the fastest-growing tourist destinations in Southeast Asia.',
-            'status' => 'active',
-        ]);
-
-        $prj3 = Project::firstOrCreate(['title' => 'Metro Business District Offices'], [
-            'location' => 'Bonifacio Global City, Philippines',
-            'category' => 'Commercial',
-            'image_url' => 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1000&auto=format&fit=crop',
-            'target_amount' => 800000.00,
-            'minimum_investment' => 200.00,
-            'expected_return_percentage' => 18.50,
-            'investment_duration_months' => 12,
-            'rating' => 4.3,
-            'description' => 'Grade-A office tower in BGC with anchor tenants pre-committed. Stable long-term leases deliver consistent monthly distributions.',
-            'status' => 'active',
-        ]);
-
-        $prj4 = Project::firstOrCreate(['title' => 'Suburban Garden Homes'], [
+        // 3. Create Projects with Share Price and Duration Tiers
+        $prj1 = Project::firstOrCreate(['title' => 'Suburban Garden Homes'], [
             'location' => 'Cebu City, Philippines',
             'category' => 'Multi-Family',
+            'property_type' => 'Single-Family Homes',
+            'bedrooms' => '3-4 Bedrooms',
+            'bathrooms' => '2-3 Bathrooms',
+            'land_size_sqm' => '2,800 m²',
+            'building_size_sqm' => '120 - 150 m²',
+            'total_units' => '20 Homes',
             'image_url' => 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1000&auto=format&fit=crop',
             'target_amount' => 350000.00,
+            'share_price' => 100.00,
             'minimum_investment' => 100.00,
             'expected_return_percentage' => 16.00,
             'investment_duration_months' => 12,
+            'funding_closing_date' => now()->addDays(362)->addHours(17),
             'rating' => 4.1,
-            'description' => 'Gated community of 120 single-family homes with strong rental demand from families relocating to the metro area.',
+            'description' => 'Gated community of 20 single-family homes with strong rental demand from families relocating to the metro area.',
+            'developer_summary' => 'Developed by Aurevia Residential Builders, premier real estate developers with 15+ years track record in sustainable housing.',
+            'purpose' => 'Construction and long-term rental monetization of 20 luxury family units.',
+            'revenue_source' => 'Monthly rental income + capital appreciation upon completion.',
+            'current_stage' => 'Under Construction',
             'status' => 'active',
+            'is_verified' => true,
         ]);
 
-        // 3c. Seed an active project investment for the demo user (idempotent)
-        ProjectInvestment::firstOrCreate(
-            ['user_id' => $user->id, 'project_id' => $prj1->id],
-            [
-                'amount' => 2000.00,
-                'expected_roi_amount' => 440.00,
-                'roi_earned' => 110.00,
-                'status' => 'active',
-            ]
-        );
-
-        // 4. Create Active Investments for User (idempotent)
-        $inv1 = Investment::firstOrCreate(
-            ['user_id' => $user->id, 'property_id' => $p1->id],
-            [
-                'shares_bought' => 20,
-                'total_amount' => 10000.00,
-                'expected_roi_amount' => 2450.00,
-                'roi_earned' => 612.50,
-                'status' => 'active',
-            ]
-        );
-
-        $inv2 = Investment::firstOrCreate(
-            ['user_id' => $user->id, 'property_id' => $p2->id],
-            [
-                'shares_bought' => 40,
-                'total_amount' => 10000.00,
-                'expected_roi_amount' => 1920.00,
-                'roi_earned' => 480.00,
-                'status' => 'active',
-            ]
-        );
-
-        // 5. Seed Deposits (idempotent)
-        Deposit::firstOrCreate(['deposit_code' => 'DEP-99401'], [
-            'user_id' => $user->id,
-            'amount' => 25000.00,
-            'payment_method' => 'bank_transfer',
-            'details' => 'Chase Bank Wire Transfer',
-            'reference_id' => 'TXN-BANK-883920',
-            'status' => 'approved',
+        $prj2 = Project::firstOrCreate(['title' => 'Metro Business District Offices'], [
+            'location' => 'Bonifacio Global City, Philippines',
+            'category' => 'Commercial',
+            'property_type' => 'Commercial Offices',
+            'bedrooms' => 'N/A',
+            'bathrooms' => 'Executive Restrooms',
+            'land_size_sqm' => '4,500 m²',
+            'building_size_sqm' => '12,000 m²',
+            'total_units' => '45 Commercial Suites',
+            'image_url' => 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1000&auto=format&fit=crop',
+            'target_amount' => 800000.00,
+            'share_price' => 100.00,
+            'minimum_investment' => 100.00,
+            'expected_return_percentage' => 18.50,
+            'investment_duration_months' => 12,
+            'funding_closing_date' => now()->addDays(298)->addHours(21),
+            'rating' => 4.3,
+            'description' => 'Grade-A office tower in BGC with anchor tenants pre-committed. Stable long-term leases deliver consistent monthly distributions.',
+            'status' => 'active',
+            'is_verified' => true,
         ]);
 
-        Deposit::firstOrCreate(['deposit_code' => 'DEP-99402'], [
-            'user_id' => $user->id,
-            'amount' => 20000.00,
-            'payment_method' => 'crypto',
-            'details' => 'USDT (TRC20): TxHash 0x8f2a...4b1c',
-            'reference_id' => '0x8f2a9914b1c3e7',
-            'status' => 'approved',
+        $prj3 = Project::firstOrCreate(['title' => 'Palm Grove Condo Estate'], [
+            'location' => 'Davao City, Philippines',
+            'category' => 'Luxury',
+            'property_type' => 'Luxury Condos',
+            'bedrooms' => '2-3 Bedrooms',
+            'bathrooms' => '2 Bathrooms',
+            'land_size_sqm' => '5,200 m²',
+            'building_size_sqm' => '8,400 m²',
+            'total_units' => '60 Luxury Units',
+            'image_url' => 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1000&auto=format&fit=crop',
+            'target_amount' => 600000.00,
+            'share_price' => 100.00,
+            'minimum_investment' => 100.00,
+            'expected_return_percentage' => 20.00,
+            'investment_duration_months' => 24,
+            'funding_closing_date' => now()->addDays(333)->addHours(8),
+            'rating' => 4.5,
+            'description' => 'Beachfront condominium estate with resort amenities. Located in one of the fastest-growing tourist destinations in Southeast Asia.',
+            'status' => 'active',
+            'is_verified' => true,
         ]);
 
-        Deposit::firstOrCreate(['deposit_code' => 'DEP-99403'], [
-            'user_id' => $user->id,
-            'amount' => 15000.00,
-            'payment_method' => 'credit_card',
-            'details' => 'Visa Ending in 4242',
-            'reference_id' => 'VISA-88271',
-            'status' => 'approved',
+        $prj4 = Project::firstOrCreate(['title' => 'Horizon Towers Development'], [
+            'location' => 'Makati City, Philippines',
+            'category' => 'Residential',
+            'property_type' => 'High-Rise Residences',
+            'bedrooms' => '1-3 Bedrooms',
+            'bathrooms' => '1-2 Bathrooms',
+            'land_size_sqm' => '3,100 m²',
+            'building_size_sqm' => '15,000 m²',
+            'total_units' => '120 Apartments',
+            'image_url' => 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1000&auto=format&fit=crop',
+            'target_amount' => 500000.00,
+            'share_price' => 100.00,
+            'minimum_investment' => 100.00,
+            'expected_return_percentage' => 22.00,
+            'investment_duration_months' => 18,
+            'funding_closing_date' => now()->addDays(265)->addHours(14),
+            'rating' => 4.7,
+            'description' => 'A 42-story premium residential tower in the Makati CBD. Construction is 60% complete with units pre-selling fast.',
+            'status' => 'active',
+            'is_verified' => true,
         ]);
 
-        Deposit::firstOrCreate(['deposit_code' => 'DEP-99404'], [
-            'user_id' => $user->id,
-            'amount' => 10000.00,
-            'payment_method' => 'wire_transfer',
-            'details' => 'Federal International Wire',
-            'reference_id' => 'WIRE-99201',
-            'status' => 'pending',
-        ]);
+        // Seed Duration Tiers for each project
+        $projects = [$prj1, $prj2, $prj3, $prj4];
+        foreach ($projects as $project) {
+            ProjectDurationTier::firstOrCreate(['project_id' => $project->id, 'duration_key' => '14_days'], [
+                'duration_label' => '14 Days',
+                'duration_days' => 14,
+                'required_shares' => 10,
+                'min_avc_value' => 1000.00,
+                'target_earnings_pct' => 4.00,
+                'is_popular' => true,
+            ]);
 
-        // 6. Seed Withdrawals (idempotent)
-        Withdrawal::firstOrCreate(['withdrawal_code' => 'WTH-33101'], [
-            'user_id' => $user->id,
-            'amount' => 3000.00,
-            'withdrawal_method' => 'crypto',
-            'account_details' => 'USDT Wallet: TEvXn9942a10sK9921',
-            'status' => 'approved',
-        ]);
+            ProjectDurationTier::firstOrCreate(['project_id' => $project->id, 'duration_key' => '1_month'], [
+                'duration_label' => '1 Month',
+                'duration_days' => 30,
+                'required_shares' => 25,
+                'min_avc_value' => 2500.00,
+                'target_earnings_pct' => 8.00,
+                'is_popular' => false,
+            ]);
 
-        Withdrawal::firstOrCreate(['withdrawal_code' => 'WTH-33102'], [
-            'user_id' => $user->id,
-            'amount' => 1500.00,
-            'withdrawal_method' => 'bank_transfer',
-            'account_details' => 'Bank: Bank of America, Acc: ****6789',
-            'status' => 'pending',
-        ]);
-
-        // 7. Seed Transactions (idempotent)
-        Transaction::firstOrCreate(['reference' => 'DEP-99401'], [
-            'user_id' => $user->id,
-            'type' => 'deposit',
-            'amount' => 25000.00,
-            'description' => 'Bank Transfer Deposit Approved',
-            'status' => 'completed',
-        ]);
-
-        Transaction::firstOrCreate(['reference' => 'DEP-99402'], [
-            'user_id' => $user->id,
-            'type' => 'deposit',
-            'amount' => 20000.00,
-            'description' => 'USDT Cryptocurrency Deposit Approved',
-            'status' => 'completed',
-        ]);
-
-        Transaction::firstOrCreate(['reference' => 'INV-AURA-20'], [
-            'user_id' => $user->id,
-            'type' => 'property_investment',
-            'amount' => 10000.00,
-            'description' => 'Purchased 20 Shares in Aura Grand Penthouse Suites',
-            'status' => 'completed',
-        ]);
-
-        Transaction::firstOrCreate(['reference' => 'INV-SILICON-40'], [
-            'user_id' => $user->id,
-            'type' => 'property_investment',
-            'amount' => 10000.00,
-            'description' => 'Purchased 40 Shares in Silicon Valley Eco Tech Hub',
-            'status' => 'completed',
-        ]);
-
-        Transaction::firstOrCreate(['reference' => 'ROI-Q2-2026'], [
-            'user_id' => $user->id,
-            'type' => 'roi_payout',
-            'amount' => 1092.50,
-            'description' => 'Quarterly ROI Yield Distribution',
-            'status' => 'completed',
-        ]);
-
-        Transaction::firstOrCreate(['reference' => 'AFF-COMMISSION'], [
-            'user_id' => $user->id,
-            'type' => 'affiliate_earning',
-            'amount' => 1450.00,
-            'description' => 'Affiliate Referral Reward Commission',
-            'status' => 'completed',
-        ]);
-
-        // 8. Seed gallery images for projects and properties (idempotent)
-        $projectGalleries = [
-            [$prj1, ['https://images.unsplash.com/photo-1515263487990-61b07816b324?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?q=80&w=1200&auto=format&fit=crop']],
-            [$prj2, ['https://images.unsplash.com/photo-1580587771525-78b9dba3b914?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop']],
-            [$prj3, ['https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop']],
-            [$prj4, ['https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1200&auto=format&fit=crop']],
-        ];
-        foreach ($projectGalleries as [$project, $urls]) {
-            foreach ($urls as $order => $url) {
-                if ($project && !$project->images()->where('image_path', $url)->exists()) {
-                    $project->images()->create(['image_path' => $url, 'sort_order' => $order]);
-                }
-            }
+            ProjectDurationTier::firstOrCreate(['project_id' => $project->id, 'duration_key' => '3_months'], [
+                'duration_label' => '3 Months',
+                'duration_days' => 90,
+                'required_shares' => 50,
+                'min_avc_value' => 5000.00,
+                'target_earnings_pct' => 16.00,
+                'is_popular' => false,
+            ]);
         }
 
-        $propertyGalleries = [
-            [$p1, ['https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1200&auto=format&fit=crop']],
-            [$p2, ['https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1200&auto=format&fit=crop']],
-            [$p3, ['https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop']],
-            [$p4, ['https://images.unsplash.com/photo-1460317442991-0ec209397118?q=80&w=1200&auto=format&fit=crop', 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=1200&auto=format&fit=crop']],
-        ];
-        foreach ($propertyGalleries as [$property, $urls]) {
-            foreach ($urls as $order => $url) {
-                if ($property && !$property->images()->where('image_path', $url)->exists()) {
-                    $property->images()->create(['image_path' => $url, 'sort_order' => $order]);
-                }
-            }
+        // 4. Seed Demo Share Cycles for Investor User (Matches UI Mockup 3)
+        if ($user) {
+            // Active Cycle 1: Suburban Garden Homes (1 Month)
+            ProjectShareCycle::firstOrCreate(['cycle_code' => 'CYC-SG-1001'], [
+                'user_id' => $user->id,
+                'project_id' => $prj1->id,
+                'duration_key' => '1_month',
+                'duration_label' => '1 Month',
+                'duration_days' => 30,
+                'shares_owned' => 25,
+                'required_shares' => 25,
+                'share_price' => 100.00,
+                'total_purchase_amount' => 2500.00,
+                'target_earnings_pct' => 8.00,
+                'projected_earnings' => 200.00,
+                'completion_value' => 2700.00,
+                'status' => 'active',
+                'purchased_at' => now()->subDays(11),
+                'activated_at' => now()->subDays(11),
+                'completion_date' => now()->addDays(19),
+                'receipt_number' => 'RCP-20260720-9901',
+            ]);
+
+            // Active Cycle 2: Metro Business District Offices (14 Days)
+            ProjectShareCycle::firstOrCreate(['cycle_code' => 'CYC-MB-1002'], [
+                'user_id' => $user->id,
+                'project_id' => $prj2->id,
+                'duration_key' => '14_days',
+                'duration_label' => '14 Days',
+                'duration_days' => 14,
+                'shares_owned' => 12,
+                'required_shares' => 10,
+                'share_price' => 100.00,
+                'total_purchase_amount' => 1200.00,
+                'target_earnings_pct' => 4.50,
+                'projected_earnings' => 54.00,
+                'completion_value' => 1254.00,
+                'status' => 'active',
+                'purchased_at' => now()->subDays(6),
+                'activated_at' => now()->subDays(6),
+                'completion_date' => now()->addDays(8),
+                'receipt_number' => 'RCP-20260725-9902',
+            ]);
+
+            // Pending Activation Cycle: Palm Grove Condo Estate (3 Months)
+            ProjectShareCycle::firstOrCreate(['cycle_code' => 'CYC-PG-1003'], [
+                'user_id' => $user->id,
+                'project_id' => $prj3->id,
+                'duration_key' => '3_months',
+                'duration_label' => '3 Months',
+                'duration_days' => 90,
+                'shares_owned' => 35,
+                'required_shares' => 50,
+                'share_price' => 100.00,
+                'total_purchase_amount' => 3500.00,
+                'target_earnings_pct' => 16.00,
+                'projected_earnings' => 560.00,
+                'completion_value' => 4060.00,
+                'status' => 'pending_activation',
+                'purchased_at' => now()->subDays(3),
+                'activated_at' => null,
+                'completion_date' => null,
+                'receipt_number' => 'RCP-20260801-9903',
+            ]);
+
+            // Completed Cycle: Horizon Towers Development (14 Days)
+            ProjectShareCycle::firstOrCreate(['cycle_code' => 'CYC-HT-1004'], [
+                'user_id' => $user->id,
+                'project_id' => $prj4->id,
+                'duration_key' => '14_days',
+                'duration_label' => '14 Days',
+                'duration_days' => 14,
+                'shares_owned' => 10,
+                'required_shares' => 10,
+                'share_price' => 100.00,
+                'total_purchase_amount' => 1000.00,
+                'target_earnings_pct' => 4.00,
+                'projected_earnings' => 40.00,
+                'completion_value' => 1040.00,
+                'status' => 'completed',
+                'purchased_at' => now()->subDays(25),
+                'activated_at' => now()->subDays(25),
+                'completion_date' => now()->subDays(11),
+                'earnings_credited_at' => now()->subDays(11),
+                'receipt_number' => 'RCP-20260613-9904',
+            ]);
         }
+
+        // 5. Create Documents and Updates for Projects
+        ProjectDocument::firstOrCreate(['project_id' => $prj1->id, 'title' => 'Project Investment Brochure'], [
+            'document_type' => 'brochure',
+            'file_path' => 'documents/sample_brochure.pdf',
+            'is_restricted' => false,
+        ]);
+        ProjectDocument::firstOrCreate(['project_id' => $prj1->id, 'title' => 'Share Purchase Terms & Agreement'], [
+            'document_type' => 'agreement',
+            'file_path' => 'documents/share_agreement.pdf',
+            'is_restricted' => true,
+        ]);
+
+        ProjectUpdate::firstOrCreate(['project_id' => $prj1->id, 'title' => 'Foundation & Framing Stage Complete'], [
+            'category' => 'Construction Progress',
+            'content' => 'The structural framing for Phase 1 single-family homes is complete. Mechanical, electrical, and plumbing rough-ins are currently underway.',
+            'published_at' => now()->subDays(5),
+        ]);
     }
 }

@@ -115,6 +115,11 @@ class User extends Authenticatable
         return $this->hasMany(CreditSwap::class, 'buyer_id');
     }
 
+    public function shareCycles()
+    {
+        return $this->hasMany(ProjectShareCycle::class);
+    }
+
     public function referrer()
     {
         return $this->belongsTo(User::class, 'referred_by');

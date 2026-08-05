@@ -249,7 +249,7 @@
                         <nav class="d-none d-lg-flex align-items-center gap-1">
                             <a href="{{ url('/') }}" class="nav-link-item {{ request()->is('/') ? 'active' : '' }}">Home</a>
                             <a href="{{ url('/properties') }}" class="nav-link-item {{ request()->is('properties*') ? 'active' : '' }}">Properties</a>
-                            <a href="{{ url('/invest') }}" class="nav-link-item {{ request()->is('invest') ? 'active' : '' }}">Project Marketplace</a>
+                            <a href="{{ route('marketplace.index') }}" class="nav-link-item {{ request()->is('project-marketplace*') ? 'active' : '' }}">Project Marketplace</a>
                             <a href="{{ url('/list-property') }}" class="nav-link-item {{ request()->is('list-property*') ? 'active' : '' }}">List Property</a>
 
                             <!-- Partners Dropdown -->
@@ -303,9 +303,9 @@
 
                                         <span class="sidebar-group-label px-3" style="font-size:0.65rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#94a3b8; display:block; margin-top:6px; margin-bottom:2px;">My Portfolio</span>
                                         <a href="{{ url('/dashboard') }}" class="nav-dropdown-item"><i class="bi bi-grid-fill me-2 text-primary" style="width:16px;"></i>Dashboard</a>
-                                        <a href="{{ url('/dashboard') }}#invest" class="nav-dropdown-item"><i class="bi bi-shop me-2 text-primary" style="width:16px;"></i>Project Marketplace</a>
+                                        <a href="{{ route('marketplace.index') }}" class="nav-dropdown-item"><i class="bi bi-shop me-2 text-primary" style="width:16px;"></i>Project Marketplace</a>
                                         <a href="{{ url('/properties') }}" class="nav-dropdown-item"><i class="bi bi-building me-2 text-primary" style="width:16px;"></i>Browse Properties</a>
-                                        <a href="{{ url('/dashboard') }}#my_investments" class="nav-dropdown-item"><i class="bi bi-pie-chart-fill me-2 text-primary" style="width:16px;"></i>My Portfolio</a>
+                                        <a href="{{ route('portfolio.index') }}" class="nav-dropdown-item"><i class="bi bi-briefcase-fill me-2 text-primary" style="width:16px;"></i>My Portfolio</a>
 
                                         <span class="sidebar-group-label px-3" style="font-size:0.65rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#94a3b8; display:block; margin-top:6px; margin-bottom:2px;">Wallet</span>
                                         <a href="{{ url('/dashboard') }}#deposit" class="nav-dropdown-item"><i class="bi bi-arrow-down-circle-fill me-2 text-primary" style="width:16px;"></i>Deposit</a>
@@ -378,17 +378,17 @@
 
                         <!-- GROUP: MY PORTFOLIO -->
                         <span class="sidebar-group-label">My Portfolio</span>
-                        <a href="{{ url('/dashboard') }}" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
-                            <i class="bi bi-grid-fill"></i> Dashboard
-                        </a>
-                        <a href="{{ url('/dashboard') }}#invest" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
+                        <a href="{{ route('marketplace.index') }}" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
                             <i class="bi bi-shop"></i> Project Marketplace
                         </a>
                         <a href="{{ url('/properties') }}" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
                             <i class="bi bi-building"></i> Browse Properties
                         </a>
-                        <a href="{{ url('/dashboard') }}#my_investments" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
-                            <i class="bi bi-pie-chart-fill"></i> My Portfolio
+                        <a href="{{ route('portfolio.index') }}" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
+                            <i class="bi bi-briefcase-fill"></i> My Portfolio
+                        </a>
+                        <a href="{{ route('portfolio.index') }}#active" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
+                            <i class="bi bi-clock-history"></i> Active Cycles
                         </a>
 
                         <!-- GROUP: WALLET -->

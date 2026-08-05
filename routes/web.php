@@ -89,23 +89,34 @@ Route::middleware('auth')->group(function () {
     Route::post('/property/{property}/save', [PropertyController::class, 'toggleSave'])->name('property.save')->middleware('throttle:forms');
 });
 
-// Invest in Projects
-Route::get('/invest', [InvestController::class, 'index'])->name('invest.index');
-Route::get('/project/{project}', [InvestController::class, 'show'])->name('project.show');
-Route::get('/project/{project}/download', [InvestController::class, 'downloadDocument'])->name('project.download');
-Route::get('/project/{project}/reviews', [InvestController::class, 'getReviews'])->name('project.reviews');
+// Project Marketplace & My Portfolio Routes
+use App\Http\Controllers\ProjectMarketplaceController;
+use App\Http\Controllers\SharePurchaseController;
+use App\Http\Controllers\PortfolioController;
+
+Route::get('/project-marketplace', [ProjectMarketplaceController::class, 'index'])->name('marketplace.index');
+Route::get('/project-marketplace/{project}', [ProjectMarketplaceController::class, 'show'])->name('marketplace.show');
+Route::get('/project-marketplace/{project}/document/{document}', [ProjectMarketplaceController::class, 'downloadDocument'])->name('marketplace.document.download');
+Route::post('/project-marketplace/{project}/calculate', [SharePurchaseController::class, 'calculate'])->name('share.calculate');
+
 Route::middleware('auth')->group(function () {
-    Route::post('/project/{project}/save', [InvestController::class, 'toggleSave'])->name('project.save')->middleware('throttle:forms');
-    Route::post('/project/{project}/invest', [InvestController::class, 'invest'])->name('project.invest')->middleware('throttle:forms');
-    Route::post('/project/{project}/review', [InvestController::class, 'storeReview'])->name('project.review')->middleware('throttle:forms');
+    Route::post('/project-marketplace/{project}/buy', [SharePurchaseController::class, 'store'])->name('share.buy')->middleware('throttle:forms');
+    Route::post('/project-marketplace/{project}/save', [InvestController::class, 'toggleSave'])->name('project.save')->middleware('throttle:forms');
+    Route::post('/project-marketplace/{project}/review', [InvestController::class, 'storeReview'])->name('project.review')->middleware('throttle:forms');
+    Route::get('/my-portfolio', [PortfolioController::class, 'index'])->name('portfolio.index');
+    Route::get('/my-portfolio/cycle/{cycle}/receipt', [PortfolioController::class, 'downloadReceipt'])->name('portfolio.receipt');
 });
+
+// Legacy redirection aliases
+Route::get('/invest', function () {
+    return redirect()->route('marketplace.index');
+})->name('invest.index');
+Route::get('/project/{project}', function ($project) {
+    return redirect()->route('marketplace.show', $project);
+})->name('project.show');
 
 Route::get('/list-property', function () {
     return view('list-property');
-});
-
-Route::get('/project-marketplace', function () {
-    return redirect()->route('invest.index');
 });
 
 Route::get('/team', function () {

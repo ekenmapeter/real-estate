@@ -261,7 +261,7 @@
 
                 <!-- GROUP: MY PORTFOLIO -->
                 <span class="sidebar-group-label">My Portfolio</span>
-                <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'invest' }" @click.prevent="activeTab = 'invest'">
+                <a href="{{ route('marketplace.index') }}" class="nav-link-sidebar nav-link-sub">
                     <i class="bi bi-shop"></i> Project Marketplace
                 </a>
                 <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'saved_projects' }" @click.prevent="activeTab = 'saved_projects'">
@@ -273,8 +273,14 @@
                 <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'marketplace' }" @click.prevent="activeTab = 'marketplace'">
                     <i class="bi bi-building"></i> Browse Properties
                 </a>
-                <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'my_investments' }" @click.prevent="activeTab = 'my_investments'">
-                    <i class="bi bi-pie-chart-fill"></i> My Portfolio
+                <a href="{{ route('portfolio.index') }}" class="nav-link-sidebar nav-link-sub">
+                    <i class="bi bi-briefcase-fill"></i> My Portfolio
+                </a>
+                <a href="{{ route('portfolio.index') }}#active" class="nav-link-sidebar nav-link-sub">
+                    <i class="bi bi-clock-history"></i> Active Cycles
+                </a>
+                <a href="{{ route('portfolio.index') }}#completed" class="nav-link-sidebar nav-link-sub">
+                    <i class="bi bi-check-circle"></i> Completed Cycles
                 </a>
 
                 <!-- GROUP: WALLET -->
