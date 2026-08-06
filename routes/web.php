@@ -18,8 +18,52 @@ Route::get('/', function () {
     return view('welcome', compact('properties', 'projects'));
 });
 
-// User Investment Dashboard
+use App\Http\Controllers\DepositController;
+use App\Http\Controllers\WithdrawalController;
+use App\Http\Controllers\SavedWithdrawalMethodController;
+use App\Http\Controllers\AdminDepositManagementController;
+use App\Http\Controllers\AdminWithdrawalManagementController;
+use App\Http\Controllers\AdminPaymentChannelController;
+
+// User Investment Dashboard & AVC Deposit / Withdrawal Routes
 Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+Route::middleware('auth')->group(function () {
+    // Deposit Routes
+    Route::get('/deposit', [DepositController::class, 'index'])->name('deposit.index');
+    Route::get('/deposit/buy-avc', [DepositController::class, 'index']);
+    Route::get('/deposit/channel/{method}', [DepositController::class, 'create'])->name('deposit.channel');
+    Route::post('/deposit/create', [DepositController::class, 'store'])->name('deposit.create.store')->middleware('throttle:forms');
+    Route::get('/deposit/{deposit}', [DepositController::class, 'show'])->name('deposit.show');
+    Route::post('/deposit/{deposit}/proof', [DepositController::class, 'submitPaymentProof'])->name('deposit.proof.store')->middleware('throttle:forms');
+    Route::post('/deposit/{deposit}/cancel', [DepositController::class, 'cancel'])->name('deposit.cancel')->middleware('throttle:forms');
+
+    // Withdrawal Routes
+    Route::get('/withdraw', [WithdrawalController::class, 'index'])->name('withdraw.index');
+    Route::get('/withdraw/sell-avc', [WithdrawalController::class, 'index']);
+    Route::post('/withdraw/create', [WithdrawalController::class, 'store'])->name('withdraw.create.store')->middleware('throttle:forms');
+    Route::get('/withdraw/{withdrawal}', [WithdrawalController::class, 'show'])->name('withdraw.show');
+    Route::post('/withdraw/{withdrawal}/cancel', [WithdrawalController::class, 'cancel'])->name('withdraw.cancel')->middleware('throttle:forms');
+
+    // Finance Center & Transaction History Routes
+    Route::get('/finance', [\App\Http\Controllers\FinanceController::class, 'overview'])->name('finance.overview');
+    Route::get('/finance/transactions', [\App\Http\Controllers\FinanceController::class, 'transactions'])->name('finance.transactions');
+    Route::get('/finance/transactions/export/csv', [\App\Http\Controllers\FinanceController::class, 'exportCsv'])->name('finance.transactions.export.csv');
+    Route::get('/finance/transactions/{transaction}', [\App\Http\Controllers\FinanceController::class, 'transactionShow'])->name('finance.transactions.show');
+
+    // Dedicated Finance Team Routes
+    Route::get('/finance/team', [\App\Http\Controllers\FinanceTeamController::class, 'index'])->name('finance.team.index');
+    Route::get('/finance/team/create', [\App\Http\Controllers\FinanceTeamController::class, 'create'])->name('finance.team.create');
+    Route::post('/finance/team/store', [\App\Http\Controllers\FinanceTeamController::class, 'store'])->name('finance.team.store')->middleware('throttle:forms');
+    Route::get('/finance/team/request/{request_id}', [\App\Http\Controllers\FinanceTeamController::class, 'show'])->name('finance.team.show');
+    Route::post('/finance/team/request/{request_id}/evidence', [\App\Http\Controllers\FinanceTeamController::class, 'uploadEvidence'])->name('finance.team.evidence.store')->middleware('throttle:forms');
+    Route::post('/finance/team/request/{request_id}/cancel', [\App\Http\Controllers\FinanceTeamController::class, 'cancel'])->name('finance.team.cancel')->middleware('throttle:forms');
+
+    // Saved Withdrawal Methods Routes
+    Route::post('/saved-withdrawal-methods', [SavedWithdrawalMethodController::class, 'store'])->name('saved-withdrawal-methods.store');
+    Route::delete('/saved-withdrawal-methods/{savedMethod}', [SavedWithdrawalMethodController::class, 'destroy'])->name('saved-withdrawal-methods.destroy');
+    Route::post('/saved-withdrawal-methods/{savedMethod}/default', [SavedWithdrawalMethodController::class, 'setDefault'])->name('saved-withdrawal-methods.default');
+});
+
 Route::post('/deposit', [UserDashboardController::class, 'deposit'])->name('deposit.store')->middleware('throttle:forms');
 Route::post('/deposit/evidence/{id}', [UserDashboardController::class, 'uploadEvidence'])->name('deposit.evidence')->middleware('throttle:forms');
 Route::post('/withdraw', [UserDashboardController::class, 'withdraw'])->name('withdraw.store')->middleware('throttle:forms');
@@ -39,6 +83,31 @@ Route::post('/card/apply', [UserDashboardController::class, 'applyCard'])->name(
 // Admin Platform Management Dashboard
 Route::prefix('admin')->name('admin.')->middleware(['admin', 'throttle:admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    
+    // Deposit Management Routes
+    Route::get('/deposits', [AdminDepositManagementController::class, 'index'])->name('deposits.index');
+    Route::post('/deposits/{deposit}/assign-instructions', [AdminDepositManagementController::class, 'assignInstructions'])->name('deposits.assign-instructions');
+    Route::post('/deposits/{deposit}/credit-avc', [AdminDepositManagementController::class, 'creditAvc'])->name('deposits.credit-avc');
+    Route::post('/deposits/{deposit}/request-info', [AdminDepositManagementController::class, 'requestInfo'])->name('deposits.request-info');
+    Route::post('/deposits/{deposit}/reject', [AdminDepositManagementController::class, 'reject'])->name('deposits.reject');
+    Route::post('/deposits/{deposit}/extend-timer', [AdminDepositManagementController::class, 'extendTimer'])->name('deposits.extend-timer');
+
+    // Withdrawal Management Routes
+    Route::get('/withdrawals', [AdminWithdrawalManagementController::class, 'index'])->name('withdrawals.index');
+    Route::post('/withdrawals/{withdrawal}/approve', [AdminWithdrawalManagementController::class, 'approve'])->name('withdrawals.approve');
+    Route::post('/withdrawals/{withdrawal}/complete', [AdminWithdrawalManagementController::class, 'complete'])->name('withdrawals.complete');
+    Route::post('/withdrawals/{withdrawal}/reject', [AdminWithdrawalManagementController::class, 'reject'])->name('withdrawals.reject');
+
+    // Payment Channel Management Routes
+    Route::resource('payment-channels', AdminPaymentChannelController::class)->except(['create', 'show', 'edit']);
+
+    // Admin Finance Requests Management Routes
+    Route::get('/finance-requests', [\App\Http\Controllers\AdminFinanceRequestController::class, 'index'])->name('finance-requests.index');
+    Route::get('/finance-requests/{id}', [\App\Http\Controllers\AdminFinanceRequestController::class, 'show'])->name('finance-requests.show');
+    Route::post('/finance-requests/{id}/assign-instructions', [\App\Http\Controllers\AdminFinanceRequestController::class, 'assignInstructions'])->name('finance-requests.assign-instructions');
+    Route::post('/finance-requests/{id}/approve', [\App\Http\Controllers\AdminFinanceRequestController::class, 'approve'])->name('finance-requests.approve');
+    Route::post('/finance-requests/{id}/reject', [\App\Http\Controllers\AdminFinanceRequestController::class, 'reject'])->name('finance-requests.reject');
+
     Route::post('/deposit/instructions/{id}', [AdminDashboardController::class, 'sendInstructions'])->name('deposit.instructions');
     Route::post('/deposit/approve/{id}', [AdminDashboardController::class, 'approveDeposit'])->name('deposit.approve');
     Route::post('/deposit/reject/{id}', [AdminDashboardController::class, 'rejectDeposit'])->name('deposit.reject');

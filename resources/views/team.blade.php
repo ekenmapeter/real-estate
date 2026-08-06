@@ -25,7 +25,7 @@
       <!-- Right Column: Hero Image Showcase -->
       <div class="col-lg-6 col-md-12 text-center position-relative reveal-on-scroll delay-2">
         <div class="hero-image-wrapper position-relative d-inline-block">
-          <img src="https://radiantdreamrealty.com/frontend/images/agents/agent-1.jpg" alt="Team Showcase" class="img-fluid rounded-4 shadow-lg border border-2 border-white-50" style="max-height: 440px; object-fit: cover; width: 100%;">
+          <img src="{{ asset('frontend/images/team/team_hero.png') }}" alt="Team Showcase" class="img-fluid rounded-4 shadow-lg border border-2 border-white-50" style="max-height: 440px; object-fit: cover; width: 100%;">
           
           <!-- Floating Glassmorphism Overlay Card -->
           <div class="position-absolute bottom-0 start-0 translate-middle-y ms-3 p-3 rounded-4 glass-panel-dark" style="max-width: 270px;">
@@ -48,40 +48,49 @@
 <!-- Team Grid -->
 <section id="teamGrid" class="py-5" style="background-color: #f8fafc;">
   <div class="container">
+    <div class="text-center mb-5">
+      <span class="text-primary fw-extrabold text-uppercase small" style="letter-spacing: 1.5px;">Executive Board & Leaders</span>
+      <h2 class="fw-bold text-dark mt-1">Our Leadership Team</h2>
+      <p class="text-muted" style="max-width: 600px; margin: 0 auto;">Directing strategic operations, real estate acquisitions, global finance, and investor success.</p>
+    </div>
+
     <div class="row g-4">
       <div class="col-lg-3 col-sm-6 reveal-on-scroll delay-1">
-        <div class="card border-0 glass-card rounded-4 text-center overflow-hidden">
-          <img src="https://radiantdreamrealty.com/frontend/images/agents/agent-1.jpg" class="card-img-top" alt="Chris Patt" style="height: 250px; object-fit: cover;">
+        <div class="card border-0 glass-card rounded-4 text-center overflow-hidden shadow-sm h-100">
+          <img src="{{ asset('frontend/images/team/chris_patt.png') }}" class="card-img-top" alt="Chris Patt" style="height: 280px; object-fit: cover;">
           <div class="card-body p-3">
             <h5 class="fw-bold mb-1" style="color: #1a3c5e;">Chris Patt</h5>
-            <small class="text-muted">Chief Operations Officer</small>
+            <small class="text-muted fw-semibold">Chief Operations Officer</small>
           </div>
         </div>
       </div>
+
       <div class="col-lg-3 col-sm-6 reveal-on-scroll delay-2">
-        <div class="card border-0 glass-card rounded-4 text-center overflow-hidden">
-          <img src="https://radiantdreamrealty.com/frontend/images/agents/agent-2.jpg" class="card-img-top" alt="Esther Howard" style="height: 250px; object-fit: cover;">
+        <div class="card border-0 glass-card rounded-4 text-center overflow-hidden shadow-sm h-100">
+          <img src="{{ asset('frontend/images/team/esther_howard.png') }}" class="card-img-top" alt="Esther Howard" style="height: 280px; object-fit: cover;">
           <div class="card-body p-3">
             <h5 class="fw-bold mb-1" style="color: #1a3c5e;">Esther Howard</h5>
-            <small class="text-muted">Head of Global Finance</small>
+            <small class="text-muted fw-semibold">Head of Global Finance</small>
           </div>
         </div>
       </div>
+
       <div class="col-lg-3 col-sm-6 reveal-on-scroll delay-3">
-        <div class="card border-0 glass-card rounded-4 text-center overflow-hidden">
-          <img src="https://radiantdreamrealty.com/frontend/images/agents/agent-3.jpg" class="card-img-top" alt="Darrell Steward" style="height: 250px; object-fit: cover;">
+        <div class="card border-0 glass-card rounded-4 text-center overflow-hidden shadow-sm h-100">
+          <img src="{{ asset('frontend/images/team/darrell_steward.png') }}" class="card-img-top" alt="Darrell Steward" style="height: 280px; object-fit: cover;">
           <div class="card-body p-3">
             <h5 class="fw-bold mb-1" style="color: #1a3c5e;">Darrell Steward</h5>
-            <small class="text-muted">Head of Asset Management</small>
+            <small class="text-muted fw-semibold">Head of Asset Management</small>
           </div>
         </div>
       </div>
+
       <div class="col-lg-3 col-sm-6 reveal-on-scroll delay-4">
-        <div class="card border-0 glass-card rounded-4 text-center overflow-hidden">
-          <img src="https://radiantdreamrealty.com/frontend/images/agents/agent-4.jpg" class="card-img-top" alt="Robert Fox" style="height: 250px; object-fit: cover;">
+        <div class="card border-0 glass-card rounded-4 text-center overflow-hidden shadow-sm h-100">
+          <img src="{{ asset('frontend/images/team/robert_fox.png') }}" class="card-img-top" alt="Robert Fox" style="height: 280px; object-fit: cover;">
           <div class="card-body p-3">
             <h5 class="fw-bold mb-1" style="color: #1a3c5e;">Robert Fox</h5>
-            <small class="text-muted">Senior Broker Specialist</small>
+            <small class="text-muted fw-semibold">Senior Broker Specialist</small>
           </div>
         </div>
       </div>

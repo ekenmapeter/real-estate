@@ -35,6 +35,28 @@
         overflow-x: hidden;
       }
 
+      /* ── Breadcrumbs Styling ── */
+      .breadcrumb-item + .breadcrumb-item::before {
+        content: "/" !important;
+        color: #94a3b8 !important;
+        padding-left: 0.4rem !important;
+        padding-right: 0.4rem !important;
+      }
+      .breadcrumb-item a {
+        color: #2563eb !important;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.15s ease;
+      }
+      .breadcrumb-item a:hover {
+        color: #1d4ed8 !important;
+        text-decoration: underline;
+      }
+      .breadcrumb-item.active {
+        color: #0f172a !important;
+        font-weight: 700;
+      }
+
       /* ── Navbar base ── */
       .nav-link-item {
         display: inline-flex;
@@ -307,11 +329,12 @@
                                         <a href="{{ url('/properties') }}" class="nav-dropdown-item"><i class="bi bi-building me-2 text-primary" style="width:16px;"></i>Browse Properties</a>
                                         <a href="{{ route('portfolio.index') }}" class="nav-dropdown-item"><i class="bi bi-briefcase-fill me-2 text-primary" style="width:16px;"></i>My Portfolio</a>
 
-                                        <span class="sidebar-group-label px-3" style="font-size:0.65rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#94a3b8; display:block; margin-top:6px; margin-bottom:2px;">Wallet</span>
-                                        <a href="{{ url('/dashboard') }}#deposit" class="nav-dropdown-item"><i class="bi bi-arrow-down-circle-fill me-2 text-primary" style="width:16px;"></i>Deposit</a>
-                                        <a href="{{ url('/dashboard') }}#withdraw" class="nav-dropdown-item"><i class="bi bi-arrow-up-circle-fill me-2 text-primary" style="width:16px;"></i>Withdraw</a>
+                                        <span class="sidebar-group-label px-3" style="font-size:0.65rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#94a3b8; display:block; margin-top:6px; margin-bottom:2px;">Wallet & Finance</span>
+                                        <a href="{{ route('finance.overview') }}" class="nav-dropdown-item"><i class="bi bi-wallet2 me-2 text-primary" style="width:16px;"></i>Finance Center</a>
+                                        <a href="{{ route('deposit.index') }}" class="nav-dropdown-item"><i class="bi bi-arrow-down-circle-fill me-2 text-success" style="width:16px;"></i>Deposit / Buy AVC</a>
+                                        <a href="{{ route('withdraw.index') }}" class="nav-dropdown-item"><i class="bi bi-arrow-up-circle-fill me-2 text-danger" style="width:16px;"></i>Withdraw / Sell AVC</a>
+                                        <a href="{{ route('finance.transactions') }}" class="nav-dropdown-item"><i class="bi bi-clock-history me-2 text-info" style="width:16px;"></i>Transaction History</a>
                                         <a href="{{ url('/marketplace') }}" class="nav-dropdown-item"><i class="bi bi-arrow-repeat me-2 text-warning" style="width:16px;"></i>AVC Marketplace</a>
-                                        <a href="{{ url('/dashboard') }}#transactions" class="nav-dropdown-item"><i class="bi bi-arrow-down-up me-2 text-primary" style="width:16px;"></i>Transactions</a>
 
                                         <span class="sidebar-group-label px-3" style="font-size:0.65rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#94a3b8; display:block; margin-top:6px; margin-bottom:2px;">Account</span>
                                         <a href="{{ url('/dashboard') }}#notifications" class="nav-dropdown-item"><i class="bi bi-bell-fill me-2 text-primary" style="width:16px;"></i>Notifications</a>

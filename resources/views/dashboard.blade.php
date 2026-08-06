@@ -285,11 +285,11 @@
 
                 <!-- GROUP: WALLET -->
                 <span class="sidebar-group-label">Wallet</span>
-                <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'deposit' }" @click.prevent="activeTab = 'deposit'">
-                    <i class="bi bi-arrow-down-circle-fill"></i> Deposit
+                <a href="{{ route('deposit.index') }}" class="nav-link-sidebar nav-link-sub">
+                    <i class="bi bi-arrow-down-circle-fill"></i> Deposit / Buy AVC
                 </a>
-                <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'withdraw' }" @click.prevent="activeTab = 'withdraw'">
-                    <i class="bi bi-arrow-up-circle-fill"></i> Withdraw
+                <a href="{{ route('withdraw.index') }}" class="nav-link-sidebar nav-link-sub">
+                    <i class="bi bi-arrow-up-circle-fill"></i> Withdraw / Sell AVC
                 </a>
                 <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'transfer' }" @click.prevent="activeTab = 'transfer'">
                     <i class="bi bi-send-fill"></i> Transfer

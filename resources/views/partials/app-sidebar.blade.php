@@ -60,23 +60,37 @@
             <i class="bi bi-check-circle-fill"></i> Completed Cycles
         </a>
 
-        <!-- GROUP: WALLET -->
-        <span class="sidebar-group-header mt-3">WALLET</span>
+        <!-- GROUP: WALLET & FINANCE CENTER -->
+        <span class="sidebar-group-header mt-3">WALLET & FINANCE</span>
         
-        <a href="{{ url('/dashboard') }}#deposit" class="sidebar-item">
-            <i class="bi bi-arrow-down-circle-fill"></i> Deposit
+        <a href="{{ route('finance.overview') }}" class="sidebar-item {{ request()->is('finance') ? 'active' : '' }}">
+            <i class="bi bi-wallet2 text-primary"></i> Finance Center
         </a>
 
-        <a href="{{ url('/dashboard') }}#withdraw" class="sidebar-item">
-            <i class="bi bi-arrow-up-circle-fill"></i> Withdraw
+        <a href="{{ route('finance.team.index') }}" class="sidebar-item {{ request()->is('finance/team*') ? 'active' : '' }}">
+            <i class="bi bi-people-fill text-info"></i> Finance Team Desk
+            @php
+                $pendingTeamCount = \App\Models\FinanceRequest::where('user_id', Auth::id())->whereIn('status', ['under_review', 'payment_instructions_assigned', 'evidence_submitted'])->count();
+            @endphp
+            @if($pendingTeamCount > 0)
+                <span class="badge bg-warning text-dark rounded-pill ms-auto px-2 py-0.5" style="font-size:0.68rem;">{{ $pendingTeamCount }}</span>
+            @endif
+        </a>
+
+        <a href="{{ route('deposit.index') }}" class="sidebar-item {{ request()->is('deposit*') ? 'active' : '' }}">
+            <i class="bi bi-arrow-down-circle-fill text-success"></i> Deposit / Buy AVC
+        </a>
+
+        <a href="{{ route('withdraw.index') }}" class="sidebar-item {{ request()->is('withdraw*') ? 'active' : '' }}">
+            <i class="bi bi-arrow-up-circle-fill text-danger"></i> Withdraw / Sell AVC
+        </a>
+
+        <a href="{{ route('finance.transactions') }}" class="sidebar-item {{ request()->is('finance/transactions*') ? 'active' : '' }}">
+            <i class="bi bi-clock-history text-info"></i> Transaction History
         </a>
 
         <a href="{{ route('marketplace') }}" class="sidebar-item">
             <i class="bi bi-lightning-charge-fill text-warning"></i> AVC Marketplace
-        </a>
-
-        <a href="{{ url('/dashboard') }}#transactions" class="sidebar-item">
-            <i class="bi bi-arrow-down-up"></i> Transactions
         </a>
 
         <!-- GROUP: ACCOUNT -->
