@@ -3,7 +3,8 @@
 @section('title', 'Transaction #' . $transaction->reference . ' | Finance Center | ' . site_name())
 
 @section('content')
-<div class="container-fluid px-0" style="background-color: #f8fafc; min-height: 100vh;">
+@include('partials.user-shell-sidebar')
+<div class="container-fluid px-0 user-shell-content" style="background-color: #f8fafc; min-height: 100vh;">
     <div class="container-xl py-4 px-3 px-md-4">
 
         <!-- Breadcrumb & Nav -->

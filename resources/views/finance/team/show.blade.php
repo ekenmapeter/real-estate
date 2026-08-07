@@ -3,8 +3,9 @@
 @section('title', 'Request #' . $financeRequest->request_id . ' | Finance Team | ' . site_name())
 
 @section('content')
+@include('partials.user-shell-sidebar')
 <style>
-    .timer-badge {
+.timer-badge {
         font-family: 'Courier New', Courier, monospace;
         font-weight: 800;
         font-size: 1.5rem;
@@ -19,7 +20,7 @@
     }
 </style>
 
-<div class="container-fluid px-0" style="background-color: #f8fafc; min-height: 100vh;">
+<div class="container-fluid px-0 user-shell-content" style="background-color: #f8fafc; min-height: 100vh;">
     <div class="container-xl py-4 px-3 px-md-4">
 
         <!-- Breadcrumb & Back -->

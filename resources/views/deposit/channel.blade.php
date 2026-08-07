@@ -3,6 +3,7 @@
 @section('title', ucfirst(str_replace('_', ' ', $method)) . ' Deposit | ' . site_name())
 
 @section('content')
+@include('partials.user-shell-sidebar')
 <style>
     .channel-container { background: #f8fafc; min-height: 100vh; }
     .green-callout { background-color: #ecfdf5; border-left: 4px solid #10b981; border-radius: 8px; color: #065f46; font-size: 0.85rem; padding: 12px 16px; }
@@ -12,7 +13,7 @@
     .qr-box { width: 90px; height: 90px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 4px; background: #fff; }
 </style>
 
-<div class="channel-container py-4" x-data="depositChannelApp('{{ $method }}')">
+<div class="channel-container py-4 user-shell-content" x-data="depositChannelApp('{{ $method }}')">
     <div class="container-xl px-3 px-md-4">
 
         <!-- Main Modal / Form Card Container (Matching Photo 1) -->

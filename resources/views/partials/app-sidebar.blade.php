@@ -16,11 +16,11 @@
             <span class="text-muted small d-block" style="font-size: 0.78rem;">Investor</span>
             @if(($user->kyc_verified ?? true))
                 <span class="badge fw-semibold rounded-pill px-2 py-0.5 mt-1" style="font-size: 0.68rem; background: rgba(34, 197, 94, 0.15); color: #15803d;">
-                    <i class="bi bi-patch-check-fill me-1"></i> Verified
+                    Verified
                 </span>
             @else
                 <span class="badge fw-semibold rounded-pill px-2 py-0.5 mt-1" style="font-size: 0.68rem; background: rgba(239, 68, 68, 0.15); color: #dc2626;">
-                    <i class="bi bi-shield-exclamation me-1"></i> Unverified
+                    Unverified
                 </span>
             @endif
         </div>
@@ -58,6 +58,29 @@
 
         <a href="{{ route('portfolio.index') }}#completed" class="sidebar-item">
             <i class="bi bi-check-circle-fill"></i> Completed Cycles
+        </a>
+
+        <!-- GROUP: PROPERTY TOOLS -->
+        <span class="sidebar-group-header mt-3">PROPERTY TOOLS</span>
+
+        <a href="{{ route('properties.create') }}" class="sidebar-item {{ request()->routeIs('properties.create', 'properties.store') ? 'active' : '' }}">
+            <i class="bi bi-plus-square"></i> List Your Property
+        </a>
+
+        <a href="{{ route('properties.mine') }}" class="sidebar-item {{ request()->routeIs('properties.mine', 'properties.edit', 'properties.update') ? 'active' : '' }}">
+            <i class="bi bi-house-gear"></i> My Property Listings
+        </a>
+
+        <a href="{{ route('properties.saved') }}" class="sidebar-item {{ request()->routeIs('properties.saved') ? 'active' : '' }}">
+            <i class="bi bi-bookmark-heart"></i> Saved Properties
+        </a>
+
+        <a href="{{ route('properties.inquiries') }}" class="sidebar-item {{ request()->routeIs('properties.inquiries') ? 'active' : '' }}">
+            <i class="bi bi-chat-dots"></i> Property Inquiries
+        </a>
+
+        <a href="{{ route('properties.viewing-requests') }}" class="sidebar-item {{ request()->routeIs('properties.viewing-requests') ? 'active' : '' }}">
+            <i class="bi bi-calendar-check"></i> Viewing Requests
         </a>
 
         <!-- GROUP: WALLET & FINANCE CENTER -->
@@ -109,6 +132,10 @@
             <i class="bi bi-person-badge-fill"></i> Profile & KYC
         </a>
 
+        <a href="{{ route('documents.index') }}" class="sidebar-item {{ $activeRoute == 'documents.index' ? 'active' : '' }}">
+            <i class="bi bi-folder2-open"></i> Documents
+        </a>
+
         <a href="{{ url('/dashboard') }}#settings" class="sidebar-item">
             <i class="bi bi-gear-fill"></i> Settings
         </a>
@@ -121,14 +148,14 @@
     <!-- View Site & Logout -->
     <div class="d-flex flex-column gap-2 mb-4">
         <a href="{{ url('/') }}" target="_blank" class="btn btn-primary fw-bold w-100 rounded-3 py-2 shadow-sm d-flex align-items-center justify-content-center gap-2" style="background: #2563eb; border: none;">
-            <i class="bi bi-box-arrow-up-right"></i> View Site
+            View Site
         </a>
         
         @auth
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="btn btn-light text-danger fw-semibold w-100 rounded-3 py-2 border-0 d-flex align-items-center justify-content-center gap-2" style="background: #fef2f2;">
-                <i class="bi bi-box-arrow-right"></i> Logout
+                Logout
             </button>
         </form>
         @endauth
@@ -145,32 +172,32 @@
         
         <div class="d-flex gap-2 mb-2">
             <a href="{{ url('/dashboard') }}#deposit" class="btn btn-light btn-sm flex-fill fw-bold text-primary rounded-3" style="font-size: 0.75rem;">
-                <i class="bi bi-arrow-down-circle me-1"></i> Deposit
+                Deposit
             </a>
             <a href="{{ url('/dashboard') }}#receive" class="btn btn-outline-light btn-sm flex-fill fw-bold rounded-3" style="font-size: 0.75rem;">
-                <i class="bi bi-qr-code me-1"></i> Receive AVC
+                Receive AVC
             </a>
         </div>
         <a href="{{ route('marketplace') }}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3 border-light border-opacity-20 text-white" style="background: rgba(255,255,255,0.15); font-size: 0.75rem;">
-            <i class="bi bi-arrow-repeat me-1"></i> AVC Marketplace
+            <i class="bi bi-lightning-charge-fill text-warning"></i> AVC Marketplace
         </a>
     </div>
 
     <!-- Quick Actions Widget -->
     <div class="bg-light p-3 rounded-4 border">
-        <span class="sidebar-group-header d-block mb-2 text-warning fw-bold"><i class="bi bi-lightning-charge-fill me-1"></i> QUICK ACTIONS</span>
+        <span class="sidebar-group-header d-block mb-2 text-warning fw-bold">QUICK ACTIONS</span>
         <div class="d-flex flex-column gap-2">
             <a href="{{ route('marketplace.index') }}" class="btn btn-white border btn-sm text-start fw-semibold text-dark rounded-3 bg-white py-2">
-                <i class="bi bi-lightning-charge text-primary me-2"></i> Buy Shares
+                Buy Shares
             </a>
             <a href="{{ route('portfolio.index') }}" class="btn btn-white border btn-sm text-start fw-semibold text-dark rounded-3 bg-white py-2">
-                <i class="bi bi-briefcase text-primary me-2"></i> My Project Shares
+                <i class="bi bi-briefcase-fill"></i> My Project Shares
             </a>
             <a href="{{ route('portfolio.index') }}#active" class="btn btn-white border btn-sm text-start fw-semibold text-dark rounded-3 bg-white py-2">
-                <i class="bi bi-clock-history text-primary me-2"></i> Active Cycles
+                <i class="bi bi-clock-history"></i> Active Cycles
             </a>
             <a href="{{ route('portfolio.index') }}#saved" class="btn btn-white border btn-sm text-start fw-semibold text-dark rounded-3 bg-white py-2">
-                <i class="bi bi-bookmark text-primary me-2"></i> Saved Projects
+                <i class="bi bi-bookmark-star-fill"></i> Saved Projects
             </a>
         </div>
     </div>

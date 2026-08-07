@@ -340,6 +340,7 @@
                                         <a href="{{ url('/dashboard') }}#notifications" class="nav-dropdown-item"><i class="bi bi-bell-fill me-2 text-primary" style="width:16px;"></i>Notifications</a>
                                         <a href="{{ url('/dashboard') }}#referrals" class="nav-dropdown-item"><i class="bi bi-people-fill me-2 text-primary" style="width:16px;"></i>Referrals</a>
                                         <a href="{{ url('/dashboard') }}#profile_kyc" class="nav-dropdown-item"><i class="bi bi-person-badge-fill me-2 text-primary" style="width:16px;"></i>Profile & KYC</a>
+                                        <a href="{{ route('documents.index') }}" class="nav-dropdown-item"><i class="bi bi-folder2-open me-2 text-primary" style="width:16px;"></i>Documents</a>
 
                                         <div class="border-top mt-1 pt-1"></div>
                                         <a href="{{ url('/') }}" class="nav-dropdown-item" target="_blank"><i class="bi bi-box-arrow-up-right me-2 text-secondary" style="width:16px;"></i>View Site</a>

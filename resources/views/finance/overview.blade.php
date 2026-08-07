@@ -3,8 +3,9 @@
 @section('title', 'Finance Center | ' . site_name())
 
 @section('content')
+@include('partials.user-shell-sidebar')
 <style>
-    .finance-hero-card {
+.finance-hero-card {
         background: linear-gradient(135deg, #0b1329 0%, #1e3a8a 100%);
         border: none;
     }
@@ -31,7 +32,7 @@
     }
 </style>
 
-<div class="container-fluid px-0" style="background-color: #f8fafc; min-height: 100vh;">
+<div class="container-fluid px-0 user-shell-content" style="background-color: #f8fafc; min-height: 100vh;">
     <div class="container-xl py-4 px-3 px-md-4">
 
         <!-- Header Title Row -->

@@ -127,3 +127,58 @@ if (! function_exists('masked_name')) {
         return ucwords($first) . ($last !== '' ? ' ' . strtoupper($last) . '.**' : '');
     }
 }
+
+if (! function_exists('whatsapp_handle')) {
+    /**
+     * The official Aurevia Property Support WhatsApp number configured in admin settings.
+     */
+    function whatsapp_handle(): string
+    {
+        return ltrim(preg_replace('/\D+/', '', (string) Setting::get('whatsapp_handle', '')), '0');
+    }
+}
+
+if (! function_exists('whatsapp_url')) {
+    /**
+     * Build a wa.me link with a pre-filled message.
+     */
+    function whatsapp_url(string $message): string
+    {
+        if (! whatsapp_handle()) {
+            return '#';
+        }
+
+        return 'https://wa.me/' . whatsapp_handle() . '?text=' . rawurlencode($message);
+    }
+}
+
+if (! function_exists('format_usd')) {
+    /**
+     * Format an amount as USD, e.g. "$750,000" or "$2,500.50".
+     */
+    function format_usd(?float $amount): string
+    {
+        if ($amount === null) {
+            return '$0';
+        }
+
+        $amount = (float) $amount;
+
+        return '$' . number_format($amount, ($amount == floor($amount)) ? 0 : 2);
+    }
+}
+
+if (! function_exists('admin_contact_message')) {
+    /**
+     * The pre-filled support message used by the WhatsApp / Telegram buttons on a property.
+     */
+    function admin_contact_message(\App\Models\Property $property, string $request = 'Please provide more information.'): string
+    {
+        return sprintf(
+            'Hello Aurevia Property Support, I am interested in %s (Reference: %s). %s',
+            $property->title,
+            $property->ref(),
+            $request
+        );
+    }
+}

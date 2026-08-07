@@ -35,6 +35,10 @@ class User extends Authenticatable
         'kyc_submitted_at',
         'kyc_rejected_reason',
         'referred_by',
+        'rep_type',
+        'rep_status',
+        'rep_verified_at',
+        'rep_documents',
     ];
 
     /**
@@ -46,6 +50,42 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function repLabel(): string
+    {
+        return match ($this->rep_type) {
+            'owner' => 'Owner',
+            'agent' => 'Real Estate Agent',
+            'developer' => 'Developer',
+            'property_manager' => 'Property Manager',
+            default => 'Member',
+        };
+    }
+
+    public function isRepresentativeVerified(): bool
+    {
+        return $this->rep_status === 'verified';
+    }
+
+    public function propertyListings()
+    {
+        return $this->hasMany(Property::class, 'user_id');
+    }
+
+    public function propertyInquiries()
+    {
+        return $this->hasMany(PropertyInquiry::class, 'user_id');
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class, 'user_id');
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -62,6 +102,8 @@ class User extends Authenticatable
             'expires_at' => 'datetime',
             'kyc_submitted_at' => 'datetime',
             'kyc_verified' => 'boolean',
+            'rep_verified_at' => 'datetime',
+            'rep_documents' => 'array',
         ];
     }
 

@@ -3,6 +3,7 @@
 @section('title', 'User Dashboard | ' . site_name() . ' Investment Platform')
 
 @section('content')
+@section('footer')<!-- suppressed -->@endsection
 
 @if($showTour)
 <div x-data="siteTourGuard()" x-init="initTour" x-cloak>
@@ -272,6 +273,33 @@
                 </a>
                 <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'marketplace' }" @click.prevent="activeTab = 'marketplace'">
                     <i class="bi bi-building"></i> Browse Properties
+                </a>
+
+                <!-- GROUP: PROPERTY TOOLS -->
+                <span class="sidebar-group-label">Property Tools</span>
+                <a href="{{ route('properties.create') }}" class="nav-link-sidebar nav-link-sub">
+                    <i class="bi bi-plus-square"></i> List Your Property
+                </a>
+                <a href="{{ route('properties.mine') }}" class="nav-link-sidebar nav-link-sub">
+                    <i class="bi bi-house-gear"></i> My Property Listings
+                </a>
+                <a href="{{ route('properties.saved') }}" class="nav-link-sidebar nav-link-sub">
+                    <i class="bi bi-bookmark-heart"></i> Saved Properties
+                    @if(count($savedPropertyIds) > 0)
+                        <span class="badge ms-auto rounded-pill" style="background:#f59e0b; color:#1a1a1a; font-size:0.7rem;">{{ count($savedPropertyIds) }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('properties.inquiries') }}" class="nav-link-sidebar nav-link-sub">
+                    <i class="bi bi-chat-dots"></i> Property Inquiries
+                </a>
+                <a href="{{ route('properties.viewing-requests') }}" class="nav-link-sidebar nav-link-sub">
+                    <i class="bi bi-calendar-check"></i> Viewing Requests
+                </a>
+
+                <!-- GROUP: DOCUMENTS -->
+                <span class="sidebar-group-label">Documents</span>
+                <a href="{{ route('documents.index') }}" class="nav-link-sidebar nav-link-sub">
+                    <i class="bi bi-folder2-open"></i> My Documents
                 </a>
                 <a href="{{ route('portfolio.index') }}" class="nav-link-sidebar nav-link-sub">
                     <i class="bi bi-briefcase-fill"></i> My Portfolio
@@ -1715,25 +1743,29 @@
                 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
                     <div>
                         <h4 class="fw-bold text-dark mb-1">Browse Properties</h4>
-                        <p class="text-muted mb-0 small">Explore available properties. Save them to your list, share them, or purchase directly with a one-time payment.</p>
+                        <p class="text-muted mb-0 small">Explore available properties. Save them to your list, share them, or express purchase interest.</p>
                     </div>
-                    <div class="btn-group btn-group-sm" role="group">
-                        <button type="button" class="btn fw-bold rounded-3 me-1" :class="propFilter === 'all' ? 'btn-primary' : 'btn-light border'" @click="propFilter = 'all'">
-                            <i class="bi bi-grid me-1"></i> All
-                        </button>
-                        <button type="button" class="btn fw-bold rounded-3" :class="propFilter === 'saved' ? 'btn-primary' : 'btn-light border'" @click="propFilter = 'saved'">
-                            <i class="bi bi-bookmark-fill me-1"></i> Saved
-                            @if(count($savedPropertyIds) > 0)
-                                <span class="badge bg-warning text-dark ms-1 rounded-pill">{{ count($savedPropertyIds) }}</span>
-                            @endif
-                        </button>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url('/properties') }}" class="btn btn-sm fw-bold rounded-3 text-white" style="background:#0B1F3A;"><i class="bi bi-house-check me-1"></i> Open Verified Marketplace</a>
+                        <a href="{{ route('properties.create') }}" class="btn btn-sm fw-bold rounded-3" style="background:#16a34a; color:#fff;"><i class="bi bi-plus-lg me-1"></i> List Property</a>
                     </div>
+                </div>
+                <div class="btn-group btn-group-sm mb-3" role="group">
+                    <button type="button" class="btn fw-bold rounded-3 me-1" :class="propFilter === 'all' ? 'btn-primary' : 'btn-light border'" @click="propFilter = 'all'">
+                        <i class="bi bi-grid me-1"></i> All
+                    </button>
+                    <button type="button" class="btn fw-bold rounded-3" :class="propFilter === 'saved' ? 'btn-primary' : 'btn-light border'" @click="propFilter = 'saved'">
+                        <i class="bi bi-bookmark-fill me-1"></i> Saved
+                        @if(count($savedPropertyIds) > 0)
+                            <span class="badge bg-warning text-dark ms-1 rounded-pill">{{ count($savedPropertyIds) }}</span>
+                        @endif
+                    </button>
                 </div>
                 <div class="row g-4">
                     @foreach($properties as $prop)
                         @php
                             $propPrice = $prop->purchasePrice();
-                            $propSold = $prop->status === 'sold_out';
+                            $propSold = $prop->status === 'sold' || $prop->status === 'rented';
                             $propSaved = in_array($prop->id, $savedPropertyIds);
                         @endphp
                         <div class="col-md-6 col-lg-4" x-show="propFilter === 'all' || {{ $propSaved ? 'true' : 'false' }}">
@@ -2595,7 +2627,7 @@
         <div class="p-3 rounded-3 bg-light border mb-3">
             <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">Location</span><strong class="text-dark" x-text="selectedProperty?.location"></strong></div>
             <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">Category</span><strong class="text-dark" x-text="selectedProperty?.category"></strong></div>
-            <div class="d-flex justify-content-between small"><span class="text-muted">Status</span><strong class="text-success" x-text="selectedProperty?.status === 'sold_out' ? 'Sold' : 'For Sale'"></strong></div>
+            <div class="d-flex justify-content-between small"><span class="text-muted">Status</span><strong class="text-success" x-text="selectedProperty?.status === 'sold' || selectedProperty?.status === 'rented' ? 'Sold' : 'For Sale'"></strong></div>
         </div>
         <form :action="'/property/' + (selectedProperty?.id || '') + '/purchase'" method="POST" @submit="if (!confirm('Confirm purchase of ' + (selectedProperty?.title || '') + ' for $' + parseFloat(selectedProperty?.price || 0).toFixed(2) + '? This amount will be deducted from your wallet.')) { $event.preventDefault(); }">
             @csrf

@@ -66,7 +66,7 @@ class UserDashboardController extends Controller
         $totalInvested = $userInvestments->sum('total_amount') + $projectInvestments->sum('amount');
         $totalRoiEarned = $userInvestments->sum('roi_earned') + $projectInvestments->sum('roi_earned');
 
-        $properties = Property::where('status', 'active')->orderBy('id', 'desc')->get();
+        $properties = Property::where('status', 'published')->orderBy('id', 'desc')->get();
         $projects = Project::where('status', 'active')->orderBy('id', 'desc')->get();
         $savedProjectIds = $user ? SavedProject::where('user_id', $user->id)->pluck('project_id')->all() : [];
         $savedProjects = $user ? Project::whereIn('id', $savedProjectIds)->orderBy('id', 'desc')->get() : collect([]);
@@ -466,7 +466,7 @@ class UserDashboardController extends Controller
             return redirect()->route('login');
         }
 
-        if ($property->status === 'sold_out') {
+        if ($property->status === 'sold' || $property->status === 'rented') {
             return redirect()->back()->with('error', 'This property has already been sold.');
         }
 
@@ -490,6 +490,18 @@ class UserDashboardController extends Controller
             'amount' => $price,
             'status' => 'completed',
         ]);
+
+        try {
+            $documents = app(\App\Services\DocumentService::class);
+            $documents->generate('property_contract', $purchase, $user, [
+                'metadata' => ['related_label' => $property->title . ' (' . $property->ref() . ')'],
+            ]);
+            $documents->generate('property_receipt', $purchase, $user, [
+                'metadata' => ['related_label' => $property->title . ' (' . $property->ref() . ')'],
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         Transaction::create([
             'user_id' => $user->id,
@@ -589,6 +601,20 @@ class UserDashboardController extends Controller
         $user->kyc_submitted_at = now();
         $user->kyc_rejected_reason = null;
         $user->save();
+
+        try {
+            $documents = app(\App\Services\DocumentService::class);
+            $documents->registerExternal('identity_report', $user, 'Identity Document', $docPath, [
+                'related_label' => 'KYC Identity Document',
+                'document_label' => 'Identity Document',
+            ], 'pending');
+            $documents->registerExternal('identity_report', $user, 'Identity Selfie', $selfiePath, [
+                'related_label' => 'KYC Identity Selfie',
+                'document_label' => 'Identity Selfie',
+            ], 'pending');
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         Mail::to($user->email)->send(new KycSubmittedMail($user));
 

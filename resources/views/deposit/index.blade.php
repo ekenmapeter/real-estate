@@ -3,8 +3,9 @@
 @section('title', 'Deposit / Buy AVC | ' . site_name())
 
 @section('content')
+@include('partials.user-shell-sidebar')
 <style>
-    .balance-card-gradient {
+.balance-card-gradient {
         background: linear-gradient(135deg, #0b1329 0%, #1e3a8a 100%);
     }
     .check-icon-green { color: #10b981; }
@@ -12,12 +13,14 @@
     .nav-pill-active { background-color: #f1f5f9; font-weight: 700; color: #0f172a; }
     .channel-card-hover { transition: transform 0.2s ease, shadow 0.2s ease; cursor: pointer; }
     .channel-card-hover:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08); }
+    .pm-row { transition: background-color 0.15s ease; cursor: pointer; }
+    .pm-row:hover { background-color: #f8fafc; }
     .bottom-mobile-nav {
         position: fixed; bottom: 0; left: 0; right: 0; background: #ffffff; border-top: 1px solid #e2e8f0; z-index: 1000;
     }
 </style>
 
-<div class="container-fluid px-0" style="background-color: #f8fafc; min-height: 100vh;">
+<div class="container-fluid px-0 user-shell-content" style="background-color: #f8fafc; min-height: 100vh;">
     <div class="container-xl py-4 px-3 px-md-4">
 
         <!-- Top Header Row -->
@@ -187,15 +190,59 @@
                         </a>
                     </div>
 
-                    <!-- Channel 4: Other Local Methods -->
+                    <!-- Channel 4: Other Local Methods (Expandable) -->
                     <div class="col-6 col-sm-3">
-                        <a href="{{ route('deposit.channel', 'credit_card') }}" class="card border-0 rounded-4 shadow-sm bg-white p-3 text-center text-decoration-none channel-card-hover h-100">
+                        <button type="button" class="card border-0 rounded-4 shadow-sm bg-white p-3 text-center w-100 h-100 channel-card-hover" data-bs-toggle="collapse" data-bs-target="#otherLocalMethodsCollapse" aria-expanded="false" aria-controls="otherLocalMethodsCollapse" style="border: 0; background: #fff;">
                             <div class="rounded-circle bg-purple bg-opacity-10 p-2.5 mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: rgba(147,51,234,0.1); color: #9333ea;">
                                 <i class="bi bi-three-dots fs-5"></i>
                             </div>
-                            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.82rem;">Other Local Methods</h6>
-                            <span class="badge bg-success text-white fw-semibold px-2 py-0.5 rounded-pill mx-auto mt-auto" style="font-size: 0.7rem;">Active</span>
-                        </a>
+                            <h6 class="fw-bold text-dark mb-1" style="font-size: 0.82rem;">More Payment Options</h6>
+                            <span class="badge bg-success text-white fw-semibold px-2 py-0.5 rounded-pill mx-auto mt-auto" style="font-size: 0.7rem;"><i class="bi bi-chevron-down me-1"></i>Active</span>
+                        </button>
+                    </div>
+
+                    <!-- Expanded Section: Remaining Local Payment Methods -->
+                    <div class="col-12 collapse" id="otherLocalMethodsCollapse">
+                        <div class="card border-0 rounded-4 shadow-sm bg-white mt-1 overflow-hidden">
+                            <div class="d-flex justify-content-between align-items-center gap-2 px-3 py-3 border-bottom">
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-0" style="font-size: 0.9rem;"><i class="bi bi-wallet2 text-primary me-2"></i>Select a Payment Option</h6>
+                                    <span class="text-muted small" style="font-size: 0.75rem;">Pay securely or request an assisted Finance Team deposit.</span>
+                                </div>
+                                <span class="badge bg-light text-muted fw-semibold px-2 py-1 rounded-pill flex-shrink-0" style="font-size: 0.7rem;">2 Options</span>
+                            </div>
+
+                            <!-- Card Payment -->
+                            <a href="{{ route('deposit.channel', 'credit_card') }}" class="pm-row d-flex align-items-center gap-3 px-3 py-3 text-decoration-none border-bottom">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; background: rgba(147,51,234,0.1); color: #9333ea;">
+                                    <i class="bi bi-credit-card-2-front fs-5"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <strong class="text-dark d-block" style="font-size: 0.88rem;">Card Payment</strong>
+                                    <span class="text-muted d-block" style="font-size: 0.72rem;">Visa, Mastercard, AMEX</span>
+                                </div>
+                                <span class="badge fw-semibold px-2 py-0.5 rounded-pill" style="font-size: 0.68rem; background: #dcfce7; color: #059669;">Instant</span>
+                                <i class="bi bi-chevron-right text-muted small"></i>
+                            </a>
+
+                            <!-- Finance Team Request -->
+                            <a href="{{ route('deposit.channel', 'bank_transfer') }}" class="pm-row d-flex align-items-center gap-3 px-3 py-3 text-decoration-none">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; background: rgba(37,99,235,0.1); color: #2563eb;">
+                                    <i class="bi bi-headset fs-5"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <strong class="text-dark d-block" style="font-size: 0.88rem;">Finance Team Request</strong>
+                                    <span class="text-muted d-block" style="font-size: 0.72rem;">Assisted manual deposit request</span>
+                                </div>
+                                <span class="badge fw-semibold px-2 py-0.5 rounded-pill" style="font-size: 0.68rem; background: #eff6ff; color: #2563eb;">Assisted</span>
+                                <i class="bi bi-chevron-right text-muted small"></i>
+                            </a>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2 mt-3" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px;">
+                            <i class="bi bi-info-circle text-primary flex-shrink-0"></i>
+                            <span class="text-muted small" style="font-size: 0.75rem;">Both options use the official Finance Team deposit flow. Only send payments to the accounts provided in your deposit request.</span>
+                        </div>
                     </div>
                 </div>
 
@@ -378,4 +425,18 @@
 
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var collapseEl = document.getElementById('otherLocalMethodsCollapse');
+    if (!collapseEl) return;
+    var trigger = document.querySelector('[data-bs-target="#otherLocalMethodsCollapse"]');
+    function setChevron(open) {
+        var chevron = trigger ? trigger.querySelector('.bi-chevron-down') : null;
+        if (chevron) chevron.classList.toggle('bi-chevron-up', open);
+    }
+    collapseEl.addEventListener('show.bs.collapse', function () { setChevron(true); });
+    collapseEl.addEventListener('hide.bs.collapse', function () { setChevron(false); });
+});
+</script>
 @endsection

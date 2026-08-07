@@ -151,6 +151,14 @@ class AdminFinanceRequestController extends Controller
             $financeRequest->admin_notes = $request->input('admin_notes', 'Approved by Admin');
             $financeRequest->completed_at = Carbon::now();
             $financeRequest->save();
+
+            try {
+                app(\App\Services\DocumentService::class)->generate('finance_request_receipt', $financeRequest, $user, [
+                    'metadata' => ['related_label' => $financeRequest->request_id],
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
         });
 
         return redirect()->back()->with('success', 'Finance request approved! User wallet has been updated.');

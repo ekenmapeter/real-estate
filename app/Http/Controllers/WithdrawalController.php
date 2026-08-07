@@ -277,6 +277,14 @@ class WithdrawalController extends Controller
 
             DB::commit();
 
+            try {
+                app(\App\Services\DocumentService::class)->generate('withdrawal_request_receipt', $withdrawal, $lockedUser, [
+                    'metadata' => ['related_label' => $withdrawalCode],
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
             return redirect()->route('withdraw.show', $withdrawal->id)
                 ->with('success', 'Withdrawal request ' . $withdrawalCode . ' submitted successfully! The Finance Team is reviewing your payout.');
 

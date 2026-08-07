@@ -81,6 +81,14 @@ class AdminDepositManagementController extends Controller
         $deposit->status = 'payment_instructions_assigned';
         $deposit->save();
 
+        try {
+            app(\App\Services\DocumentService::class)->generate('deposit_confirmation', $deposit, $deposit->user, [
+                'metadata' => ['related_label' => $deposit->deposit_code],
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         return redirect()->back()->with('success', 'Payment instructions assigned to deposit request ' . $deposit->deposit_code . ' (Expires in ' . $expirationMinutes . ' mins).');
     }
 
@@ -125,6 +133,14 @@ class AdminDepositManagementController extends Controller
             $deposit->save();
 
             DB::commit();
+
+            try {
+                app(\App\Services\DocumentService::class)->generate('deposit_receipt', $deposit, $user, [
+                    'metadata' => ['related_label' => $deposit->deposit_code],
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
 
             return redirect()->back()->with('success', 'Successfully credited ' . number_format($creditAmount, 2) . ' AVC to ' . $user->name . ' (' . $deposit->deposit_code . ')!');
 

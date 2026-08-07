@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('roi:process-daily')->daily();
+Schedule::command('documents:statements-monthly')->monthlyOn(1, '06:00');

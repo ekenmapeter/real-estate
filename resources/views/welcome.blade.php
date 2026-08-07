@@ -455,8 +455,8 @@
               <img src="{{ $prop->image_url ?? 'https://radiantdreamrealty.com/frontend/images/home/house-7.jpg' }}" class="card-img-top" alt="{{ $prop->title }}" style="height: 230px; object-fit: cover;">
               <div class="position-absolute top-0 start-0 m-3 d-flex gap-2">
                 <span class="badge bg-primary">{{ $prop->category }}</span>
-                @if($prop->status === 'sold_out')
-                  <span class="badge bg-secondary">Sold</span>
+                @if($prop->status === 'sold' || $prop->status === 'rented')
+                  <span class="badge bg-secondary">{{ $prop->status === 'sold' ? 'Sold' : 'Rented' }}</span>
                 @else
                   <span class="badge bg-success">Verified</span>
                 @endif

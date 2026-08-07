@@ -517,6 +517,7 @@ class AdminDashboardController extends Controller
             'referral_bonus_amount' => 'required|numeric|min:0',
             'support_email' => 'required|email',
             'telegram_handle' => 'nullable|string|max:50',
+            'whatsapp_handle' => 'nullable|string|max:30',
         ]);
 
         Setting::set('beneficiary_method', $request->beneficiary_method);
@@ -528,6 +529,7 @@ class AdminDashboardController extends Controller
         Setting::set('referral_bonus_amount', $request->referral_bonus_amount);
         Setting::set('support_email', $request->support_email);
         Setting::set('telegram_handle', ltrim(trim($request->telegram_handle ?? ''), '@'));
+        Setting::set('whatsapp_handle', ltrim(preg_replace('/\D+/', '', (string) ($request->whatsapp_handle ?? '')), '0'));
 
         return redirect()->route('admin.dashboard', ['tab' => 'settings'])->with('success', 'Platform settings saved successfully!');
     }
@@ -644,6 +646,14 @@ class AdminDashboardController extends Controller
         $user->kyc_status = 'approved';
         $user->save();
 
+        try {
+            app(\App\Services\DocumentService::class)->generate('kyc_verification_certificate', null, $user, [
+                'metadata' => ['related_label' => 'Personal'],
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         Mail::to($user->email)->send(new KycVerifiedMail($user));
 
         return redirect()->back()->with('success', 'KYC approved for ' . $user->name . '!');
@@ -721,6 +731,14 @@ class AdminDashboardController extends Controller
         $swap->status = 'active';
         $swap->appendLog('Listing approved and published as #' . $swap->listing_number, Auth::user()?->name ?? 'Admin');
         $swap->save();
+
+        try {
+            $documents = app(\App\Services\DocumentService::class);
+            $documents->generate($swap->offer_type === 'buy' ? 'buy_order_receipt' : 'sell_order_receipt', $swap, $swap->seller, ['metadata' => ['related_label' => $swap->listingLabel()]]);
+            $documents->generate('escrow_agreement', $swap, $swap->seller, ['metadata' => ['related_label' => $swap->listingLabel()]]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return redirect()->back()->with('success', 'Marketplace offer ' . $swap->listingLabel() . ' approved and is now live for ' . ucfirst($swap->offer_type) . ' ' . format_avc($swap->amount) . '.');
     }
@@ -822,9 +840,17 @@ class AdminDashboardController extends Controller
             'type' => 'deposit',
             'amount' => $swap->amount,
             'reference' => $swap->reference,
-            'description' => 'AVC Marketplace #' . $swap->listingLabel() . ' — credits received via admin escrow',
+            'description' => 'AVC Marketplace #' . $swap->listingLabel() . ' - credits received via admin escrow',
             'status' => 'completed',
         ]);
+
+        try {
+            $documents = app(\App\Services\DocumentService::class);
+            $documents->generate('escrow_completion_certificate', $swap, $creditBuyer, ['metadata' => ['related_label' => $swap->listingLabel()]]);
+            $documents->generate('escrow_completion_certificate', $swap, $escrowHolder, ['metadata' => ['related_label' => $swap->listingLabel()]]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return redirect()->back()->with('success', 'Deal #' . $swap->listingLabel() . ' completed! ' . format_avc($swap->amount) . ' released to the buyer. The listing has been removed from the marketplace.');
     }

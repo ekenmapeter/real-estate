@@ -15,7 +15,10 @@
         
         <!-- Left Sidebar Column -->
         <div class="col-12 col-md-4 col-lg-3 d-none d-md-block">
-            @include('partials.app-sidebar')
+            <div class="sticky-top" style="top:70px; height:calc(100vh - 70px);">
+    @include('partials.navy-sidebar')
+</div>
+@section('footer')<!-- suppressed -->@endsection
         </div>
 
         <!-- Main Content Area -->

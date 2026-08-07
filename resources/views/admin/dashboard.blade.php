@@ -102,6 +102,10 @@
                 <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'properties' }" @click.prevent="activeAdminTab = 'properties'">
                     <i class="bi bi-building"></i> Investments / Properties
                 </a>
+                <a href="{{ route('admin.properties.index', ['tab' => 'pending']) }}" class="nav-link-admin">
+                    <i class="bi bi-house-check"></i> Properties Marketplace
+                    <span class="badge bg-warning text-dark ms-auto rounded-pill">NEW</span>
+                </a>
                 <a href="#" class="nav-link-admin" :class="{ 'active': activeAdminTab === 'projects' }" @click.prevent="activeAdminTab = 'projects'">
                     <i class="bi bi-rocket-takeoff"></i> Projects
                     @if($totalProjectsCount > 0)
@@ -366,7 +370,7 @@
                                         <td class="px-4 py-3">
                                             <div class="fw-bold small text-dark">{{ $prop->title }}</div>
                                             <small class="text-muted" style="font-size:0.7rem;">{{ $prop->location }}</small>
-                                            <span class="badge fw-semibold rounded-pill ms-1" style="background:{{ $prop->status === 'active' ? '#f0fdf4' : '#f1f5f9' }}; color:{{ $prop->status === 'active' ? '#16a34a' : '#64748b' }}; font-size:0.62rem;">{{ $prop->status }}</span>
+                                            <span class="badge fw-semibold rounded-pill ms-1" style="background:{{ in_array($prop->status, ['active', 'published', 'approved']) ? '#f0fdf4' : '#f1f5f9' }}; color:{{ in_array($prop->status, ['active', 'published', 'approved']) ? '#16a34a' : '#64748b' }}; font-size:0.62rem;">{{ $prop->status }}</span>
                                         </td>
                                         <td class="py-3"><span class="small fw-semibold text-dark">${{ number_format($prop->purchasePrice(), 2) }}</span></td>
                                         <td class="py-3"><span class="small fw-semibold text-dark">${{ number_format($prop->price_per_share, 2) }}</span></td>
@@ -1314,6 +1318,11 @@
                                 <label class="form-label fw-semibold text-dark small">Telegram Handle (Marketplace)</label>
                                 <input type="text" name="telegram_handle" class="form-control" value="{{ $settings['telegram_handle'] ?? '' }}" maxlength="50" placeholder="rdrfinance">
                                 <small class="text-muted d-block mt-1">Handle shown in the AVC Marketplace for deal contacts. Leave empty to hide Telegram buttons.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold text-dark small">WhatsApp Number (Property Support)</label>
+                                <input type="text" name="whatsapp_handle" class="form-control" value="{{ $settings['whatsapp_handle'] ?? '' }}" maxlength="30" placeholder="e.g. 14155550123">
+                                <small class="text-muted d-block mt-1">International format without + or spaces. Used by the "Contact via WhatsApp" buttons on property pages. Leave empty to hide WhatsApp buttons.</small>
                             </div>
                         </div>
                         <button type="submit" class="btn fw-bold px-4 py-2 rounded-3 text-white mt-3" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">

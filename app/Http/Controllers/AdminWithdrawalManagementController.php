@@ -122,6 +122,14 @@ class AdminWithdrawalManagementController extends Controller
 
             DB::commit();
 
+            try {
+                app(\App\Services\DocumentService::class)->generate('withdrawal_confirmation', $withdrawal, $lockedUser, [
+                    'metadata' => ['related_label' => $withdrawal->withdrawal_code],
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
             return redirect()->back()->with('success', 'Withdrawal request ' . $withdrawal->withdrawal_code . ' marked as COMPLETED! Payout finalized.');
 
         } catch (\Exception $e) {

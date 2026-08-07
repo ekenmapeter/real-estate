@@ -13,7 +13,7 @@ Route::get('/', function () {
     if ($ref) {
         return redirect()->route('register', ['ref' => $ref]);
     }
-    $properties = \App\Models\Property::where('status', 'active')->orderBy('id', 'desc')->get();
+    $properties = \App\Models\Property::where('status', 'published')->orderBy('id', 'desc')->get();
     $projects = \App\Models\Project::where('status', 'active')->orderBy('id', 'desc')->get();
     return view('welcome', compact('properties', 'projects'));
 });
@@ -158,6 +158,39 @@ Route::middleware('auth')->group(function () {
     Route::post('/property/{property}/save', [PropertyController::class, 'toggleSave'])->name('property.save')->middleware('throttle:forms');
 });
 
+// Properties Marketplace — user listing & inquiry flows
+Route::middleware('auth')->group(function () {
+    Route::get('/list-property', [PropertyController::class, 'create'])->name('properties.create');
+    Route::post('/list-property', [PropertyController::class, 'store'])->name('properties.store')->middleware('throttle:forms');
+    Route::get('/property/{property}/edit', [PropertyController::class, 'edit'])->name('properties.edit');
+    Route::post('/property/{property}/update', [PropertyController::class, 'update'])->name('properties.update')->middleware('throttle:forms');
+    Route::post('/property/{property}/delete', [PropertyController::class, 'destroy'])->name('properties.destroy')->middleware('throttle:forms');
+    Route::post('/property/{property}/pause', [PropertyController::class, 'togglePause'])->name('properties.pause')->middleware('throttle:forms');
+    Route::post('/property/{property}/mark-sold', [PropertyController::class, 'markSold'])->name('properties.sold')->middleware('throttle:forms');
+    Route::post('/property/{property}/mark-rented', [PropertyController::class, 'markRented'])->name('properties.rented')->middleware('throttle:forms');
+    Route::get('/my-properties', [PropertyController::class, 'myListings'])->name('properties.mine');
+    Route::get('/my-properties/inquiries', [PropertyController::class, 'myInquiries'])->name('properties.inquiries');
+    Route::get('/my-properties/viewing-requests', [PropertyController::class, 'viewingRequests'])->name('properties.viewing-requests');
+    Route::get('/my-properties/saved', [PropertyController::class, 'savedProperties'])->name('properties.saved');
+});
+
+Route::post('/property/{property}/inquiry/{type}', [PropertyController::class, 'storeInquiry'])->name('properties.inquiry')->middleware('throttle:forms');
+Route::get('/property-inquiry/{inquiry}/confirmation', [PropertyController::class, 'viewingConfirmation'])->name('properties.viewing.confirmation');
+Route::post('/property/{property}/report', [PropertyController::class, 'report'])->name('properties.report')->middleware('throttle:forms');
+
+// Documents module
+use App\Http\Controllers\DocumentController;
+Route::middleware('auth')->group(function () {
+    Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
+    Route::get('/documents/zip', [DocumentController::class, 'zip'])->name('documents.zip');
+    Route::post('/documents/statement', [DocumentController::class, 'statement'])->name('documents.statement')->middleware('throttle:forms');
+    Route::get('/documents/{document}', [DocumentController::class, 'view'])->name('documents.view');
+    Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+    Route::get('/documents/{document}/print', [DocumentController::class, 'print'])->name('documents.print');
+    Route::post('/documents/{document}/share', [DocumentController::class, 'share'])->name('documents.share')->middleware('throttle:forms');
+});
+Route::get('/documents/share/{token}', [DocumentController::class, 'shared'])->name('documents.shared');
+
 // Project Marketplace & My Portfolio Routes
 use App\Http\Controllers\ProjectMarketplaceController;
 use App\Http\Controllers\SharePurchaseController;
@@ -184,8 +217,41 @@ Route::get('/project/{project}', function ($project) {
     return redirect()->route('marketplace.show', $project);
 })->name('project.show');
 
-Route::get('/list-property', function () {
-    return view('list-property');
+// Admin Properties Marketplace module
+use App\Http\Controllers\AdminPropertyController;
+Route::prefix('admin')->name('admin.')->middleware(['admin', 'throttle:admin'])->group(function () {
+    Route::get('/properties', [AdminPropertyController::class, 'index'])->name('properties.index');
+    Route::get('/properties/{property}', [AdminPropertyController::class, 'review'])->name('properties.review');
+    Route::post('/properties/{property}/approve', [AdminPropertyController::class, 'approve'])->name('properties.approve');
+    Route::post('/properties/{property}/reject', [AdminPropertyController::class, 'reject'])->name('properties.reject');
+    Route::post('/properties/{property}/request-info', [AdminPropertyController::class, 'requestInfo'])->name('properties.request-info');
+    Route::post('/properties/{property}/suspend', [AdminPropertyController::class, 'suspend'])->name('properties.suspend');
+    Route::post('/properties/{property}/restore', [AdminPropertyController::class, 'restore'])->name('properties.restore');
+    Route::post('/properties/{property}/feature', [AdminPropertyController::class, 'toggleFeatured'])->name('properties.feature');
+    Route::post('/properties/{property}/delete', [AdminPropertyController::class, 'destroy'])->name('properties.destroy');
+    Route::post('/properties/{property}/update', [AdminPropertyController::class, 'update'])->name('properties.update');
+    Route::get('/properties/{property}/document/{document}', [AdminPropertyController::class, 'downloadDocument'])->name('properties.document.download');
+
+    Route::get('/property-categories', [AdminPropertyController::class, 'categories'])->name('properties.categories');
+    Route::post('/property-categories/store', [AdminPropertyController::class, 'storeCategory'])->name('properties.categories.store');
+    Route::post('/property-categories/{category}/update', [AdminPropertyController::class, 'updateCategory'])->name('properties.categories.update');
+    Route::post('/property-categories/{category}/delete', [AdminPropertyController::class, 'destroyCategory'])->name('properties.categories.delete');
+
+    Route::get('/inquiries', [AdminPropertyController::class, 'inquiries'])->name('inquiries.index');
+    Route::get('/inquiries/{inquiry}', [AdminPropertyController::class, 'inquiryShow'])->name('inquiries.show');
+    Route::post('/inquiries/{inquiry}/status', [AdminPropertyController::class, 'inquiryUpdate'])->name('inquiries.status');
+    Route::post('/inquiries/{inquiry}/connect', [AdminPropertyController::class, 'inquiryConnect'])->name('inquiries.connect');
+
+    Route::get('/conversations', [AdminPropertyController::class, 'conversations'])->name('conversations.index');
+    Route::post('/conversations/{conversation}/close', [AdminPropertyController::class, 'conversationClose'])->name('conversations.close');
+
+    Route::get('/representatives', [AdminPropertyController::class, 'representatives'])->name('representatives.index');
+    Route::post('/representatives/{user}/verify', [AdminPropertyController::class, 'verifyRepresentative'])->name('representatives.verify');
+    Route::post('/representatives/{user}/reject', [AdminPropertyController::class, 'rejectRepresentative'])->name('representatives.reject');
+
+    Route::get('/reports', [AdminPropertyController::class, 'reports'])->name('reports.index');
+    Route::post('/reports/{report}/resolve', [AdminPropertyController::class, 'reportResolve'])->name('reports.resolve');
+    Route::post('/reports/{report}/dismiss', [AdminPropertyController::class, 'reportDismiss'])->name('reports.dismiss');
 });
 
 Route::get('/team', function () {

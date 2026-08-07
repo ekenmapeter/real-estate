@@ -189,6 +189,8 @@ class SharePurchaseController extends Controller
 
             DB::commit();
 
+            $this->generateCycleDocuments($user, $cycle, $existingPending ?? null);
+
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -207,6 +209,38 @@ class SharePurchaseController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Purchase failed. Please try again or contact support.');
+        }
+    }
+
+    /**
+     * Auto-generate investment documents after a share purchase.
+     */
+    protected function generateCycleDocuments(User $user, ProjectShareCycle $cycle, ?ProjectShareCycle $previous): void
+    {
+        try {
+            $documents = app(\App\Services\DocumentService::class);
+
+            $documents->generate('cycle_receipt', $cycle, $user, [
+                'metadata' => ['related_label' => \App\Support\DocumentTypes::relatedLabel($cycle)],
+            ]);
+
+            $documents->generate('investment_agreement', $cycle, $user, [
+                'metadata' => ['related_label' => \App\Support\DocumentTypes::relatedLabel($cycle)],
+            ]);
+
+            if (! $previous) {
+                $documents->generate('share_certificate', $cycle, $user, [
+                    'metadata' => ['related_label' => \App\Support\DocumentTypes::relatedLabel($cycle)],
+                ]);
+            }
+
+            if ($cycle->status === 'active' && $cycle->activated_at && (!$previous || $previous->status !== 'active')) {
+                $documents->generate('ownership_certificate', $cycle, $user, [
+                    'metadata' => ['related_label' => \App\Support\DocumentTypes::relatedLabel($cycle)],
+                ]);
+            }
+        } catch (\Throwable $e) {
+            report($e);
         }
     }
 }

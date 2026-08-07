@@ -258,6 +258,11 @@ class Project extends Model
         return (int) round(min(5, max(0, $this->averageRating())) / 5 * 100);
     }
 
+    public function ref(): string
+    {
+        return 'PRJ-' . str_pad((string) $this->id, 5, '0', STR_PAD_LEFT);
+    }
+
     public function statusLabel(): string
     {
         return match ($this->status) {
