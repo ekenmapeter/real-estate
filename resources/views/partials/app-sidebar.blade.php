@@ -112,31 +112,31 @@
             <i class="bi bi-clock-history text-info"></i> Transaction History
         </a>
 
-        <a href="{{ route('marketplace') }}" class="sidebar-item">
+        <a href="{{ route('avc-marketplace.index') }}" class="sidebar-item">
             <i class="bi bi-lightning-charge-fill text-warning"></i> AVC Marketplace
         </a>
 
         <!-- GROUP: ACCOUNT -->
         <span class="sidebar-group-header mt-3">ACCOUNT</span>
 
-        <a href="{{ url('/dashboard') }}#notifications" class="sidebar-item">
+        <a href="{{ route('dashboard') }}" class="sidebar-item">
             <i class="bi bi-bell-fill"></i> Notifications
             <span class="badge bg-danger rounded-pill ms-auto px-2 py-0.5" style="font-size: 0.68rem;">3</span>
         </a>
 
-        <a href="{{ url('/dashboard') }}#referrals" class="sidebar-item">
-            <i class="bi bi-people-fill"></i> Referrals
+        <a href="{{ route('affiliate.center') }}" class="sidebar-item">
+            <i class="bi bi-people-fill"></i> Affiliate Center
         </a>
 
-        <a href="{{ url('/dashboard') }}#profile_kyc" class="sidebar-item">
-            <i class="bi bi-person-badge-fill"></i> Profile & KYC
+        <a href="{{ route('profile.settings') }}" class="sidebar-item">
+            <i class="bi bi-person-badge-fill"></i> Profile & Settings
         </a>
 
         <a href="{{ route('documents.index') }}" class="sidebar-item {{ $activeRoute == 'documents.index' ? 'active' : '' }}">
             <i class="bi bi-folder2-open"></i> Documents
         </a>
 
-        <a href="{{ url('/dashboard') }}#settings" class="sidebar-item">
+        <a href="{{ route('profile.settings') }}" class="sidebar-item">
             <i class="bi bi-gear-fill"></i> Settings
         </a>
 
@@ -171,14 +171,14 @@
         <span class="text-white-50 small d-block mb-3" style="font-size: 0.72rem;">≈ ${{ number_format($userBalance, 2) }} USD</span>
         
         <div class="d-flex gap-2 mb-2">
-            <a href="{{ url('/dashboard') }}#deposit" class="btn btn-light btn-sm flex-fill fw-bold text-primary rounded-3" style="font-size: 0.75rem;">
+            <a href="{{ route('deposit.index') }}" class="btn btn-light btn-sm flex-fill fw-bold text-primary rounded-3" style="font-size: 0.75rem;">
                 Deposit
             </a>
-            <a href="{{ url('/dashboard') }}#receive" class="btn btn-outline-light btn-sm flex-fill fw-bold rounded-3" style="font-size: 0.75rem;">
-                Receive AVC
+            <a href="{{ route('transfer.index') }}" class="btn btn-outline-light btn-sm flex-fill fw-bold rounded-3" style="font-size: 0.75rem;">
+                AVC Transfer
             </a>
         </div>
-        <a href="{{ route('marketplace') }}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3 border-light border-opacity-20 text-white" style="background: rgba(255,255,255,0.15); font-size: 0.75rem;">
+        <a href="{{ route('avc-marketplace.index') }}" class="btn btn-primary btn-sm w-100 fw-bold rounded-3 border-light border-opacity-20 text-white" style="background: rgba(255,255,255,0.15); font-size: 0.75rem;">
             <i class="bi bi-lightning-charge-fill text-warning"></i> AVC Marketplace
         </a>
     </div>

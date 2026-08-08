@@ -24,6 +24,9 @@
                     <p class="text-muted mb-0" style="font-size: 0.95rem;">Manage all your project shares, active cycles, pending activations and completed earnings.</p>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ route('project-earnings.index') }}" class="btn btn-outline-primary fw-semibold px-4 py-2 rounded-3">
+                        <i class="bi bi-cash-coin me-1"></i> Project Earnings
+                    </a>
                     <a href="{{ route('marketplace.index') }}" class="btn btn-primary fw-semibold px-4 py-2 rounded-3 shadow-sm" style="background: #2563eb; border: none;">
                         <i class="bi bi-cart-plus me-1"></i> Browse Marketplace
                     </a>
@@ -219,6 +222,7 @@
                                                 <div class="d-flex gap-2">
                                                     <a href="{{ route('marketplace.show', $cycle->project) }}" class="btn btn-outline-secondary btn-sm fw-semibold rounded-3">View Project</a>
                                                     <a href="{{ route('marketplace.show', $cycle->project) }}#buy-panel" class="btn btn-outline-primary btn-sm fw-semibold rounded-3">Buy More Shares</a>
+                                                    <a href="{{ route('project-earnings.index', ['project' => $cycle->project->uuid]) }}" class="btn btn-outline-success btn-sm fw-semibold rounded-3"><i class="bi bi-cash-coin me-1"></i> View Earnings</a>
                                                     <a href="{{ route('portfolio.receipt', $cycle) }}" class="btn btn-primary btn-sm fw-semibold rounded-3" style="background: #2563eb;">Cycle Details</a>
                                                 </div>
                                             </div>

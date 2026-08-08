@@ -48,7 +48,6 @@ return [
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
-
         'ses' => [
             'transport' => 'ses',
         ],
@@ -114,5 +113,17 @@ return [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Notification Address
+    |--------------------------------------------------------------------------
+    |
+    | Address used for admin-facing notification emails (e.g. new referrals,
+    | finance alerts). Configurable via MAIL_ADMIN_ADDRESS.
+    |
+    */
+
+    'admin_email' => env('MAIL_ADMIN_ADDRESS', 'admin@radiantrealty.com'),
 
 ];

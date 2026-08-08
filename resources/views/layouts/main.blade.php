@@ -334,12 +334,12 @@
                                         <a href="{{ route('deposit.index') }}" class="nav-dropdown-item"><i class="bi bi-arrow-down-circle-fill me-2 text-success" style="width:16px;"></i>Deposit / Buy AVC</a>
                                         <a href="{{ route('withdraw.index') }}" class="nav-dropdown-item"><i class="bi bi-arrow-up-circle-fill me-2 text-danger" style="width:16px;"></i>Withdraw / Sell AVC</a>
                                         <a href="{{ route('finance.transactions') }}" class="nav-dropdown-item"><i class="bi bi-clock-history me-2 text-info" style="width:16px;"></i>Transaction History</a>
-                                        <a href="{{ url('/marketplace') }}" class="nav-dropdown-item"><i class="bi bi-arrow-repeat me-2 text-warning" style="width:16px;"></i>AVC Marketplace</a>
+                                        <a href="{{ route('avc-marketplace.index') }}" class="nav-dropdown-item"><i class="bi bi-arrow-repeat me-2 text-warning" style="width:16px;"></i>AVC Marketplace</a>
 
                                         <span class="sidebar-group-label px-3" style="font-size:0.65rem; font-weight:800; letter-spacing:0.09em; text-transform:uppercase; color:#94a3b8; display:block; margin-top:6px; margin-bottom:2px;">Account</span>
-                                        <a href="{{ url('/dashboard') }}#notifications" class="nav-dropdown-item"><i class="bi bi-bell-fill me-2 text-primary" style="width:16px;"></i>Notifications</a>
-                                        <a href="{{ url('/dashboard') }}#referrals" class="nav-dropdown-item"><i class="bi bi-people-fill me-2 text-primary" style="width:16px;"></i>Referrals</a>
-                                        <a href="{{ url('/dashboard') }}#profile_kyc" class="nav-dropdown-item"><i class="bi bi-person-badge-fill me-2 text-primary" style="width:16px;"></i>Profile & KYC</a>
+                                        <a href="{{ route('dashboard') }}" class="nav-dropdown-item"><i class="bi bi-bell-fill me-2 text-primary" style="width:16px;"></i>Notifications</a>
+                                        <a href="{{ route('affiliate.center') }}" class="nav-dropdown-item"><i class="bi bi-people-fill me-2 text-primary" style="width:16px;"></i>Affiliate Center</a>
+                                        <a href="{{ route('profile.settings') }}" class="nav-dropdown-item"><i class="bi bi-person-badge-fill me-2 text-primary" style="width:16px;"></i>Profile & Settings</a>
                                         <a href="{{ route('documents.index') }}" class="nav-dropdown-item"><i class="bi bi-folder2-open me-2 text-primary" style="width:16px;"></i>Documents</a>
 
                                         <div class="border-top mt-1 pt-1"></div>
@@ -417,29 +417,29 @@
 
                         <!-- GROUP: WALLET -->
                         <span class="sidebar-group-label">Wallet</span>
-                        <a href="{{ url('/dashboard') }}#deposit" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
+                        <a href="{{ route('deposit.index') }}" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
                             <i class="bi bi-arrow-down-circle-fill"></i> Deposit
                         </a>
-                        <a href="{{ url('/dashboard') }}#withdraw" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
+                        <a href="{{ route('withdraw.index') }}" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
                             <i class="bi bi-arrow-up-circle-fill"></i> Withdraw
                         </a>
-                        <a href="{{ url('/marketplace') }}" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
+                        <a href="{{ route('avc-marketplace.index') }}" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
                             <i class="bi bi-arrow-repeat text-warning"></i> AVC Marketplace
                         </a>
-                        <a href="{{ url('/dashboard') }}#transactions" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
+                        <a href="{{ route('finance.transactions') }}" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
                             <i class="bi bi-arrow-down-up"></i> Transactions
                         </a>
 
                         <!-- GROUP: ACCOUNT -->
                         <span class="sidebar-group-label">Account</span>
-                        <a href="{{ url('/dashboard') }}#notifications" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
+                        <a href="{{ route('dashboard') }}" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
                             <i class="bi bi-bell-fill"></i> Notifications
                         </a>
-                        <a href="{{ url('/dashboard') }}#referrals" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
-                            <i class="bi bi-people-fill"></i> Referrals
+                        <a href="{{ route('affiliate.center') }}" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
+                            <i class="bi bi-people-fill"></i> Affiliate Center
                         </a>
-                        <a href="{{ url('/dashboard') }}#profile_kyc" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
-                            <i class="bi bi-person-badge-fill"></i> Profile & KYC
+                        <a href="{{ route('profile.settings') }}" class="nav-link-sidebar" onclick="toggleMobileSidebar()">
+                            <i class="bi bi-person-badge-fill"></i> Profile & Settings
                         </a>
 
                         <hr class="border-secondary opacity-20 my-3">
@@ -578,23 +578,23 @@
     <!-- Mobile Bottom Navigation (mobile only) -->
     <nav id="mobileBottomNav" class="d-md-none" style="position:fixed; bottom:0; left:0; right:0; z-index:99998; background:#ffffff; border-top:1px solid #e2e8f0; box-shadow:0 -4px 20px rgba(0,0,0,0.06); padding-bottom: env(safe-area-inset-bottom);">
         <div class="d-flex align-items-stretch justify-content-around" style="height:62px;">
-            <a href="{{ url('/dashboard') }}#overview" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="overview" onclick="setBottomNavActive(this)">
+            <a href="{{ route('dashboard') }}" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="overview" onclick="setBottomNavActive(this)">
                 <i class="bi bi-house-fill" style="font-size:1.25rem; line-height:1;"></i>
                 <small class="fw-semibold mt-1" style="font-size:0.64rem;">Home</small>
             </a>
-            <a href="{{ url('/dashboard') }}#my_investments" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="my_investments" onclick="setBottomNavActive(this)">
+            <a href="{{ route('portfolio.index') }}" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="my_investments" onclick="setBottomNavActive(this)">
                 <i class="bi bi-pie-chart-fill" style="font-size:1.25rem; line-height:1;"></i>
                 <small class="fw-semibold mt-1" style="font-size:0.64rem;">Assets</small>
             </a>
-            <a href="{{ url('/dashboard') }}#deposit" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="deposit" onclick="setBottomNavActive(this)">
+            <a href="{{ route('deposit.index') }}" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="deposit" onclick="setBottomNavActive(this)">
                 <i class="bi bi-wallet2" style="font-size:1.25rem; line-height:1;"></i>
                 <small class="fw-semibold mt-1" style="font-size:0.64rem;">Deposit</small>
             </a>
-            <a href="{{ url('/marketplace') }}" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="credit_swap" onclick="setBottomNavActive(this)">
+            <a href="{{ route('avc-marketplace.index') }}" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="credit_swap" onclick="setBottomNavActive(this)">
                 <i class="bi bi-arrow-repeat" style="font-size:1.25rem; line-height:1;"></i>
                 <small class="fw-semibold mt-1" style="font-size:0.64rem;">Trade</small>
             </a>
-            <a href="{{ url('/dashboard') }}#transactions" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="transactions" onclick="setBottomNavActive(this)">
+            <a href="{{ route('finance.transactions') }}" class="mobile-bottom-link d-flex flex-column align-items-center justify-content-center flex-fill text-decoration-none" style="color:#94a3b8;" data-key="transactions" onclick="setBottomNavActive(this)">
                 <i class="bi bi-clock-history" style="font-size:1.25rem; line-height:1;"></i>
                 <small class="fw-semibold mt-1" style="font-size:0.64rem;">History</small>
             </a>

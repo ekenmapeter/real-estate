@@ -78,7 +78,7 @@ class RegisteredUserController extends Controller
 
                 Mail::to($referrer->email)->send(new ReferralBonusMail($referrer, $user, $bonusAmount));
 
-                $adminEmail = env('MAIL_ADMIN_ADDRESS', 'admin@radiantrealty.com');
+                $adminEmail = config('mail.admin_email');
                 Mail::to($adminEmail)->send(new ReferralNotificationMail($referrer, $user, $bonusAmount));
             }
         }

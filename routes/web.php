@@ -26,8 +26,45 @@ use App\Http\Controllers\AdminWithdrawalManagementController;
 use App\Http\Controllers\AdminPaymentChannelController;
 
 // User Investment Dashboard & AVC Deposit / Withdrawal Routes
-Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', [\App\Http\Controllers\DashboardOverviewController::class, 'index'])->name('dashboard');
+Route::post('/dashboard/tour/complete', [\App\Http\Controllers\DashboardOverviewController::class, 'completeTour'])->name('dashboard.tour.complete')->middleware('throttle:forms');
+Route::post('/dashboard/tour/skip', [\App\Http\Controllers\DashboardOverviewController::class, 'skipTour'])->name('dashboard.tour.skip')->middleware('throttle:forms');
+Route::get('/dashboard-legacy', [UserDashboardController::class, 'index'])->name('dashboard.legacy');
 Route::middleware('auth')->group(function () {
+    // Affiliate Center Routes
+    Route::get('/affiliate-center', [\App\Http\Controllers\AffiliateController::class, 'index'])->name('affiliate.center');
+    Route::get('/affiliate-center/{section}', [\App\Http\Controllers\AffiliateController::class, 'section'])
+        ->whereIn('section', [
+            'my-referrals', 'assigned-projects', 'referral-link', 'referral-code', 'qr-code',
+            'media-library', 'promo-builder', 'downloads', 'finance-requests', 'support-history',
+            'commission-wallet', 'withdrawals', 'referral-history', 'commission-history',
+            'finance-history', 'downloads-history', 'profile-settings', 'notification-settings',
+        ])->name('affiliate.section');
+
+    // Profile & Settings
+    Route::get('/profile-settings', [\App\Http\Controllers\ProfileSettingsController::class, 'index'])->name('profile.settings');
+
+    // Project Earnings
+    Route::get('/project-earnings', [\App\Http\Controllers\ProjectEarningsController::class, 'index'])->name('project-earnings.index');
+
+    // Support & Help Center
+    Route::get('/support', [\App\Http\Controllers\SupportController::class, 'index'])->name('support.index');
+    Route::get('/support/{reference}', [\App\Http\Controllers\SupportController::class, 'show'])->name('support.show');
+
+    // AVC Transfer
+    Route::get('/transfer', [\App\Http\Controllers\TransferController::class, 'index'])->name('transfer.index');
+    Route::get('/transfer/send', [\App\Http\Controllers\TransferController::class, 'send'])->name('transfer.send');
+    Route::get('/transfer/receive', [\App\Http\Controllers\TransferController::class, 'receive'])->name('transfer.receive');
+    Route::get('/transfer/history/{transfer}', [\App\Http\Controllers\TransferController::class, 'show'])->name('transfer.show');
+    Route::post('/transfer/pin/verify', [\App\Http\Controllers\TransferController::class, 'verifyPin'])->name('transfer.pin.verify')->middleware('throttle:forms');
+
+    // AVC Marketplace (escrow-backed peer-to-peer trading)
+    Route::get('/avc-marketplace', [\App\Http\Controllers\AvcMarketplaceController::class, 'index'])->name('avc-marketplace.index');
+    Route::get('/avc-marketplace/create', [\App\Http\Controllers\AvcMarketplaceController::class, 'create'])->name('avc-marketplace.create');
+    Route::get('/avc-marketplace/my-listings', [\App\Http\Controllers\AvcMarketplaceController::class, 'myListings'])->name('avc-marketplace.my-listings');
+    Route::get('/avc-marketplace/my-deals', [\App\Http\Controllers\AvcMarketplaceController::class, 'myDeals'])->name('avc-marketplace.my-deals');
+    Route::get('/avc-marketplace/deals/{reference}', [\App\Http\Controllers\AvcMarketplaceController::class, 'deal'])->name('avc-marketplace.deal');
+
     // Deposit Routes
     Route::get('/deposit', [DepositController::class, 'index'])->name('deposit.index');
     Route::get('/deposit/buy-avc', [DepositController::class, 'index']);

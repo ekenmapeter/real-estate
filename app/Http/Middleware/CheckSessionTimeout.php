@@ -17,7 +17,7 @@ class CheckSessionTimeout
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check()) {
-            $maxIdleSeconds = (int) env('SESSION_TIMEOUT_SECONDS', 900); // Default 15 minutes idle timeout
+            $maxIdleSeconds = (int) config('session.timeout', 900); // Default 15 minutes idle timeout
             $lastActivity = session('last_activity_time');
 
             if ($lastActivity && (time() - $lastActivity > $maxIdleSeconds)) {

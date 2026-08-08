@@ -78,7 +78,7 @@
                         <a href="{{ route('deposit.channel', 'bank_transfer') }}" class="btn btn-primary fw-bold rounded-3 px-4 py-2.5 shadow-sm" style="background: #2563eb; border: none; font-size: 0.92rem;">
                             <i class="bi bi-plus-circle-fill me-1.5"></i> Deposit Through Finance Team
                         </a>
-                        <a href="{{ route('marketplace') }}" class="btn btn-outline-light fw-bold rounded-3 px-4 py-2.5" style="font-size: 0.92rem; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2);">
+                        <a href="{{ route('avc-marketplace.index') }}" class="btn btn-outline-light fw-bold rounded-3 px-4 py-2.5" style="font-size: 0.92rem; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2);">
                             <i class="bi bi-cart3 me-1.5"></i> Buy AVC From Marketplace
                         </a>
                     </div>
@@ -132,7 +132,7 @@
                                 <li class="mb-2 d-flex align-items-center gap-2"><i class="bi bi-check-circle-fill check-icon-purple"></i> <span>Fast & secure delivery</span></li>
                             </ul>
 
-                            <a href="{{ route('marketplace') }}" class="btn btn-purple text-white fw-bold w-100 rounded-3 py-2.5 shadow-sm" style="background: #7c3aed; border: none;">
+                            <a href="{{ route('avc-marketplace.index') }}" class="btn btn-purple text-white fw-bold w-100 rounded-3 py-2.5 shadow-sm" style="background: #7c3aed; border: none;">
                                 Browse AVC Marketplace
                             </a>
                         </div>

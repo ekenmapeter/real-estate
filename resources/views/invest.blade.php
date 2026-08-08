@@ -26,7 +26,7 @@
         <div class="mt-4 d-flex flex-wrap gap-3 align-items-center">
           <a href="#projectGrid" class="tf-btn primary shadow-lg fw-bold" style="min-width: 175px; padding: 15px 30px; font-size: 1.05rem; border-radius: 8px; font-weight: 800;">View Projects</a>
           @auth
-            <a href="{{ url('/dashboard') }}#saved_projects" class="tf-btn glass-panel text-white fw-bold" style="min-width: 175px; padding: 15px 30px; font-size: 1.05rem; border-radius: 8px; font-weight: 700;">My Saved Projects</a>
+            <a href="{{ route('portfolio.index') }}" class="tf-btn glass-panel text-white fw-bold" style="min-width: 175px; padding: 15px 30px; font-size: 1.05rem; border-radius: 8px; font-weight: 700;">My Saved Projects</a>
           @else
             <a href="{{ route('register') }}" class="tf-btn glass-panel text-white fw-bold" style="min-width: 175px; padding: 15px 30px; font-size: 1.05rem; border-radius: 8px; font-weight: 700;">Start Investing</a>
           @endauth

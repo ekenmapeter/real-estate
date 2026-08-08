@@ -34,6 +34,9 @@ return [
 
     'lifetime' => (int) env('SESSION_LIFETIME', 15),
 
+    // Maximum idle time (seconds) before the user is signed out by CheckSessionTimeout.
+    'timeout' => (int) env('SESSION_TIMEOUT_SECONDS', 900),
+
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
     /*

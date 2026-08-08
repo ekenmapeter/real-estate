@@ -319,8 +319,8 @@
                 <a href="{{ route('withdraw.index') }}" class="nav-link-sidebar nav-link-sub">
                     <i class="bi bi-arrow-up-circle-fill"></i> Withdraw / Sell AVC
                 </a>
-                <a href="#" class="nav-link-sidebar nav-link-sub" :class="{ 'active': activeTab === 'transfer' }" @click.prevent="activeTab = 'transfer'">
-                    <i class="bi bi-send-fill"></i> Transfer
+                <a href="{{ route('transfer.index') }}" class="nav-link-sidebar nav-link-sub">
+                    <i class="bi bi-send-fill"></i> AVC Transfer
                 </a>
                 <a href="{{ route('marketplace') }}" class="nav-link-sidebar nav-link-sub">
                     <i class="bi bi-arrow-repeat text-warning"></i> AVC Marketplace
@@ -448,7 +448,7 @@
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'my_investments' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'my_investments'">My Portfolio</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'deposit' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'deposit'">Deposit</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'withdraw' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'withdraw'">Withdraw</button>
-                    <button class="btn btn-sm fw-semibold" :class="activeTab === 'transfer' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'transfer'">Transfer</button>
+                    <a href="{{ route('transfer.index') }}" class="btn btn-sm btn-light border fw-semibold text-decoration-none">AVC Transfer</a>
                     <a href="{{ route('marketplace') }}" class="btn btn-sm btn-warning fw-semibold text-dark text-decoration-none">AVC Marketplace</a>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'transactions' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'transactions'">Transactions</button>
                     <button class="btn btn-sm fw-semibold" :class="activeTab === 'notifications' ? 'btn-primary' : 'btn-light border'" @click="activeTab = 'notifications'">Notifications</button>

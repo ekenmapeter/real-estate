@@ -88,7 +88,7 @@
                                 <h5 class="fw-bold text-dark mb-1">Sell AVC on Marketplace</h5>
                                 <p class="text-muted small mb-4" style="font-size: 0.82rem; line-height: 1.45;">Create or accept AVC sale offers from verified buyers using Admin Escrow for a secure transaction.</p>
 
-                                <a href="{{ route('marketplace') }}" class="btn btn-emerald text-white fw-bold w-100 rounded-3 py-2.5 shadow-sm mt-auto" style="background: #059669; border: none;">
+                                <a href="{{ route('avc-marketplace.index') }}" class="btn btn-emerald text-white fw-bold w-100 rounded-3 py-2.5 shadow-sm mt-auto" style="background: #059669; border: none;">
                                     Go to Marketplace
                                 </a>
                             </div>

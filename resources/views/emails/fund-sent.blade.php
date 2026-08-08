@@ -18,6 +18,6 @@
     </table>
 
     <table width="100%" cellpadding="0" cellspacing="0">
-        <tr><td align="center" style="padding-top:24px;"><a href="{{ url('/dashboard') }}#transactions" style="display:inline-block; background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; font-size:15px; font-weight:700; padding:14px 36px; border-radius:10px; text-decoration:none;">View Transactions</a></td></tr>
+        <tr><td align="center" style="padding-top:24px;"><a href="{{ route('finance.transactions') }}" style="display:inline-block; background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; font-size:15px; font-weight:700; padding:14px 36px; border-radius:10px; text-decoration:none;">View Transactions</a></td></tr>
     </table>
 @endsection

@@ -44,7 +44,7 @@
             @svg('heroicon-o-arrow-up-tray', 'h-5 w-5 text-slate-400 group-hover:text-rose-400')
             Withdraw
         </a>
-        <a href="{{ route('marketplace') }}" class="group mb-0.5 flex items-center gap-3 rounded-lg px-2.5 py-2 text-slate-300 transition hover:bg-white/5 hover:text-white">
+        <a href="{{ route('avc-marketplace.index') }}" class="group mb-0.5 flex items-center gap-3 rounded-lg px-2.5 py-2 text-slate-300 transition hover:bg-white/5 hover:text-white">
             @svg('heroicon-o-arrows-right-left', 'h-5 w-5 text-slate-400 group-hover:text-amber-400')
             AVC Marketplace
         </a>
@@ -54,24 +54,24 @@
         </a>
 
         <p class="mb-2 mt-5 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">Account</p>
-        <a href="{{ url('/dashboard') }}#notifications" class="group mb-0.5 flex items-center gap-3 rounded-lg px-2.5 py-2 text-slate-300 transition hover:bg-white/5 hover:text-white">
+        <a href="{{ route('dashboard') }}" class="group mb-0.5 flex items-center gap-3 rounded-lg px-2.5 py-2 text-slate-300 transition hover:bg-white/5 hover:text-white">
             @svg('heroicon-o-bell', 'h-5 w-5 text-slate-400 group-hover:text-blue-400')
             Notifications
             <span class="ml-auto rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-bold text-white">3</span>
         </a>
-        <a href="{{ url('/dashboard') }}#referrals" class="group mb-0.5 flex items-center gap-3 rounded-lg px-2.5 py-2 text-slate-300 transition hover:bg-white/5 hover:text-white">
+        <a href="{{ route('affiliate.center') }}" class="group mb-0.5 flex items-center gap-3 rounded-lg px-2.5 py-2 text-slate-300 transition hover:bg-white/5 hover:text-white">
             @svg('heroicon-o-user-group', 'h-5 w-5 text-slate-400 group-hover:text-blue-400')
-            Referrals
+            Affiliate Center
         </a>
-        <a href="{{ url('/dashboard') }}#profile_kyc" class="group mb-0.5 flex items-center gap-3 rounded-lg px-2.5 py-2 text-slate-300 transition hover:bg-white/5 hover:text-white">
+        <a href="{{ route('profile.settings') }}" class="group mb-0.5 flex items-center gap-3 rounded-lg px-2.5 py-2 text-slate-300 transition hover:bg-white/5 hover:text-white">
             @svg('heroicon-o-identification', 'h-5 w-5 text-slate-400 group-hover:text-blue-400')
-            Profile & KYC
+            Profile & Settings
         </a>
         <a href="{{ route('documents.index') }}" class="mb-0.5 flex items-center gap-3 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 px-2.5 py-2 font-semibold text-white shadow-lg shadow-blue-900/40 {{ $activeRoute == 'documents.index' ? '' : 'opacity-90 hover:opacity-100' }}">
             @svg('heroicon-o-folder', 'h-5 w-5 text-blue-200')
             Documents
         </a>
-        <a href="{{ url('/dashboard') }}#settings" class="group flex items-center gap-3 rounded-lg px-2.5 py-2 text-slate-300 transition hover:bg-white/5 hover:text-white">
+        <a href="{{ route('profile.settings') }}" class="group flex items-center gap-3 rounded-lg px-2.5 py-2 text-slate-300 transition hover:bg-white/5 hover:text-white">
             @svg('heroicon-o-cog-6-tooth', 'h-5 w-5 text-slate-400 group-hover:text-blue-400')
             Settings
         </a>

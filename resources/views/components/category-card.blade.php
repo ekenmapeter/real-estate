@@ -1,18 +1,16 @@
-@props(['icon' => 'bi-folder', 'color' => '#2563eb', 'name' => '', 'count' => 0, 'href' => '#', 'footer' => null])
+@props([
+    'label' => '',
+    'description' => '',
+    'icon' => 'heroicon-o-chat-bubble-left-right',
+    'color' => 'bg-blue-50 text-blue-600',
+])
 
-<a href="{{ $href }}" class="text-decoration-none d-block w-100 h-100" style="min-width:0;">
-    <div class="card border-0 rounded-4 shadow-sm h-100 overflow-hidden doc-cat-card" style="min-width:0;">
-        <div class="card-body p-3 d-flex justify-content-between align-items-center gap-2" style="min-width:0;">
-            <div class="d-flex align-items-center gap-3" style="min-width:0;">
-                <div class="d-flex align-items-center justify-content-center text-white rounded-3 flex-shrink-0" style="width:44px; height:44px; background:{{ $color }};">
-                    <i class="bi {{ $icon }}" style="font-size:1.15rem;"></i>
-                </div>
-                <div class="overflow-hidden" style="min-width:0;">
-                    <div class="fw-bold text-truncate" style="color:#0B1F3A;">{{ $name }}</div>
-                    <div class="small text-muted text-truncate">{{ $footer ?? $count . ' Documents' }}</div>
-                </div>
-            </div>
-            <i class="bi bi-arrow-right-circle text-muted flex-shrink-0" style="font-size:1.2rem;"></i>
-        </div>
-    </div>
-</a>
+<button {{ $attributes->merge(['class' => 'flex flex-col items-start gap-2.5 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md']) }}>
+    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ $color }}">
+        @svg($icon, 'h-5 w-5')
+    </span>
+    <span>
+        <span class="block text-xs font-extrabold text-slate-900">{{ $label }}</span>
+        <span class="mt-0.5 block text-[10px] font-medium leading-relaxed text-slate-400">{{ $description }}</span>
+    </span>
+</button>

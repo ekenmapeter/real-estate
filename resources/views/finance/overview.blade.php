@@ -127,7 +127,7 @@
                         </a>
 
                         <!-- AVC Marketplace -->
-                        <a href="{{ route('marketplace') }}" class="btn btn-outline-light fw-bold rounded-3 px-3 py-2 flex-fill text-warning" style="font-size:0.88rem; background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.2);">
+                        <a href="{{ route('avc-marketplace.index') }}" class="btn btn-outline-light fw-bold rounded-3 px-3 py-2 flex-fill text-warning" style="font-size:0.88rem; background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.2);">
                             <i class="bi bi-lightning-charge-fill me-1.5"></i> AVC Marketplace
                         </a>
                     </div>
@@ -374,11 +374,11 @@
                     <p class="text-muted small mb-3">Buy or sell AVC directly with verified community members via Admin Escrow protection.</p>
                     
                     <div class="d-flex flex-column gap-2">
-                        <a href="{{ route('marketplace') }}" class="btn btn-warning text-dark fw-bold rounded-3 py-2 shadow-sm d-flex align-items-center justify-content-between px-3">
+                        <a href="{{ route('avc-marketplace.index') }}" class="btn btn-warning text-dark fw-bold rounded-3 py-2 shadow-sm d-flex align-items-center justify-content-between px-3">
                             <span><i class="bi bi-bag-plus-fill me-2"></i> Buy AVC from Sellers</span>
                             <i class="bi bi-chevron-right"></i>
                         </a>
-                        <a href="{{ route('marketplace') }}" class="btn btn-outline-warning text-dark fw-bold rounded-3 py-2 d-flex align-items-center justify-content-between px-3">
+                        <a href="{{ route('avc-marketplace.index') }}" class="btn btn-outline-warning text-dark fw-bold rounded-3 py-2 d-flex align-items-center justify-content-between px-3">
                             <span><i class="bi bi-tag-fill me-2"></i> Create AVC Sell Listing</span>
                             <i class="bi bi-chevron-right"></i>
                         </a>

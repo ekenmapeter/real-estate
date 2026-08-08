@@ -23,6 +23,7 @@ class UserSeeder extends Seeder
                 'wallet_balance' => 45250.00,
                 'role' => 'user',
                 'affiliate_code' => 'RAD8849',
+                'transaction_pin' => Hash::make('8849'),
                 'affiliate_earnings' => 1450.00,
             ]
         );
@@ -37,6 +38,7 @@ class UserSeeder extends Seeder
                 'wallet_balance' => 150000.00,
                 'role' => 'admin',
                 'affiliate_code' => 'ADMIN01',
+                'transaction_pin' => Hash::make('8849'),
                 'affiliate_earnings' => 0.00,
             ]
         );
@@ -51,6 +53,7 @@ class UserSeeder extends Seeder
                 'wallet_balance' => 28500.00,
                 'role' => 'user',
                 'affiliate_code' => 'RAD1940',
+                'transaction_pin' => Hash::make('8849'),
                 'affiliate_earnings' => 600.00,
             ]
         );

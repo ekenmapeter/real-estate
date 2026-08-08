@@ -618,7 +618,7 @@ class UserDashboardController extends Controller
 
         Mail::to($user->email)->send(new KycSubmittedMail($user));
 
-        $adminEmail = env('MAIL_ADMIN_ADDRESS', 'admin@radiantrealty.com');
+        $adminEmail = config('mail.admin_email');
         Mail::to($adminEmail)->send(new \App\Mail\KycSubmittedMail($user));
 
         return redirect()->route('dashboard', '#profile_kyc')->with('success', 'KYC documents submitted successfully! We will review them shortly.');
